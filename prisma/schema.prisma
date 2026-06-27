@@ -1,0 +1,77 @@
+// Lumina — Prisma schema (SQLite, local-dev)
+// 仅核心几张表：User / Creator / Category / Region / Work / TierPlan
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("creator") // user | creator | admin
+  createdAt DateTime @default(now())
+  creator   Creator?
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  slug     String    @unique
+  label    String
+  creators Creator[]
+}
+
+model Region {
+  id       Int       @id @default(autoincrement())
+  label    String    @unique
+  creators Creator[]
+}
+
+model Creator {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  specialty  String
+  price      String   // 展示用,如 "S$6"
+  tier       String   // basic | pro | elite
+  subs       Int      @default(0)
+  followers  Int      @default(0)
+  worksCount Int      @default(0)
+  bio        String?
+  userId     String   @unique
+  categoryId Int
+  regionId   Int
+  createdAt  DateTime @default(now())
+
+  user     User       @relation(fields: [userId], references: [id])
+  category Category   @relation(fields: [categoryId], references: [id])
+  region   Region     @relation(fields: [regionId], references: [id])
+  works    Work[]
+  tiers    TierPlan[]
+}
+
+model Work {
+  id         String   @id @default(cuid())
+  title      String
+  visibility String   @default("public") // public | subscriber
+  creatorId  String
+  createdAt  DateTime @default(now())
+
+  creator Creator @relation(fields: [creatorId], references: [id])
+}
+
+model TierPlan {
+  id        Int    @id @default(autoincrement())
+  name      String // basic | pro | elite
+  label     String // 入门 / 进阶 / Elite
+  price     String // "S$6"
+  benefits  String // JSON 字符串(SQLite 无原生数组)
+  creatorId String
+
+  creator Creator @relation(fields: [creatorId], references: [id])
+}

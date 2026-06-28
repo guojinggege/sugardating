@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { listRegionsGrouped } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "拾光 — 华语与亚裔创作者发现平台",
   description: "发现摄影、视频、艺术服务等领域的华语与亚裔创作者，订阅他们的作品。",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const regionGroups = await listRegionsGrouped();
   return (
     <html lang="zh-Hans">
       <head>
@@ -20,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Nav />
+        <Nav regionGroups={regionGroups} />
         <main>{children}</main>
         <Footer />
       </body>

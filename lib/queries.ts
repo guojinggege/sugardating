@@ -38,12 +38,46 @@ function toCreatorDTO(c: CreatorWithJoins): Creator {
   };
 }
 
-export async function listCreators(): Promise<Creator[]> {
+export async function listCreators(opts?: { region?: string }): Promise<Creator[]> {
   const rows = await prisma.creator.findMany({
+    where: opts?.region ? { region: { label: opts.region } } : undefined,
     include: { category: true, region: true },
     orderBy: { createdAt: "asc" },
   });
   return rows.map((c) => toCreatorDTO(c as CreatorWithJoins));
+}
+
+// 城市按地理分组返回,供 Nav 下拉用
+// 分组在前端逻辑里硬编码,避免给 Region 表加 group 字段
+const REGION_GROUP: Record<string, "se-asia" | "east-asia" | "overseas"> = {
+  "新加坡": "se-asia", "吉隆坡": "se-asia", "曼谷": "se-asia",
+  "马尼拉": "se-asia", "胡志明市": "se-asia",
+  "香港": "east-asia", "台北": "east-asia", "首尔": "east-asia", "东京": "east-asia",
+  "伦敦": "overseas", "悉尼": "overseas",
+};
+const GROUP_LABEL: Record<string, string> = {
+  "se-asia": "东南亚",
+  "east-asia": "东亚",
+  "overseas": "海外",
+};
+const GROUP_ORDER = ["se-asia", "east-asia", "overseas"] as const;
+
+export interface RegionGroup {
+  key: string;
+  label: string;
+  cities: string[];
+}
+
+export async function listRegionsGrouped(): Promise<RegionGroup[]> {
+  const rows = await prisma.region.findMany({ orderBy: { id: "asc" } });
+  const buckets: Record<string, string[]> = { "se-asia": [], "east-asia": [], "overseas": [] };
+  for (const r of rows) {
+    const g = REGION_GROUP[r.label] ?? "overseas";
+    buckets[g].push(r.label);
+  }
+  return GROUP_ORDER
+    .map((k) => ({ key: k, label: GROUP_LABEL[k], cities: buckets[k] }))
+    .filter((g) => g.cities.length > 0);
 }
 
 export async function listCreatorsByCategory(categorySlug: string): Promise<Creator[]> {

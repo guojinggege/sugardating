@@ -11,7 +11,7 @@ export const channels: Channel[] = [
   { slug: "community", label: "社区" },
 ];
 
-export const regions = ["香港", "新加坡", "台北", "吉隆坡", "首尔", "曼谷", "伦敦", "悉尼"];
+export const regions = ["新加坡", "香港", "台北", "吉隆坡", "曼谷", "首尔", "东京", "伦敦", "悉尼", "马尼拉", "胡志明市"];
 export const sorts = ["推荐", "最新", "最热", "订阅最多"];
 
 const tierLabel: Record<string, string> = { basic: "入门", pro: "进阶", elite: "Elite" };

@@ -1,6 +1,8 @@
 :root{
   --page:#F4F4F5; --card:#FFFFFF; --ink:#161618; --ink2:#46464B;
   --muted:#9B9BA3; --line:#E8E8EC; --line2:#DEDEE3; --live:#E5484D;
+  /* 低饱和暖灰点缀色,只在次要强调处出现(hero eyebrow / section eyebrow) */
+  --accent:#B8A789;
   --r:14px;
   --ui:"Plus Jakarta Sans","Noto Sans SC",system-ui,-apple-system,sans-serif;
   --maxw:1200px;
@@ -66,11 +68,13 @@ img{display:block;max-width:100%}
 .arrow:hover{background:rgba(0,0,0,.5)}.arrow.prev{left:18px}.arrow.next{right:18px}
 
 /* ---------- sections ---------- */
-.sec{padding:30px 0 0}
-.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;gap:14px}
-.sec-h .l{display:flex;align-items:baseline;gap:10px}
-.sec-h h2{font-weight:700;font-size:20px;letter-spacing:-.01em;margin:0}
-.sec-h .cnt{font-size:13px;color:var(--muted);font-weight:500}
+/* .sec 仅首页使用,所以这里直接放宽节奏不会影响其它页面 */
+.sec{padding:96px 0 0}
+.sec:first-of-type{padding-top:110px}
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;gap:14px}
+.sec-h .l{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.sec-h h2{font-weight:700;font-size:clamp(26px,3.4vw,36px);letter-spacing:-.025em;line-height:1.1;margin:0}
+.sec-h .cnt{font-size:13px;color:var(--muted);font-weight:500;letter-spacing:.01em}
 .more{font-weight:600;font-size:13.5px;color:var(--ink2);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .more svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
 .more:hover{color:var(--ink)}
@@ -214,4 +218,203 @@ img{display:block;max-width:100%}
   .foot-in{grid-template-columns:1fr 1fr;gap:22px}.foot .about{grid-column:1/-1}
   .cta{padding:24px}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  /* reveal 元素直接显示,避免在 hydration 窗口里短暂不可见 */
+  .reveal{opacity:1!important;transform:none!important}
+  /* rail 卡片信息分层也直接全显 */
+  .crail .cc .info .ct,.crail .cc .info .f{opacity:1!important;transform:none!important}
+}
+
+/* ============================================================
+   首页沉浸式 hero (HomeHero) + nav 覆盖模式 + 首页节奏微调
+   作用域全部在 .hh-* 或 body.home-immersive 下,其它页面不受影响
+   ============================================================ */
+
+/* ---- HomeHero ---- */
+.hh{position:relative;width:100%;height:min(88vh,760px);min-height:560px;overflow:hidden;background:#1a1a1c;color:#fff;isolation:isolate}
+.hh-stack{position:absolute;inset:0;z-index:0}
+.hh-slide{position:absolute;inset:0;opacity:0;transition:opacity .9s cubic-bezier(.4,0,.2,1)}
+.hh-slide.on{opacity:1}
+.hh-veil{position:absolute;inset:0;background:
+  linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.18) 22%,rgba(0,0,0,0) 38%,rgba(0,0,0,0) 50%,rgba(0,0,0,.55) 88%,rgba(0,0,0,.78) 100%),
+  linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 45%,rgba(0,0,0,0) 70%);
+  z-index:1;pointer-events:none}
+
+.hh-inner{position:relative;z-index:2;max-width:var(--maxw);height:100%;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;justify-content:flex-end}
+.hh-cap{max-width:780px;padding:0 0 64px}
+.hh-eye{display:inline-flex;align-items:center;gap:10px;font-size:11.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#fff;padding:0 0 4px}
+.hh-eye i{width:22px;height:1.5px;background:var(--accent);display:inline-block}
+.hh-title{font-weight:800;font-size:clamp(40px,7.4vw,72px);line-height:1.02;letter-spacing:-.035em;margin:18px 0 14px;color:#fff;text-wrap:balance}
+.hh-sub{font-size:clamp(15px,1.4vw,17px);line-height:1.5;color:rgba(255,255,255,.78);margin:0 0 30px;max-width:560px;font-weight:400}
+.hh-search{display:flex;align-items:center;gap:8px;max-width:520px;background:rgba(255,255,255,.94);border-radius:14px;padding:7px 7px 7px 18px;backdrop-filter:blur(10px);box-shadow:0 10px 40px -8px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.05)}
+.hh-search .hh-mag{width:18px;height:18px;stroke:var(--ink2);fill:none;stroke-width:2;flex:0 0 18px}
+.hh-search input{flex:1;min-width:0;border:none;background:transparent;outline:none;font-family:var(--ui);font-size:14.5px;color:var(--ink);padding:10px 0}
+.hh-search input::placeholder{color:var(--muted)}
+.hh-cta{padding:10px 18px;border-radius:9px;font-size:13.5px;background:var(--ink);color:#fff;flex:0 0 auto}
+.hh-cta:hover{background:#000}
+
+.hh-foot{position:absolute;left:24px;right:24px;bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:14px;max-width:calc(var(--maxw) - 48px);margin:0 auto;pointer-events:none}
+.hh-dots{display:flex;gap:8px;pointer-events:auto}
+.hh-dot{width:26px;height:2.5px;border-radius:2px;background:rgba(255,255,255,.32);transition:.3s;padding:0}
+.hh-dot:hover{background:rgba(255,255,255,.55)}
+.hh-dot.on{background:#fff;width:38px}
+.hh-meta{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.hh-meta em{width:24px;height:1px;background:rgba(255,255,255,.32);display:inline-block;font-style:normal}
+
+/* ---- Nav overlay 模式(仅当 body 有 home-immersive 时) ---- */
+body.home-immersive{}
+body.home-immersive .nav{
+  position:fixed;left:0;right:0;top:0;
+  background:transparent;border-bottom-color:transparent;
+  transition:background .28s ease,border-color .28s ease,backdrop-filter .28s ease,color .28s ease;
+}
+/* 透明态: 把内部元件改成白色 */
+body.home-immersive:not(.nav-scrolled) .nav .brand{color:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .brand .gm{background:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .brand .gm svg{fill:var(--ink)}
+body.home-immersive:not(.nav-scrolled) .nav .loc{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+body.home-immersive:not(.nav-scrolled) .nav .loc .pin{stroke:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .loc .chev{stroke:rgba(255,255,255,.7)}
+body.home-immersive:not(.nav-scrolled) .nav .navlinks a{color:rgba(255,255,255,.82)}
+body.home-immersive:not(.nav-scrolled) .nav .navlinks a:hover{color:#fff;background:rgba(255,255,255,.12)}
+body.home-immersive:not(.nav-scrolled) .nav .navlinks .ai-tag{background:rgba(255,255,255,.85);color:var(--ink)}
+body.home-immersive:not(.nav-scrolled) .nav .ic{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+body.home-immersive:not(.nav-scrolled) .nav .ic svg{stroke:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .navright .btn-out{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#fff;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+body.home-immersive:not(.nav-scrolled) .nav .navright .btn-ink{background:#fff;color:var(--ink)}
+body.home-immersive:not(.nav-scrolled) .nav .navright .btn-ink:hover{background:#e9e9ec}
+body.home-immersive:not(.nav-scrolled) .nav .hamburger{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+body.home-immersive:not(.nav-scrolled) .nav .hamburger svg{stroke:#fff}
+
+/* 滚动后的实底态: 玻璃质感的白底 */
+body.home-immersive.nav-scrolled .nav{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(20px) saturate(140%);
+  -webkit-backdrop-filter:blur(20px) saturate(140%);
+  border-bottom-color:var(--line);
+}
+
+/* fixed nav 在首页不占据流空间,hero 顶到视口顶 */
+body.home-immersive main{padding-top:0}
+
+/* ---- 首页 CTA 加点呼吸感 ---- */
+.sec + .cta{margin-top:96px}
+.cta{padding:54px 56px;border-radius:18px}
+.cta h2{font-size:clamp(24px,2.6vw,30px);font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
+.cta p{font-size:15px;line-height:1.55}
+
+/* ============================================================
+   首页 reveal 动效 + 新叙事 section (about / why) + rail 交互
+   ============================================================ */
+
+/* Reveal — IntersectionObserver 触发,加 .on 时淡入上移 */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s cubic-bezier(.2,.7,.2,1),transform .65s cubic-bezier(.2,.7,.2,1)}
+.reveal.on{opacity:1;transform:translateY(0)}
+
+/* 我们是什么 — 居中,大字号布道式排版
+   全部 scope 在 .about-sec 下,避免与 Footer 既有的 <p class="about"> 冲突 */
+.about-sec{padding-top:128px}
+.about-sec .about{max-width:880px;margin:0 auto;text-align:center;padding:24px 0}
+.about-sec .about .eye{display:inline-flex;align-items:center;gap:10px;font-size:11.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.about-sec .about .eye i{width:22px;height:1.5px;background:var(--accent);display:inline-block}
+.about-sec .about h2{font-size:clamp(36px,5.2vw,60px);font-weight:800;letter-spacing:-.035em;line-height:1.06;margin:22px 0 20px;text-wrap:balance}
+.about-sec .about p{font-size:clamp(15px,1.4vw,18px);line-height:1.65;color:var(--ink2);margin:0 auto;max-width:680px;text-wrap:balance}
+
+/* 为什么加入 — 3 列卡片 */
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.wy{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px;height:100%;transition:transform .3s ease,border-color .3s ease}
+.wy:hover{transform:translateY(-3px);border-color:#dadae0}
+.wy-ic{width:48px;height:48px;border-radius:12px;background:var(--page);display:grid;place-items:center;margin-bottom:22px}
+.wy-ic svg{width:24px;height:24px;stroke:var(--ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.wy h3{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:0 0 10px}
+.wy p{font-size:14.5px;line-height:1.6;color:var(--ink2);margin:0}
+
+/* Rail 拖拽 + 卡片 hover 放大 + 信息分层 (只作用于首页 .crail 内的卡) */
+.crail{cursor:grab;user-select:none}
+.crail.dragging{cursor:grabbing}
+.crail .cc{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.crail .cc:hover{transform:scale(1.025)}
+.crail .cc .info .ct,
+.crail .cc .info .f{opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease}
+.crail .cc:hover .info .ct,
+.crail .cc:hover .info .f{opacity:1;transform:translateY(0)}
+
+/* ============================================================
+   首页叙事章节: 内容类型 / 创作者横向滑廊 / 平台数据 / CTA banner
+   作用域全部在首页特有 class 上,其它页面不会引用
+   ============================================================ */
+
+/* ---- 内容类型大卡网格 ---- */
+.ctype{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.ctype .ct{position:relative;display:block;aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;background:#e6e6ea;color:#fff;transition:transform .25s ease}
+.ctype .ct:hover{transform:translateY(-3px)}
+.ctype .ct .gr{position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.2) 55%,rgba(0,0,0,.85));z-index:1;pointer-events:none}
+.ctype .ct .info{position:absolute;left:16px;right:16px;bottom:16px;z-index:2}
+.ctype .ct .info h3{font-size:19px;font-weight:700;letter-spacing:-.015em;margin:0 0 6px;line-height:1.2}
+.ctype .ct .info p{font-size:12px;color:rgba(255,255,255,.78);margin:0 0 12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ctype .ct .info .go{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#fff;opacity:.9}
+.ctype .ct .info .go svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ---- 创作者横向滑廊 ---- */
+.crail{display:flex;gap:14px;overflow-x:auto;overflow-y:visible;padding:4px 4px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.crail::-webkit-scrollbar{display:none}
+.crail .cc{flex:0 0 280px;scroll-snap-align:start}
+
+/* ---- 平台数据 ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:38px 8px;overflow:hidden}
+.stats .sv{padding:4px 28px;border-right:1px solid var(--line);text-align:left}
+.stats .sv:last-child{border-right:none}
+.stats .sv .accent{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:14px}
+.stats .sv b{font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.03em;display:block;line-height:1;color:var(--ink)}
+.stats .sv > span:last-child{font-size:13px;color:var(--muted);margin-top:12px;display:block;line-height:1.4}
+
+/* ---- 创作者入驻 banner ---- */
+.banner{position:relative;background:var(--ink);border-radius:22px;overflow:hidden;color:#fff;min-height:340px;padding:56px 56px;display:flex;align-items:center;gap:48px;justify-content:space-between;flex-wrap:wrap}
+.banner::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 88% 0%,rgba(184,167,137,.16),transparent 55%);pointer-events:none}
+.banner .bn-l{flex:1 1 360px;min-width:280px;max-width:560px;position:relative;z-index:1}
+.banner .bn-eye{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+.banner .bn-eye i{width:22px;height:1.5px;background:var(--accent);display:inline-block}
+.banner h2{font-size:clamp(28px,3.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin:18px 0 16px;color:#fff;text-wrap:balance}
+.banner p{font-size:15px;color:rgba(255,255,255,.78);line-height:1.6;margin:0 0 26px;max-width:480px}
+.banner .bn-acts{display:flex;gap:12px;flex-wrap:wrap}
+.banner .bn-r{flex:0 0 320px;height:260px;position:relative;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.04)}
+
+/* ---- 响应式 ---- */
+@media(max-width:860px){
+  .hh{height:78vh;min-height:480px}
+  .hh-cap{padding-bottom:96px}
+  .hh-title{font-size:clamp(34px,9vw,52px)}
+  .hh-search{flex-wrap:wrap;border-radius:12px}
+  .hh-cta{width:100%;justify-content:center}
+  .sec{padding-top:64px}
+  .sec:first-of-type{padding-top:72px}
+  .sec-h{margin-bottom:18px}
+  .cta{padding:32px 24px}
+  .sec + .cta{margin-top:64px}
+
+  .about-sec{padding-top:80px}
+  .about-sec .about{padding:8px 0}
+  .about-sec .about h2{margin:18px 0 14px}
+  .why{grid-template-columns:1fr;gap:12px}
+  .wy{padding:24px}
+  .ctype{grid-template-columns:repeat(2,1fr);gap:10px}
+  .ctype .ct{aspect-ratio:4/5}
+  .crail .cc{flex-basis:230px}
+  .stats{grid-template-columns:repeat(2,1fr);padding:24px 0}
+  .stats .sv{padding:16px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .stats .sv:nth-child(2n){border-right:none}
+  .stats .sv:nth-last-child(-n+2){border-bottom:none}
+  .banner{padding:32px 24px;min-height:0;gap:24px}
+  .banner .bn-r{flex:1 1 100%;height:180px}
+}
+

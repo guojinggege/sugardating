@@ -10,7 +10,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const detail = await getCreatorBySlug(params.slug);
   if (!detail) notFound();
   const { creator: c, bio, works, tiers } = detail;
-  const subscriberWorks = works.filter(() => false).length; // 当前 seed 全是 public,先以 0 显示
+  const imageWorks = works.filter((w) => w.type === "image");
+  const videoWorks = works.filter((w) => w.type === "video");
+  const subscriberWorks = 0; // seed 当前全是 public
 
   return (
     <div className="container">
@@ -36,9 +38,29 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <div className="tab">订阅档位</div>
       </div>
 
-      <div className="feed" style={{ paddingTop: 22 }}>
-        {works.slice(0, 10).map((w) => <WorkTile key={w.id} w={w} />)}
+      <div className="work-sub">
+        <h3>图片作品</h3>
+        <span className="c">{imageWorks.length} 件</span>
       </div>
+      {imageWorks.length === 0 ? (
+        <div className="work-empty">暂无图片作品</div>
+      ) : (
+        <div className="feed">
+          {imageWorks.map((w) => <WorkTile key={w.id} w={w} />)}
+        </div>
+      )}
+
+      <div className="work-sub">
+        <h3>视频作品</h3>
+        <span className="c">{videoWorks.length} 件</span>
+      </div>
+      {videoWorks.length === 0 ? (
+        <div className="work-empty">暂无视频作品</div>
+      ) : (
+        <div className="feed">
+          {videoWorks.map((w) => <WorkTile key={w.id} w={w} video />)}
+        </div>
+      )}
 
       <div className="tiers">
         {tiers.map((t) => {

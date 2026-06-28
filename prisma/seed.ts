@@ -113,7 +113,21 @@ async function main() {
     });
   }
 
-  // Works
+  // Works — 故意混着分配 image/video,让"图片作品 / 视频作品" tab 都能见数据
+  // 比如林夏(w1+w5)/陈屿(w2+w10)分别覆盖两种 type
+  const workTypeOverrides: Record<string, "image" | "video"> = {
+    w1: "image",   // 雨后的海岸 - 林夏
+    w2: "video",   // 霓虹与雨   - 陈屿
+    w3: "image",   // 清晨的山   - 苏念
+    w4: "image",   // 黑白海岸   - Aria
+    w5: "video",   // 山顶黄昏   - 林夏  ← 林夏拿到一条 video
+    w6: "video",   // 公路尽头   - 周野
+    w7: "image",   // 雾中森林   - 麦地
+    w8: "image",   // 湖与天     - 何雨桐
+    w9: "video",   // 雪山之巅   - Kenji
+    w10: "image",  // 日落港湾   - 陈屿  ← 陈屿拿到一条 image
+  };
+
   const creatorByName = Object.fromEntries(
     (await prisma.creator.findMany()).map((c) => [c.name, c]),
   );
@@ -123,6 +137,7 @@ async function main() {
     await prisma.work.create({
       data: {
         title: w.title,
+        type: workTypeOverrides[w.id] ?? "image",
         visibility: "public",
         creatorId: creator.id,
       },

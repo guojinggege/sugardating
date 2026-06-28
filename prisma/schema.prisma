@@ -58,6 +58,7 @@ model Creator {
 model Work {
   id         String   @id @default(cuid())
   title      String
+  type       String   @default("image") // image | video
   visibility String   @default("public") // public | subscriber
   creatorId  String
   createdAt  DateTime @default(now())

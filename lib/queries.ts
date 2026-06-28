@@ -96,10 +96,17 @@ export interface CreatorTierPlan {
   benefits: string[];
 }
 
+export type WorkType = "image" | "video";
+
+// 创作者主页要按 type 分组,所以扩展一下 Work 的形状(不动 lib/types.ts)
+export interface ProfileWork extends Work {
+  type: WorkType;
+}
+
 export interface CreatorDetail {
   creator: Creator;
   bio: string;
-  works: Work[];
+  works: ProfileWork[];
   tiers: CreatorTierPlan[];
 }
 
@@ -124,6 +131,7 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorDetail | nu
       title: w.title,
       author: c.name,
       category: categoryLabel,
+      type: (w.type === "video" ? "video" : "image") as WorkType,
     })),
     tiers: c.tiers.map((t) => ({
       name: t.name,
@@ -132,4 +140,28 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorDetail | nu
       benefits: JSON.parse(t.benefits) as string[],
     })),
   };
+}
+
+// 按 creator + type 单独查,供主页两段使用
+export async function listWorksByCreatorAndType(
+  creatorSlug: string,
+  type: WorkType,
+): Promise<ProfileWork[]> {
+  const creator = await prisma.creator.findUnique({
+    where: { slug: creatorSlug },
+    include: { category: true },
+  });
+  if (!creator) return [];
+  const categoryLabel = slugToCategoryLabel[creator.category.slug] ?? creator.category.label;
+  const rows = await prisma.work.findMany({
+    where: { creatorId: creator.id, type, visibility: "public" },
+    orderBy: { createdAt: "asc" },
+  });
+  return rows.map((w) => ({
+    id: w.id,
+    title: w.title,
+    author: creator.name,
+    category: categoryLabel,
+    type,
+  }));
 }

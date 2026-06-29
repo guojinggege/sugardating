@@ -140,7 +140,7 @@ export default function Nav({ regionGroups }: Props) {
                   {c.children.map((cc) => (
                     <Link
                       key={cc.slug}
-                      href={`/${c.slug}?type=${cc.slug}`}
+                      href={`/${c.slug}#${cc.slug}`}
                       onClick={() => setOpen(false)}
                     >
                       {cc.label}
@@ -205,7 +205,7 @@ function NavDropdownItem({ channel }: { channel: Channel }) {
             <Link
               key={cc.slug}
               role="menuitem"
-              href={`/${channel.slug}?type=${cc.slug}`}
+              href={`/${channel.slug}#${cc.slug}`}
               onClick={() => setOpen(false)}
             >
               {cc.label}

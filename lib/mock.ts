@@ -5,7 +5,7 @@ import { Channel, Creator, Work, LiveItem, Post } from "./types";
 export const channels: Channel[] = [
   { slug: "photography",  label: "动态推荐" },
   { slug: "video",        label: "视频专区" },
-  { slug: "art-services", label: "专属服务", children: [
+  { slug: "art-services", label: "定制服务", children: [
     { slug: "dating",     label: "约会" },
     { slug: "travel",     label: "旅游" },
     { slug: "shoot",      label: "拍摄" },

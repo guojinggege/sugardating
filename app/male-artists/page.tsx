@@ -1,11 +1,26 @@
-import ChannelListing from "@/components/ChannelListing";
-import { listCreatorsByCategory } from "@/lib/queries";
-import { photos } from "@/lib/images";
+import PageBgDark from "@/components/Feed/PageBgDark";
+import SugarGirlHero from "@/components/SugarGirl/SugarGirlHero";
+import SugarGirlGrid from "@/components/SugarGirl/SugarGirlGrid";
+import { sugarGirls } from "@/lib/sugarGirlMock";
+import { pick } from "@/lib/images";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
-  const items = await listCreatorsByCategory("male-artists");
-  return <ChannelListing eyebrow="频道" title="SugarGirl" desc="精选女性创作者频道。"
-    items={items} chips={["全部", "动态推荐", "视频专区", "专属服务"]} photos={photos} />;
+export const metadata = {
+  title: "SugarGirl · Sugardating",
+  description: "精选创作者目录 — 国家、城市、兴趣可筛选,按你的节奏发现。",
+};
+
+export default function Page() {
+  const heroBg = pick(0, 6) ?? "/images/placeholder.png";
+  return (
+    <>
+      <PageBgDark />
+      <main className="min-h-screen bg-feed-bg font-ui text-feed-ink">
+        <SugarGirlHero bg={heroBg} totalCount={sugarGirls.length} />
+        <SugarGirlGrid entries={sugarGirls} />
+        <div className="h-20" />
+      </main>
+    </>
+  );
 }

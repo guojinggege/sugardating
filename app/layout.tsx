@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Sugardating — 华语与亚裔创作者发现平台",
-  description: "动态推荐、视频专区、专属服务、SugarGirl、AI 艺术家 — 发现华语与亚裔创作者，订阅他们的作品。",
+  description: "动态推荐、视频专区、专属服务、SugarGirl、在线伴侣 — 发现华语与亚裔创作者，订阅他们的作品。",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

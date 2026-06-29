@@ -29,7 +29,7 @@ npm run dev                      # http://localhost:3000
 | `/video` | 视频专区 |
 | `/art-services` | 专属服务 |
 | `/male-artists` | SugarGirl |
-| `/ai-artists` | AI 艺术家（含静态智能搜索入口） |
+| `/ai-artists` | 在线伴侣（含静态智能搜索入口） |
 | `/live` | 直播平台 |
 | `/community` | 社区动态 |
 | `/creators` | 创作者目录（按地区 / 分类 / 排序，地区从 Nav 下拉过滤） |

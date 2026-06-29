@@ -12,7 +12,7 @@ export const channels: Channel[] = [
     { slug: "video-chat", label: "视频聊天" },
   ]},
   { slug: "male-artists", label: "SugarGirl" },
-  { slug: "ai-artists",   label: "AI艺术家", flag: "ai" },
+  { slug: "ai-artists",   label: "在线伴侣", flag: "ai" },
   { slug: "live",         label: "直播平台", flag: "live" },
   { slug: "community",    label: "社区" },
 ];

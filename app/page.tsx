@@ -20,13 +20,13 @@ const contentTypes = [
   { slug: "video",        title: "视频专区", desc: "短片、Vlog、直播回放——会动的故事与时间。" },
   { slug: "art-services", title: "专属服务", desc: "约拍、咨询、定制——可委托的私享合作。" },
   { slug: "male-artists", title: "SugarGirl", desc: "精选女性创作者频道。" },
-  { slug: "ai-artists",   title: "AI 艺术家", desc: "AI 辅助下的新风格与新视角。" },
+  { slug: "ai-artists",   title: "在线伴侣", desc: "随时上线、轻松对话的精选伴侣 — 文字 / 语音 / 视频自由切换。" },
 ];
 
 const stats = [
   { eye: "创作者", num: "2,840+", label: "正在 Sugardating 发布作品" },
   { eye: "地区",   num: "11",     label: "香港 / 新加坡 / 台北 / 东京 …" },
-  { eye: "门类",   num: "5",      label: "动态推荐 / 视频专区 / 专属服务 / SugarGirl / AI" },
+  { eye: "门类",   num: "5",      label: "动态推荐 / 视频专区 / 专属服务 / SugarGirl / 在线伴侣" },
   { eye: "模式",   num: "订阅制", label: "支持你长期的创作" },
 ];
 
@@ -72,7 +72,7 @@ export default async function Home() {
             <div className="about">
               <span className="eye"><i />关于我们</span>
               <h2>华语与亚裔创作者的家</h2>
-              <p>Sugardating 是一个面向全球华语与亚裔创作者的发现与订阅平台。动态推荐、视频专区、专属服务、SugarGirl、AI 创作——在这里展示作品，与支持你的人直接连接。</p>
+              <p>Sugardating 是一个面向全球华语与亚裔创作者的发现与订阅平台。动态推荐、视频专区、专属服务、SugarGirl、在线伴侣——在这里展示作品，与支持你的人直接连接。</p>
             </div>
           </Reveal>
         </section>

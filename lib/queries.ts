@@ -6,7 +6,7 @@ const slugToCategoryLabel: Record<string, string> = {
   photography:    "动态推荐",
   video:          "视频专区",
   "art-services": "专属服务",
-  "ai-artists":   "AI艺术家",
+  "ai-artists":   "在线伴侣",
   "male-artists": "SugarGirl",
 };
 

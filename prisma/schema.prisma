@@ -11,12 +11,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  role      String   @default("creator") // user | creator | admin
-  createdAt DateTime @default(now())
-  creator   Creator?
+  id          String       @id @default(cuid())
+  email       String       @unique
+  name        String
+  role        String       @default("creator") // user | creator | admin
+  createdAt   DateTime     @default(now())
+  creator     Creator?
 }
 
 model Category {
@@ -53,6 +53,8 @@ model Creator {
   region   Region     @relation(fields: [regionId], references: [id])
   works    Work[]
   tiers    TierPlan[]
+  tips     Tip[]
+  comments Comment[]
 }
 
 model Work {
@@ -75,4 +77,28 @@ model TierPlan {
   creatorId String
 
   creator Creator @relation(fields: [creatorId], references: [id])
+}
+
+model Tip {
+  id        String   @id @default(cuid())
+  amount    Int      // 整数(单位 S$),不接真实支付,只记录
+  message   String?  // 可选留言
+  creatorId String
+  createdAt DateTime @default(now())
+
+  creator Creator @relation(fields: [creatorId], references: [id])
+
+  @@index([creatorId, createdAt])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  authorName String
+  content    String
+  creatorId  String
+  createdAt  DateTime @default(now())
+
+  creator Creator @relation(fields: [creatorId], references: [id])
+
+  @@index([creatorId, createdAt])
 }

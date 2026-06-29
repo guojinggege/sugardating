@@ -3,8 +3,21 @@ import Img from "@/components/Img";
 import Placeholder from "@/components/Placeholder";
 import WorkTile from "@/components/WorkTile";
 import { Tick } from "@/components/icons";
-import { getCreatorBySlug } from "@/lib/queries";
+import { getCreatorBySlug, listCommentsByCreator } from "@/lib/queries";
 import { pick } from "@/lib/images";
+import TipButton from "./TipButton";
+import CommentForm from "./CommentForm";
+
+function timeAgo(d: Date): string {
+  const diff = Date.now() - d.getTime();
+  const min = 60_000, hour = 60 * min, day = 24 * hour;
+  if (diff < min) return "刚刚";
+  if (diff < hour) return `${Math.floor(diff / min)} 分钟前`;
+  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
+  if (diff < 30 * day) return `${Math.floor(diff / day)} 天前`;
+  return d.toLocaleDateString("zh-CN");
+}
+
 export const dynamic = "force-dynamic";
 
 // 从 slug 派生稳定 offset,确保同一创作者每次访问的封面/头像/作品图都不变
@@ -15,7 +28,10 @@ function offsetFromSlug(slug: string): number {
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
-  const detail = await getCreatorBySlug(params.slug);
+  const [detail, comments] = await Promise.all([
+    getCreatorBySlug(params.slug),
+    listCommentsByCreator(params.slug),
+  ]);
   if (!detail) notFound();
   const { creator: c, bio, works, tiers } = detail;
   const imageWorks = works.filter((w) => w.type === "image");
@@ -42,7 +58,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <div className="nm">{c.name} <Tick /></div>
           <div className="meta"><span>{c.region}</span><span>{c.category} · {c.specialty}</span><span>中文 / English</span></div>
         </div>
-        <div className="pf-act"><button className="btn btn-out">＋ 关注</button><button className="btn btn-ink">订阅 {c.price}/月</button></div>
+        <div className="pf-act">
+          <button className="btn btn-out">＋ 关注</button>
+          <TipButton slug={c.slug} />
+          <button className="btn btn-ink">订阅 {c.price}/月</button>
+        </div>
       </div>
       <p className="pf-bio">{bio}</p>
       <div className="pf-stats">
@@ -95,6 +115,29 @@ export default async function Page({ params }: { params: { slug: string } }) {
           );
         })}
       </div>
+      <section className="cmts">
+        <div className="work-sub">
+          <h3>评论</h3>
+          <span className="c">{comments.length} 条</span>
+        </div>
+        {comments.length === 0 ? (
+          <div className="work-empty">还没有评论,来说第一句吧。</div>
+        ) : (
+          <ul className="cmt-list">
+            {comments.map((cm) => (
+              <li key={cm.id} className="cmt">
+                <div className="cmt-h">
+                  <b>{cm.authorName}</b>
+                  <span>{timeAgo(cm.createdAt)}</span>
+                </div>
+                <p>{cm.content}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <CommentForm slug={c.slug} />
+      </section>
+
       <div style={{ height: 40 }} />
     </div>
   );

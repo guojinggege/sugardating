@@ -32,8 +32,43 @@ const tierMeta: Record<string, { label: string; price: string; benefits: string[
   ],
 };
 
+// 评论池子(20 条) — 围绕摄影/视频作品本身的观感,seed 时每位创作者随机抽 5-10 条
+const commentPool: { name: string; content: string }[] = [
+  { name: "小雨",       content: "这组光线真是绝了,海岸的层次推开得很自然。" },
+  { name: "陈林",       content: "构图很稳,前景的礁石做引导线特别有故事感。" },
+  { name: "Joy",        content: "色调很克制,有黑白胶片的味道。" },
+  { name: "Mira",       content: "山顶那张的色温过渡很舒服,后期没有过曝。" },
+  { name: "Kevin",      content: "拍出了那种潮湿的空气感,很喜欢。" },
+  { name: "雾里看花",   content: "雨水落在石头上的质感拍到了,镜头语言成熟。" },
+  { name: "Anika",      content: "对光线的耐心确实是好作品的关键。" },
+  { name: "野旅人",     content: "可以多分享一些后期手记吗?想学习。" },
+  { name: "Lucas",      content: "看完想立刻订机票去现场。" },
+  { name: "白岛",       content: "色彩还原非常自然,没有滤镜的廉价感。" },
+  { name: "苏茉",       content: "你的画面有种安静下来的力量。" },
+  { name: "顾川",       content: "前后两张的对比把时间的流动表现出来了。" },
+  { name: "晚来",       content: "构图克制,留白处也是语言。" },
+  { name: "蓝鳞",       content: "天空的层次拉得很好,云没有糊掉。" },
+  { name: "Ava",        content: "镜头里有作者本人的呼吸。" },
+  { name: "凌川",       content: "雾中那张已经收藏到我的灵感库了。" },
+  { name: "Noemi",      content: "请问主要用什么镜头?画面紧凑很喜欢。" },
+  { name: "南野",       content: "夜景延时帧间过渡平滑,机位选得讲究。" },
+  { name: "Bea",        content: "色彩饱和很克制,不会喧宾夺主。" },
+  { name: "Olin",       content: "这一组应该出画册,值得收藏。" },
+];
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 async function main() {
   // 清空(开发用,顺序按外键)
+  await prisma.comment.deleteMany();
+  await prisma.tip.deleteMany();
   await prisma.tierPlan.deleteMany();
   await prisma.work.deleteMany();
   await prisma.creator.deleteMany();
@@ -144,6 +179,25 @@ async function main() {
     });
   }
 
+  // Comments — 每位创作者 5-10 条,内容随机抽自 commentPool
+  const creatorsInDb = await prisma.creator.findMany();
+  const DAY = 24 * 60 * 60 * 1000;
+  for (const cr of creatorsInDb) {
+    const n = 5 + Math.floor(Math.random() * 6); // 5-10
+    const picks = shuffle(commentPool).slice(0, n);
+    for (const cm of picks) {
+      const ageMs = Math.random() * 30 * DAY; // 0-30 天内随机
+      await prisma.comment.create({
+        data: {
+          authorName: cm.name,
+          content: cm.content,
+          creatorId: cr.id,
+          createdAt: new Date(Date.now() - ageMs),
+        },
+      });
+    }
+  }
+
   const summary = {
     users: await prisma.user.count(),
     creators: await prisma.creator.count(),
@@ -151,6 +205,8 @@ async function main() {
     regions: await prisma.region.count(),
     works: await prisma.work.count(),
     tierPlans: await prisma.tierPlan.count(),
+    tips: await prisma.tip.count(),
+    comments: await prisma.comment.count(),
   };
   console.log("Seeded:", summary);
 }

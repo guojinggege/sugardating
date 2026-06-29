@@ -142,6 +142,29 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorDetail | nu
   };
 }
 
+export interface ProfileComment {
+  id: string;
+  authorName: string;
+  content: string;
+  createdAt: Date;
+}
+
+// 创作者主页底部评论列表 — 倒序,最新在前
+export async function listCommentsByCreator(slug: string): Promise<ProfileComment[]> {
+  const creator = await prisma.creator.findUnique({ where: { slug }, select: { id: true } });
+  if (!creator) return [];
+  const rows = await prisma.comment.findMany({
+    where: { creatorId: creator.id },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((c) => ({
+    id: c.id,
+    authorName: c.authorName,
+    content: c.content,
+    createdAt: c.createdAt,
+  }));
+}
+
 // 按 creator + type 单独查,供主页两段使用
 export async function listWorksByCreatorAndType(
   creatorSlug: string,
@@ -165,3 +188,4 @@ export async function listWorksByCreatorAndType(
     type,
   }));
 }
+

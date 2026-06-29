@@ -1,11 +1,21 @@
-import ChannelListing from "@/components/ChannelListing";
-import { listCreatorsByCategory } from "@/lib/queries";
-import { photos } from "@/lib/images";
+import FeedShell from "@/components/Feed/FeedShell";
+import { featuredCreator, feedPosts, sidebarSuggestions, sidebarHotCreators } from "@/lib/feedMock";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
-  const items = await listCreatorsByCategory("photography");
-  return <ChannelListing eyebrow="频道" title="动态推荐" desc="基于你的兴趣每天发现新内容与新创作者。"
-    items={items} chips={["全部", "新作", "高分", "热议", "近期更新"]} photos={photos} />;
+// SEO 沿用频道名,描述贴近新页面定位
+export const metadata = {
+  title: "动态推荐 · Sugardating",
+  description: "发现创作者动态:图片、视频、VIP 内容、热门更新。",
+};
+
+export default function Page() {
+  return (
+    <FeedShell
+      creator={featuredCreator}
+      posts={feedPosts}
+      suggestions={sidebarSuggestions}
+      hot={sidebarHotCreators}
+    />
+  );
 }

@@ -1,3 +1,10 @@
+/* Tailwind 仅 utilities 层 — preflight 在 tailwind.config 关掉,不重置已有页面 */
+@tailwind utilities;
+
+/* 通用小 utility(Tailwind 默认没有 scrollbar-hide) */
+.scrollbar-hide{scrollbar-width:none}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+
 :root{
   --page:#F4F4F5; --card:#FFFFFF; --ink:#161618; --ink2:#46464B;
   --muted:#9B9BA3; --line:#E8E8EC; --line2:#DEDEE3; --live:#E5484D;
@@ -362,6 +369,45 @@ img{display:block;max-width:100%}
   .foot-in{grid-template-columns:1fr 1fr;gap:22px}.foot .about{grid-column:1/-1}
   .cta{padding:24px}
 }
+/* ============================================================
+   /photography 黑金 feed 主题 (body.page-dark)
+   只在该页激活;Nav / Footer 跟着切深色;其它页面零影响
+   ============================================================ */
+body.page-dark{background:#0a0a0c;color:#F2F2F4}
+body.page-dark .nav{background:rgba(10,10,12,.82);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-bottom-color:rgba(255,255,255,.08)}
+body.page-dark .nav .brand{color:#F2F2F4}
+body.page-dark .nav .brand .gm{background:#F2F2F4}
+body.page-dark .nav .brand .gm svg{fill:#0a0a0c}
+body.page-dark .nav .loc{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:#F2F2F4}
+body.page-dark .nav .loc .pin{stroke:#F2F2F4}
+body.page-dark .nav .loc .chev{stroke:rgba(255,255,255,.55)}
+body.page-dark .nav .navlinks a{color:rgba(242,242,244,.78)}
+body.page-dark .nav .navlinks a:hover{color:#F2F2F4;background:rgba(255,255,255,.08)}
+body.page-dark .nav .navlinks .ai-tag{background:rgba(255,255,255,.85);color:#0a0a0c}
+body.page-dark .nav .ic{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+body.page-dark .nav .ic svg{stroke:#F2F2F4}
+body.page-dark .nav .hamburger{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+body.page-dark .nav .hamburger svg{stroke:#F2F2F4}
+body.page-dark .nav .navright .btn-out{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F2F2F4}
+body.page-dark .nav .navright .btn-ink{background:#F2F2F4;color:#0a0a0c}
+body.page-dark .nav .navright .btn-ink:hover{background:#fff}
+body.page-dark .nav .btn-mship svg{color:var(--accent)}
+body.page-dark .nav .loc-pop{background:#161618;border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
+body.page-dark .nav .loc-pop button{color:rgba(242,242,244,.85)}
+body.page-dark .nav .loc-pop button:hover{background:rgba(255,255,255,.06);color:#F2F2F4}
+body.page-dark .nav .loc-pop button.on{background:#F2F2F4;color:#0a0a0c}
+body.page-dark .nav .loc-all{border-bottom-color:rgba(255,255,255,.08)}
+body.page-dark .nav .loc-grp-h{color:rgba(167,167,174,.65)}
+body.page-dark .foot{background:#0d0d10;border-top-color:rgba(255,255,255,.08);color:rgba(242,242,244,.55)}
+body.page-dark .foot h5,body.page-dark .foot .fbrand{color:#F2F2F4}
+body.page-dark .foot .fbrand .gm{background:#F2F2F4}
+body.page-dark .foot .fbrand .gm svg{fill:#0a0a0c}
+body.page-dark .foot li a{color:rgba(242,242,244,.6)}
+body.page-dark .foot li a:hover{color:#F2F2F4}
+body.page-dark .foot .about{color:rgba(167,167,174,.6)}
+body.page-dark .foot-b{border-top-color:rgba(255,255,255,.08);color:rgba(167,167,174,.5)}
+body.page-dark main{padding-top:0}
+
 @media(prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
   /* reveal 元素直接显示,避免在 hydration 窗口里短暂不可见 */

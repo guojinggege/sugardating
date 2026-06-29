@@ -67,6 +67,8 @@ function shuffle<T>(arr: T[]): T[] {
 
 async function main() {
   // 清空(开发用,顺序按外键)
+  await prisma.membership.deleteMany();
+  await prisma.membershipPlan.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.tip.deleteMany();
   await prisma.tierPlan.deleteMany();
@@ -198,6 +200,58 @@ async function main() {
     }
   }
 
+  // Membership plans — 3 等级 × 4 周期。价格用 cents 存,展示时除 100
+  // 权益不含"无限私聊创作者";走内容/体验向
+  const TIER_BENEFITS: Record<string, string[]> = {
+    basic: [
+      "免广告浏览",
+      "会员价订阅折扣 5%",
+      "专属会员徽章",
+    ],
+    premium: [
+      "免广告浏览",
+      "提前 24 小时看新作品",
+      "原图高清下载",
+      "会员价订阅折扣 10%",
+      "进阶会员徽章",
+      "活动报名优先",
+    ],
+    elite: [
+      "免广告浏览",
+      "提前 48 小时看新作品",
+      "独家内容合集每月更新",
+      "原图高清 + 无水印批量下载",
+      "会员价订阅折扣 15%",
+      "尊享会员徽章",
+      "线下活动名额优先",
+    ],
+  };
+
+  // tier → period → cents
+  const PRICES: Record<string, Record<string, number>> = {
+    basic:   { week:  300, month:  1000, quarter:  2500, year:  8000 },
+    premium: { week:  600, month:  2000, quarter:  5200, year: 18000 },
+    elite:   { week: 1200, month:  4000, quarter: 10500, year: 36000 },
+  };
+
+  const TIER_ORDER: Record<string, number> = { basic: 0, premium: 1, elite: 2 };
+  const PERIOD_ORDER: Record<string, number> = { week: 0, month: 1, quarter: 2, year: 3 };
+
+  for (const tier of Object.keys(PRICES)) {
+    for (const period of Object.keys(PRICES[tier])) {
+      await prisma.membershipPlan.create({
+        data: {
+          tier,
+          period,
+          price: PRICES[tier][period],
+          benefits: JSON.stringify(TIER_BENEFITS[tier]),
+          bestValue: period === "year",
+          sortKey: TIER_ORDER[tier] * 10 + PERIOD_ORDER[period],
+        },
+      });
+    }
+  }
+
   const summary = {
     users: await prisma.user.count(),
     creators: await prisma.creator.count(),
@@ -207,6 +261,7 @@ async function main() {
     tierPlans: await prisma.tierPlan.count(),
     tips: await prisma.tip.count(),
     comments: await prisma.comment.count(),
+    membershipPlans: await prisma.membershipPlan.count(),
   };
   console.log("Seeded:", summary);
 }

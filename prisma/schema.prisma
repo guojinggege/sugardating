@@ -17,6 +17,7 @@ model User {
   role        String       @default("creator") // user | creator | admin
   createdAt   DateTime     @default(now())
   creator     Creator?
+  memberships Membership[]
 }
 
 model Category {
@@ -101,4 +102,38 @@ model Comment {
   creator Creator @relation(fields: [creatorId], references: [id])
 
   @@index([creatorId, createdAt])
+}
+
+// 平台会员套餐 — 3 等级 × 4 周期 = 12 行
+model MembershipPlan {
+  id        String   @id @default(cuid())
+  tier      String   // basic | premium | elite
+  period    String   // week | month | quarter | year
+  price     Int      // 分(SGD cents)
+  currency  String   @default("SGD")
+  benefits  String   // JSON 字符串(SQLite 无 array)
+  bestValue Boolean  @default(false)
+  sortKey   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  memberships Membership[]
+
+  @@unique([tier, period])
+}
+
+// 用户开通的会员 — userId 暂时可空,待 auth 接入后回填
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String?
+  planId    String
+  startsAt  DateTime @default(now())
+  endsAt    DateTime
+  status    String   @default("active") // active | expired | cancelled
+  createdAt DateTime @default(now())
+
+  user User?           @relation(fields: [userId], references: [id])
+  plan MembershipPlan  @relation(fields: [planId], references: [id])
+
+  @@index([userId, status])
+  @@index([planId])
 }

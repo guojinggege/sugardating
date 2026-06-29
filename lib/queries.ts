@@ -189,3 +189,59 @@ export async function listWorksByCreatorAndType(
   }));
 }
 
+// ---- Membership ----
+
+export type MembershipTier = "basic" | "premium" | "elite";
+export type MembershipPeriod = "week" | "month" | "quarter" | "year";
+
+export interface PlanCard {
+  id: string;
+  tier: MembershipTier;
+  period: MembershipPeriod;
+  price: number;        // cents
+  currency: string;
+  benefits: string[];
+  bestValue: boolean;
+  savingsPct: number;   // 相对同等级 week 价的折扣率(>= 0); week 自身为 0
+}
+
+const PERIOD_WEEKS: Record<MembershipPeriod, number> = {
+  week: 1,
+  month: 4,
+  quarter: 13,
+  year: 52,
+};
+
+// 取某 period 下的 3 个等级套餐(basic / premium / elite),附带相对周套餐的省钱比例
+export async function listMembershipPlans(period: MembershipPeriod): Promise<PlanCard[]> {
+  const [forPeriod, weekly] = await Promise.all([
+    prisma.membershipPlan.findMany({ where: { period }, orderBy: { sortKey: "asc" } }),
+    prisma.membershipPlan.findMany({ where: { period: "week" } }),
+  ]);
+  const weeklyByTier: Record<string, number> = {};
+  for (const w of weekly) weeklyByTier[w.tier] = w.price;
+
+  const weeksInPeriod = PERIOD_WEEKS[period];
+
+  return forPeriod.map((p) => {
+    const wkPrice = weeklyByTier[p.tier];
+    const effectiveWeekly = p.price / weeksInPeriod;
+    const savingsPct =
+      period === "week" || !wkPrice ? 0 : Math.max(0, Math.round((1 - effectiveWeekly / wkPrice) * 100));
+    return {
+      id: p.id,
+      tier: p.tier as MembershipTier,
+      period: p.period as MembershipPeriod,
+      price: p.price,
+      currency: p.currency,
+      benefits: JSON.parse(p.benefits) as string[],
+      bestValue: p.bestValue,
+      savingsPct,
+    };
+  });
+}
+
+// 单条 plan 查找(server action 用)
+export async function getMembershipPlan(planId: string) {
+  return prisma.membershipPlan.findUnique({ where: { id: planId } });
+}

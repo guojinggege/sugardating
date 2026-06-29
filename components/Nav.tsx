@@ -100,6 +100,12 @@ export default function Nav({ regionGroups }: Props) {
         </nav>
         <div className="navright">
           <button className="ic" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg></button>
+          <Link href="/membership" className="btn btn-out btn-mship">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden style={{ marginRight: 4 }}>
+              <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
+            </svg>
+            开通会员
+          </Link>
           <Link href="/login" className="btn btn-out">登录</Link>
           <Link href="/register" className="btn btn-ink">成为创作者</Link>
           <button className="hamburger" aria-label="菜单" onClick={() => setOpen((v) => !v)}>
@@ -109,6 +115,7 @@ export default function Nav({ regionGroups }: Props) {
       </div>
       <div className={open ? "mobile-menu open" : "mobile-menu"}>
         {channels.map((c) => (<Link key={c.slug} href={`/${c.slug}`} onClick={() => setOpen(false)}>{c.label}</Link>))}
+        <Link href="/membership" onClick={() => setOpen(false)}>开通会员</Link>
         <Link href="/login" onClick={() => setOpen(false)}>登录</Link>
       </div>
     </header>

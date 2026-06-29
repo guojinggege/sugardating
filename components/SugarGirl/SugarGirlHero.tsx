@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 // SugarGirl 频道页 Hero — 全宽 bg 图 + 暗色渐变 + 中央 wordmark + 双 CTA
-export default function SugarGirlHero({ bg, totalCount }: { bg: string; totalCount: number }) {
+export default function SugarGirlHero({ bg }: { bg: string }) {
   return (
     <section className="relative isolate w-full overflow-hidden bg-black">
       <div className="absolute inset-0 z-0">
@@ -25,7 +25,7 @@ export default function SugarGirlHero({ bg, totalCount }: { bg: string; totalCou
         </h1>
 
         <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-feed-ink/72 md:text-[17px]">
-          精选 {totalCount} 位创作者 · 国家、城市、兴趣可筛选,按你的节奏发现。
+          精选 200 位真人优质 SugarGirl · 国家、城市、兴趣可筛选,按你的节奏发现。
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">

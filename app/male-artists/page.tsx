@@ -17,7 +17,7 @@ export default function Page() {
     <>
       <PageBgDark />
       <main className="min-h-screen bg-feed-bg font-ui text-feed-ink">
-        <SugarGirlHero bg={heroBg} totalCount={sugarGirls.length} />
+        <SugarGirlHero bg={heroBg} />
         <SugarGirlGrid entries={sugarGirls} />
         <div className="h-20" />
       </main>

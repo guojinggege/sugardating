@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import SugarGirlCard from "./SugarGirlCard";
 import SugarGirlFilterBar, { DEFAULT_FILTERS, SugarFilters } from "./SugarGirlFilterBar";
@@ -84,8 +85,8 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
         )}
 
         {/* Load More */}
-        <div className="grid place-items-center pt-12 pb-4">
-          {hasMore ? (
+        <div className="grid place-items-center pt-12">
+          {hasMore && (
             <button
               type="button"
               onClick={() => setVisible((v) => v + PAGE_STEP)}
@@ -96,11 +97,54 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
                 <path d="M12 5v14M6 13l6 6 6-6" />
               </svg>
             </button>
-          ) : list.length > 0 ? (
-            <span className="text-[12px] text-feed-dim">— 没有更多了 —</span>
-          ) : null}
+          )}
         </div>
+
+        {/* Paywall — 已展示精选,完整目录需开通会员 */}
+        {!hasMore && list.length > 0 && (
+          <PaywallGate />
+        )}
       </section>
+    </div>
+  );
+}
+
+function PaywallGate() {
+  return (
+    <div className="relative mt-12 overflow-hidden rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/[0.10] via-gold/[0.03] to-transparent p-8 text-center md:p-12">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(184,167,137,0.15),transparent_60%)]" />
+
+      <div className="inline-flex items-center gap-2">
+        <span className="h-px w-7 bg-gold" />
+        <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-gold">Members Only</span>
+        <span className="h-px w-7 bg-gold" />
+      </div>
+
+      <h3 className="mt-4 font-serif text-[28px] italic tracking-tight text-feed-ink md:text-[34px]">
+        解锁完整目录
+      </h3>
+
+      <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-relaxed text-feed-mute md:text-[14px]">
+        会员可查看完整 SugarGirl 目录、私信通道、隐藏照片与匹配推荐。已展示的是公开精选。
+      </p>
+
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/membership"
+          className="group inline-flex items-center gap-2 rounded-pill bg-gold px-7 py-3 text-[13.5px] font-semibold text-feed-bg transition hover:bg-gold-bright"
+        >
+          开通会员
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-none stroke-current stroke-[2.4] transition-transform duration-300 ease-out group-hover:translate-x-0.5">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </Link>
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 rounded-pill border border-feed-line2 px-6 py-3 text-[13px] font-medium text-feed-ink transition hover:border-gold hover:text-gold"
+        >
+          已有账号 · 登录
+        </Link>
+      </div>
     </div>
   );
 }

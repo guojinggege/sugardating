@@ -167,7 +167,7 @@ export const sugarGirls: SugarGirlEntry[] = [
   {
     id: "sg18", name: "Kana",     age: 23, city: "胡志明市", country: CITY_COUNTRY.胡志明市, height: 164, online: false,
     bio: "美食 + 街拍 + 热带咖啡馆",
-    tags: ["New"], categories: ["美食", "摄影"], popularity: 4120, createdAt: iso(2 * DAY),
+    tags: ["New"], categories: ["美食", "摄影"], popularity: 4120, createdAt: iso(14 * DAY),
     cover: cover(6, 4), featured: false,
   },
   {

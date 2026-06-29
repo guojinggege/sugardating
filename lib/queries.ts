@@ -1,12 +1,13 @@
 import { prisma } from "./db";
 import type { Creator, Tier, Work } from "./types";
 
+// 频道 slug → 展示 label,创作者卡 + 主页一律走这张表
 const slugToCategoryLabel: Record<string, string> = {
-  photography: "摄影",
-  video: "视频",
-  "art-services": "艺术服务",
-  "ai-artists": "AI艺术家",
-  "male-artists": "男艺术家",
+  photography:    "动态推荐",
+  video:          "视频专区",
+  "art-services": "专属服务",
+  "ai-artists":   "AI艺术家",
+  "male-artists": "SugarGirl",
 };
 
 // 1240 -> "1,240"   86000 -> "8.6万"

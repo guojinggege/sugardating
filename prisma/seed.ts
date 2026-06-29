@@ -7,9 +7,9 @@ const prisma = new PrismaClient();
 // 在 mock 之外补的几位创作者:专门用来填本来空着的频道(艺术服务 / AI 艺术家)
 // 只塞进 DB,不污染 lib/mock.ts(那里仍服务于尚未切库的页面)
 const extraCreators: Creator[] = [
-  { slug: "yancheng",  name: "颜城",  category: "艺术服务", specialty: "约拍服务",     region: "香港", price: "S$15", tier: "pro",   subs: "320", followers: "1.4万", works: "88"  },
-  { slug: "luye",      name: "鹿野",  category: "艺术服务", specialty: "商业后期修图", region: "香港", price: "S$20", tier: "pro",   subs: "210", followers: "9,800", works: "60"  },
-  { slug: "muyu",      name: "木与",  category: "艺术服务", specialty: "插画与平面设计", region: "香港", price: "S$10", tier: "basic", subs: "180", followers: "7,600", works: "124" },
+  { slug: "yancheng",  name: "颜城",  category: "专属服务", specialty: "约拍服务",     region: "香港", price: "S$15", tier: "pro",   subs: "320", followers: "1.4万", works: "88"  },
+  { slug: "luye",      name: "鹿野",  category: "专属服务", specialty: "商业后期修图", region: "香港", price: "S$20", tier: "pro",   subs: "210", followers: "9,800", works: "60"  },
+  { slug: "muyu",      name: "木与",  category: "专属服务", specialty: "插画与平面设计", region: "香港", price: "S$10", tier: "basic", subs: "180", followers: "7,600", works: "124" },
   { slug: "neon",      name: "Neon",  category: "AI艺术家", specialty: "AI 风光与场景", region: "香港", price: "S$8",  tier: "pro",   subs: "480", followers: "2.2万", works: "156" },
   { slug: "subai",     name: "苏白",  category: "AI艺术家", specialty: "AI 人像",      region: "香港", price: "S$12", tier: "elite", subs: "760", followers: "4.1万", works: "220" },
   { slug: "ink",       name: "Ink",   category: "AI艺术家", specialty: "AI 插画",      region: "香港", price: "S$6",  tier: "basic", subs: "240", followers: "1.2万", works: "92"  },
@@ -84,11 +84,11 @@ async function main() {
     channels.filter((c) => categorySlugs.includes(c.slug)).map((c) => [c.slug, c.label]),
   );
   const labelToSlug: Record<string, string> = {
-    摄影: "photography",
-    视频: "video",
-    艺术服务: "art-services",
+    动态推荐: "photography",
+    视频专区: "video",
+    专属服务: "art-services",
     "AI艺术家": "ai-artists",
-    男艺术家: "male-artists",
+    SugarGirl: "male-artists",
   };
 
   for (const slug of categorySlugs) {

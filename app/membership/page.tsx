@@ -46,7 +46,7 @@ export default async function Page({ searchParams }: { searchParams: { period?: 
   return (
     <div className="container mship">
       <div className="mship-hero">
-        <span className="mship-eye"><i />拾光会员</span>
+        <span className="mship-eye"><i />Sugardating 会员</span>
         <h1>选一个适合你的节奏</h1>
         <p>会员服务为内容与体验加成 — 提前看新作、原图下载、独家合集、订阅折扣与活动优先;不接私聊不接特权。</p>
       </div>

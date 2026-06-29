@@ -9,8 +9,8 @@ import { listRegionsGrouped } from "@/lib/queries";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "拾光 — 华语与亚裔创作者发现平台",
-  description: "发现摄影、视频、艺术服务等领域的华语与亚裔创作者，订阅他们的作品。",
+  title: "Sugardating — 华语与亚裔创作者发现平台",
+  description: "动态推荐、视频专区、专属服务、SugarGirl、AI 艺术家 — 发现华语与亚裔创作者，订阅他们的作品。",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -56,9 +56,10 @@ img{display:block;max-width:100%}
 .loc-all button{font-weight:600;color:var(--ink)}
 .loc-grp + .loc-grp{margin-top:4px}
 .loc-grp-h{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+/* Sugardating wordmark — 比中文双字宽,字号略小、字距更紧、字重 700(800 让长词太笨) */
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;letter-spacing:-.028em}
 .brand .gm{width:28px;height:28px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
-.brand .gm svg{width:16px;height:16px;fill:#fff}
+.brand .gm svg{width:18px;height:18px;fill:#fff}
 .navlinks{display:flex;gap:2px;margin-left:8px}
 .navlinks a{padding:8px 12px;border-radius:9px;font-weight:600;font-size:14px;color:var(--ink2);display:flex;align-items:center;gap:6px}
 .navlinks a:hover{background:var(--page);color:var(--ink)}
@@ -328,9 +329,9 @@ img{display:block;max-width:100%}
 /* ---------- footer ---------- */
 .foot{background:var(--card);color:var(--ink2);padding:46px 0 26px;margin-top:40px;border-top:1px solid var(--line)}
 .foot-in{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:28px}
-.fbrand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px;color:var(--ink)}
+.fbrand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:-.028em;color:var(--ink)}
 .fbrand .gm{width:28px;height:28px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
-.fbrand .gm svg{width:16px;height:16px;fill:#fff}
+.fbrand .gm svg{width:18px;height:18px;fill:#fff}
 .foot .about{font-size:13px;color:var(--muted);line-height:1.6;margin:12px 0 0;max-width:260px}
 .foot h5{color:var(--ink);font-size:13px;font-weight:700;margin:0 0 12px}
 .foot ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}

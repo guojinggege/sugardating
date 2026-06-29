@@ -16,17 +16,17 @@ import { photos, pick } from "@/lib/images";
 export const dynamic = "force-dynamic";
 
 const contentTypes = [
-  { slug: "photography", title: "摄影",     desc: "风光、人文、纪实、街拍——发现镜头里的城市与山海。" },
-  { slug: "video",       title: "视频",     desc: "短片、Vlog、延时——会动的故事与时间。" },
-  { slug: "art-services",title: "艺术服务", desc: "约拍、修图、设计——可委托的创作合作。" },
-  { slug: "ai-artists",  title: "AI 艺术家", desc: "AI 辅助下的新风格与新视角。" },
-  { slug: "live",        title: "直播平台", desc: "看创作者实时拍摄、答疑、分享后期。" },
+  { slug: "photography",  title: "动态推荐", desc: "基于你的兴趣每天发现新内容与新创作者。" },
+  { slug: "video",        title: "视频专区", desc: "短片、Vlog、直播回放——会动的故事与时间。" },
+  { slug: "art-services", title: "专属服务", desc: "约拍、咨询、定制——可委托的私享合作。" },
+  { slug: "male-artists", title: "SugarGirl", desc: "精选女性创作者频道。" },
+  { slug: "ai-artists",   title: "AI 艺术家", desc: "AI 辅助下的新风格与新视角。" },
 ];
 
 const stats = [
-  { eye: "创作者", num: "2,840+", label: "正在拾光发布作品" },
-  { eye: "地区",   num: "8",      label: "香港 / 新加坡 / 台北 / 首尔 …" },
-  { eye: "门类",   num: "5",      label: "摄影 / 视频 / 服务 / AI / 直播" },
+  { eye: "创作者", num: "2,840+", label: "正在 Sugardating 发布作品" },
+  { eye: "地区",   num: "11",     label: "香港 / 新加坡 / 台北 / 东京 …" },
+  { eye: "门类",   num: "5",      label: "动态推荐 / 视频专区 / 专属服务 / SugarGirl / AI" },
   { eye: "模式",   num: "订阅制", label: "支持你长期的创作" },
 ];
 
@@ -72,7 +72,7 @@ export default async function Home() {
             <div className="about">
               <span className="eye"><i />关于我们</span>
               <h2>华语与亚裔创作者的家</h2>
-              <p>拾光是一个面向全球华语与亚裔创作者的发现与订阅平台。摄影、视频、艺术服务、AI 创作——在这里展示作品，与支持你的人直接连接。</p>
+              <p>Sugardating 是一个面向全球华语与亚裔创作者的发现与订阅平台。动态推荐、视频专区、专属服务、SugarGirl、AI 创作——在这里展示作品，与支持你的人直接连接。</p>
             </div>
           </Reveal>
         </section>

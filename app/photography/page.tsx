@@ -6,6 +6,6 @@ export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const items = await listCreatorsByCategory("photography");
-  return <ChannelListing eyebrow="频道" title="摄影" desc="风光、人文、纪实、街拍——发现各地华语与亚裔摄影创作者。"
-    items={items} chips={["全部", "风光", "人文", "纪实", "街拍"]} photos={photos} />;
+  return <ChannelListing eyebrow="频道" title="动态推荐" desc="基于你的兴趣每天发现新内容与新创作者。"
+    items={items} chips={["全部", "新作", "高分", "热议", "近期更新"]} photos={photos} />;
 }

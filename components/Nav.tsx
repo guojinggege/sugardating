@@ -88,7 +88,7 @@ export default function Nav({ regionGroups }: Props) {
           )}
         </div>
 
-        <Link href="/" className="brand"><span className="gm"><Spark /></span>拾光</Link>
+        <Link href="/" className="brand"><span className="gm"><Spark /></span>Sugardating</Link>
         <nav className="navlinks">
           {channels.map((c) => (
             <Link key={c.slug} href={`/${c.slug}`}>

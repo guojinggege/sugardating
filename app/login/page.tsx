@@ -4,7 +4,7 @@ export default function Page() {
     <div className="container">
       <div className="authwrap">
         <h1>登录</h1>
-        <p className="s">欢迎回到拾光。（表单为静态占位，未接入认证。）</p>
+        <p className="s">欢迎回到 Sugardating。（表单为静态占位，未接入认证。）</p>
         <div className="field"><label>邮箱</label><input type="email" placeholder="you@example.com" /></div>
         <div className="field"><label>密码</label><input type="password" placeholder="••••••••" /></div>
         <button className="btn btn-ink">登录</button>

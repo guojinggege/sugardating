@@ -1,14 +1,15 @@
 import { Channel, Creator, Work, LiveItem, Post } from "./types";
 
 // 所有频道入口（导航 + 路由）
+// 注: URL slug 保留旧值(不破坏既有链接),只改 label
 export const channels: Channel[] = [
-  { slug: "photography", label: "摄影" },
-  { slug: "video", label: "视频" },
-  { slug: "art-services", label: "艺术服务" },
-  { slug: "male-artists", label: "男艺术家" },
-  { slug: "ai-artists", label: "AI艺术家", flag: "ai" },
-  { slug: "live", label: "直播平台", flag: "live" },
-  { slug: "community", label: "社区" },
+  { slug: "photography",  label: "动态推荐" },
+  { slug: "video",        label: "视频专区" },
+  { slug: "art-services", label: "专属服务" },
+  { slug: "male-artists", label: "SugarGirl" },
+  { slug: "ai-artists",   label: "AI艺术家", flag: "ai" },
+  { slug: "live",         label: "直播平台", flag: "live" },
+  { slug: "community",    label: "社区" },
 ];
 
 export const regions = ["新加坡", "香港", "台北", "吉隆坡", "曼谷", "首尔", "东京", "伦敦", "悉尼", "马尼拉", "胡志明市"];
@@ -18,27 +19,27 @@ const tierLabel: Record<string, string> = { basic: "入门", pro: "进阶", elit
 export function tierText(t: string) { return tierLabel[t] ?? t; }
 
 export const creators: Creator[] = [
-  { slug: "linxia", name: "林夏", category: "摄影", specialty: "山海风光", region: "香港", price: "S$6", tier: "elite", subs: "1,240", followers: "8.6万", works: "312" },
-  { slug: "sunian", name: "苏念", category: "摄影", specialty: "城市风景", region: "香港", price: "S$12", tier: "elite", subs: "920", followers: "5.1万", works: "204" },
-  { slug: "chenyu", name: "陈屿", category: "视频", specialty: "夜景延时", region: "香港", price: "S$8", tier: "pro", subs: "860", followers: "4.4万", works: "176" },
-  { slug: "aria", name: "Aria", category: "摄影", specialty: "黑白纪实", region: "香港", price: "S$5", tier: "pro", subs: "540", followers: "2.8万", works: "98" },
-  { slug: "zhouye", name: "周野", category: "视频", specialty: "旅拍风景", region: "香港", price: "S$6", tier: "basic", subs: "410", followers: "2.1万", works: "120" },
-  { slug: "maidi", name: "麦地", category: "摄影", specialty: "街头街景", region: "香港", price: "S$7", tier: "pro", subs: "680", followers: "3.3万", works: "210" },
-  { slug: "heyutong", name: "何雨桐", category: "摄影", specialty: "极简风光", region: "香港", price: "S$5", tier: "basic", subs: "300", followers: "1.6万", works: "76" },
-  { slug: "kenji", name: "Kenji", category: "视频", specialty: "雪山风景", region: "香港", price: "S$9", tier: "pro", subs: "520", followers: "3.0万", works: "140" },
+  { slug: "linxia", name: "林夏", category: "动态推荐", specialty: "山海风光", region: "香港", price: "S$6", tier: "elite", subs: "1,240", followers: "8.6万", works: "312" },
+  { slug: "sunian", name: "苏念", category: "动态推荐", specialty: "城市风景", region: "香港", price: "S$12", tier: "elite", subs: "920", followers: "5.1万", works: "204" },
+  { slug: "chenyu", name: "陈屿", category: "视频专区", specialty: "夜景延时", region: "香港", price: "S$8", tier: "pro", subs: "860", followers: "4.4万", works: "176" },
+  { slug: "aria", name: "Aria", category: "动态推荐", specialty: "黑白纪实", region: "香港", price: "S$5", tier: "pro", subs: "540", followers: "2.8万", works: "98" },
+  { slug: "zhouye", name: "周野", category: "视频专区", specialty: "旅拍风景", region: "香港", price: "S$6", tier: "basic", subs: "410", followers: "2.1万", works: "120" },
+  { slug: "maidi", name: "麦地", category: "动态推荐", specialty: "街头街景", region: "香港", price: "S$7", tier: "pro", subs: "680", followers: "3.3万", works: "210" },
+  { slug: "heyutong", name: "何雨桐", category: "动态推荐", specialty: "极简风光", region: "香港", price: "S$5", tier: "basic", subs: "300", followers: "1.6万", works: "76" },
+  { slug: "kenji", name: "Kenji", category: "视频专区", specialty: "雪山风景", region: "香港", price: "S$9", tier: "pro", subs: "520", followers: "3.0万", works: "140" },
 ];
 
 export const works: Work[] = [
-  { id: "w1", title: "雨后的海岸", author: "林夏", category: "摄影" },
-  { id: "w2", title: "霓虹与雨", author: "陈屿", category: "视频" },
-  { id: "w3", title: "清晨的山", author: "苏念", category: "摄影" },
-  { id: "w4", title: "黑白海岸", author: "Aria", category: "摄影" },
-  { id: "w5", title: "山顶黄昏", author: "林夏", category: "摄影" },
-  { id: "w6", title: "公路尽头", author: "周野", category: "视频" },
-  { id: "w7", title: "雾中森林", author: "麦地", category: "摄影" },
-  { id: "w8", title: "湖与天", author: "何雨桐", category: "摄影" },
-  { id: "w9", title: "雪山之巅", author: "Kenji", category: "视频" },
-  { id: "w10", title: "日落港湾", author: "陈屿", category: "视频" },
+  { id: "w1", title: "雨后的海岸", author: "林夏", category: "动态推荐" },
+  { id: "w2", title: "霓虹与雨", author: "陈屿", category: "视频专区" },
+  { id: "w3", title: "清晨的山", author: "苏念", category: "动态推荐" },
+  { id: "w4", title: "黑白海岸", author: "Aria", category: "动态推荐" },
+  { id: "w5", title: "山顶黄昏", author: "林夏", category: "动态推荐" },
+  { id: "w6", title: "公路尽头", author: "周野", category: "视频专区" },
+  { id: "w7", title: "雾中森林", author: "麦地", category: "动态推荐" },
+  { id: "w8", title: "湖与天", author: "何雨桐", category: "动态推荐" },
+  { id: "w9", title: "雪山之巅", author: "Kenji", category: "视频专区" },
+  { id: "w10", title: "日落港湾", author: "陈屿", category: "视频专区" },
 ];
 
 export const liveNow: LiveItem[] = [

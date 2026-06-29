@@ -1,10 +1,18 @@
 import { notFound } from "next/navigation";
+import Img from "@/components/Img";
 import Placeholder from "@/components/Placeholder";
 import WorkTile from "@/components/WorkTile";
 import { Tick } from "@/components/icons";
 import { getCreatorBySlug } from "@/lib/queries";
-
+import { pick } from "@/lib/images";
 export const dynamic = "force-dynamic";
+
+// 从 slug 派生稳定 offset,确保同一创作者每次访问的封面/头像/作品图都不变
+function offsetFromSlug(slug: string): number {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const detail = await getCreatorBySlug(params.slug);
@@ -13,12 +21,23 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const imageWorks = works.filter((w) => w.type === "image");
   const videoWorks = works.filter((w) => w.type === "video");
   const subscriberWorks = 0; // seed 当前全是 public
+  const off = offsetFromSlug(c.slug);
+  const cover  = pick(0, off);
+  const avatar = pick(1, off);
 
   return (
     <div className="container">
-      <div className="pf-cover"><Placeholder label="封面图 占位" fill /></div>
+      <div className="pf-cover">
+        {cover
+          ? <Img src={cover} alt={`${c.name} 封面`} sizes="100vw" priority />
+          : <Placeholder label="封面图 占位" fill />}
+      </div>
       <div className="pf-head">
-        <div className="pf-ava"><Placeholder label="头像" fill /></div>
+        <div className="pf-ava">
+          {avatar
+            ? <Img src={avatar} alt={`${c.name} 头像`} sizes="120px" />
+            : <Placeholder label="头像" fill />}
+        </div>
         <div className="pf-id">
           <div className="nm">{c.name} <Tick /></div>
           <div className="meta"><span>{c.region}</span><span>{c.category} · {c.specialty}</span><span>中文 / English</span></div>
@@ -46,7 +65,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <div className="work-empty">暂无图片作品</div>
       ) : (
         <div className="feed">
-          {imageWorks.map((w) => <WorkTile key={w.id} w={w} />)}
+          {imageWorks.map((w, i) => <WorkTile key={w.id} w={w} photoSrc={pick(i, off + 2)} />)}
         </div>
       )}
 
@@ -58,7 +77,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <div className="work-empty">暂无视频作品</div>
       ) : (
         <div className="feed">
-          {videoWorks.map((w) => <WorkTile key={w.id} w={w} video />)}
+          {videoWorks.map((w, i) => <WorkTile key={w.id} w={w} video photoSrc={pick(i, off + 6)} />)}
         </div>
       )}
 

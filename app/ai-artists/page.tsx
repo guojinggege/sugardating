@@ -1,5 +1,6 @@
 import ChannelListing from "@/components/ChannelListing";
 import { listCreatorsByCategory } from "@/lib/queries";
+import { photos } from "@/lib/images";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function Page() {
         <div className="fdrop" style={{ flex: 1, maxWidth: 520, color: "var(--muted)" }}>例如：“偏冷调、胶片质感的风光风格…”</div>
         <button className="btn btn-ink">智能搜索</button>
       </div>
-      <ChannelListing eyebrow="" title="" desc="" items={items} chips={["全部", "AI风光", "AI人像", "AI插画"]} />
+      <ChannelListing eyebrow="" title="" desc="" items={items} chips={["全部", "AI风光", "AI人像", "AI插画"]} photos={photos} />
     </div>
   );
 }

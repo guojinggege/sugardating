@@ -3,6 +3,7 @@ import HomeHero from "@/components/HomeHero";
 import SectionHeader from "@/components/SectionHeader";
 import LiveCard from "@/components/LiveCard";
 import WorkTile from "@/components/WorkTile";
+import Img from "@/components/Img";
 import Placeholder from "@/components/Placeholder";
 import Reveal from "@/components/Reveal";
 import Stat from "@/components/Stat";
@@ -10,6 +11,7 @@ import CreatorRail from "@/components/CreatorRail";
 import { Arrow } from "@/components/icons";
 import { works, liveNow } from "@/lib/mock";
 import { listCreators } from "@/lib/queries";
+import { photos, pick } from "@/lib/images";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +63,7 @@ export default async function Home() {
 
   return (
     <>
-      <HomeHero />
+      <HomeHero photos={photos} />
       <div className="container">
 
         {/* 1. 我们是什么 */}
@@ -98,7 +100,11 @@ export default async function Home() {
             {contentTypes.map((t, i) => (
               <Reveal key={t.slug} delay={i * 80}>
                 <Link href={`/${t.slug}`} className="ct">
-                  <Placeholder label={`${t.title}\n占位图`} fill />
+                  {pick(i, 5) ? (
+                    <Img src={pick(i, 5)!} alt={t.title} sizes="(max-width: 860px) 50vw, 20vw" />
+                  ) : (
+                    <Placeholder label={`${t.title}\n占位图`} fill />
+                  )}
                   <div className="gr" />
                   <div className="info">
                     <h3>{t.title}</h3>
@@ -115,7 +121,7 @@ export default async function Home() {
         <section className="sec">
           <Reveal><SectionHeader title="精选创作者" count={`${creators.length} 位 · 持续更新`} moreHref="/creators" moreText="全部创作者" /></Reveal>
           <Reveal>
-            <CreatorRail items={creators} />
+            <CreatorRail items={creators} photos={photos} />
           </Reveal>
         </section>
 
@@ -125,7 +131,7 @@ export default async function Home() {
           <div className="feed">
             {works.map((w, i) => (
               <Reveal key={w.id} delay={i * 60}>
-                <WorkTile w={w} />
+                <WorkTile w={w} photoSrc={pick(i, 2)} />
               </Reveal>
             ))}
           </div>
@@ -160,7 +166,11 @@ export default async function Home() {
                   <Link href="/studio" className="btn btn-g">创作者权益</Link>
                 </div>
               </div>
-              <div className="bn-r"><Placeholder label="创作者中心 占位" fill /></div>
+              <div className="bn-r">
+                {pick(0, 7)
+                  ? <Img src={pick(0, 7)!} alt="创作者中心" sizes="(max-width: 860px) 100vw, 320px" />
+                  : <Placeholder label="创作者中心 占位" fill />}
+              </div>
             </div>
           </Reveal>
         </section>
@@ -169,7 +179,7 @@ export default async function Home() {
         <section className="sec">
           <Reveal><SectionHeader title="正在直播" live count="12 位创作者直播中" moreHref="/live" moreText="直播平台" /></Reveal>
           <Reveal>
-            <div className="live-row">{liveNow.map((l) => <LiveCard key={l.slug} l={l} />)}</div>
+            <div className="live-row">{liveNow.map((l, i) => <LiveCard key={l.slug} l={l} photoSrc={pick(i, 3)} />)}</div>
           </Reveal>
         </section>
 

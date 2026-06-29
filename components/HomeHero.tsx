@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Img from "./Img";
 import Placeholder from "./Placeholder";
 
 const slides = [
@@ -9,7 +10,7 @@ const slides = [
   { k: "创作者入驻", h: "把你的作品，变成可持续的收入", p: "开放主页、设置订阅、开直播，几分钟上线。", cta: "免费开通主页", href: "/register" },
 ];
 
-export default function HomeHero() {
+export default function HomeHero({ photos = [] }: { photos?: string[] }) {
   const [i, setI] = useState(0);
   const n = slides.length;
 
@@ -48,15 +49,20 @@ export default function HomeHero() {
   return (
     <section className="hh" aria-roledescription="carousel">
       <div className="hh-stack">
-        {slides.map((slide, idx) => (
-          <div
-            key={idx}
-            className={"hh-slide" + (idx === i ? " on" : "")}
-            aria-hidden={idx !== i}
-          >
-            <Placeholder label={`Hero 占位图 ${idx + 1}\n（上线替换为授权素材）`} fill />
-          </div>
-        ))}
+        {slides.map((slide, idx) => {
+          const photo = photos.length > 0 ? photos[idx % photos.length] : undefined;
+          return (
+            <div
+              key={idx}
+              className={"hh-slide" + (idx === i ? " on" : "")}
+              aria-hidden={idx !== i}
+            >
+              {photo
+                ? <Img src={photo} alt={slide.h} sizes="100vw" priority={idx === 0} />
+                : <Placeholder label={`Hero 占位图 ${idx + 1}\n（上线替换为授权素材）`} fill />}
+            </div>
+          );
+        })}
         <div className="hh-veil" />
       </div>
 

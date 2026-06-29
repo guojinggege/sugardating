@@ -5,7 +5,7 @@ import type { Creator } from "@/lib/types";
 
 // 横向滑廊:鼠标拖拽 + 滚轮转横向滚动,移动距离>6px 时吞掉后续 click
 // pointermove 用 rAF 节流避免高频写 scrollLeft 导致掉帧
-export default function CreatorRail({ items }: { items: Creator[] }) {
+export default function CreatorRail({ items, photos = [] }: { items: Creator[]; photos?: string[] }) {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -84,7 +84,13 @@ export default function CreatorRail({ items }: { items: Creator[] }) {
 
   return (
     <div ref={ref} className="crail">
-      {items.map((c) => (<CreatorCard key={c.slug} c={c} />))}
+      {items.map((c, i) => (
+        <CreatorCard
+          key={c.slug}
+          c={c}
+          photoSrc={photos.length > 0 ? photos[i % photos.length] : undefined}
+        />
+      ))}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import FilterBar from "@/components/FilterBar";
 import CreatorGrid from "@/components/CreatorGrid";
 import { listCreators } from "@/lib/queries";
+import { photos } from "@/lib/images";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function Page({ searchParams }: { searchParams: { region?: 
           {region ? `${region} 暂无创作者` : "暂无创作者"}
         </div>
       ) : (
-        <CreatorGrid items={creators} />
+        <CreatorGrid items={creators} photos={photos} />
       )}
       <div style={{ height: 40 }} />
     </div>

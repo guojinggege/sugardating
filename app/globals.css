@@ -76,6 +76,26 @@ img{display:block;max-width:100%}
 .navlinks a.on{color:var(--ink)}
 .navlinks .dl{width:6px;height:6px;border-radius:50%;background:var(--live)}
 .navlinks .ai-tag{font-size:9px;font-weight:800;color:#fff;background:var(--ink);padding:2px 5px;border-radius:4px}
+
+/* 频道下拉(目前用在"专属服务"上) */
+.nav-dd{position:relative;flex:0 0 auto}
+.nav-dd-trigger{display:flex;align-items:center;gap:3px;padding:7px 8px 7px 10px;border-radius:8px;font-weight:600;font-size:13.5px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+.nav-dd-trigger:hover,.nav-dd-trigger.open{background:var(--page);color:var(--ink)}
+.nav-dd-chev{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.4;opacity:.7;transition:transform .2s}
+.nav-dd-trigger.open .nav-dd-chev{transform:rotate(180deg);opacity:1}
+.nav-dd-pop{
+  position:absolute;top:calc(100% + 6px);left:0;
+  min-width:160px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:6px;
+  box-shadow:0 12px 36px -8px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.02);
+  z-index:60;
+  display:flex;flex-direction:column;gap:2px;
+}
+.nav-dd-pop a{display:block;padding:8px 12px;border-radius:8px;font-weight:500;font-size:13.5px;color:var(--ink2);white-space:nowrap}
+.nav-dd-pop a:hover{background:var(--page);color:var(--ink)}
 .navright{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
 .navright .btn{padding:8px 13px;font-size:13.5px}
 .navright .btn-mship{padding-left:11px;padding-right:13px}
@@ -91,6 +111,14 @@ img{display:block;max-width:100%}
 .mobile-menu{display:none;flex-direction:column;gap:2px;padding:8px 16px 16px;border-top:1px solid var(--line)}
 .mobile-menu a{padding:11px 12px;border-radius:9px;font-weight:600;font-size:15px;color:var(--ink2)}
 .mobile-menu a:hover{background:var(--page);color:var(--ink)}
+/* mobile menu 里有 children 的频道:可展开 accordion */
+.mm-group{display:flex;flex-direction:column}
+.mm-group-h{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;font-weight:600;font-size:15px;color:var(--ink2);font-family:inherit;background:none;border:none;cursor:pointer;width:100%;text-align:left}
+.mm-group-h:hover{background:var(--page);color:var(--ink)}
+.mm-chev{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;opacity:.55;transition:transform .2s}
+.mm-chev.open{transform:rotate(180deg);opacity:.9}
+.mm-children{display:flex;flex-direction:column;gap:1px;padding:2px 0 6px 16px;border-left:1px solid var(--line);margin-left:14px}
+.mm-children a{padding:9px 12px;font-size:14px;font-weight:500;color:var(--ink2)}
 
 /* ---------- hero carousel ---------- */
 .hero{position:relative;height:500px;overflow:hidden;background:#e6e6ea}
@@ -398,6 +426,11 @@ body.page-dark .nav .loc-pop button:hover{background:rgba(255,255,255,.06);color
 body.page-dark .nav .loc-pop button.on{background:#F2F2F4;color:#0a0a0c}
 body.page-dark .nav .loc-all{border-bottom-color:rgba(255,255,255,.08)}
 body.page-dark .nav .loc-grp-h{color:rgba(167,167,174,.65)}
+body.page-dark .nav .nav-dd-trigger:hover,
+body.page-dark .nav .nav-dd-trigger.open{background:rgba(255,255,255,.08);color:#F2F2F4}
+body.page-dark .nav .nav-dd-pop{background:#161618;border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
+body.page-dark .nav .nav-dd-pop a{color:rgba(242,242,244,.85)}
+body.page-dark .nav .nav-dd-pop a:hover{background:rgba(255,255,255,.06);color:#F2F2F4}
 body.page-dark .foot{background:#0d0d10;border-top-color:rgba(255,255,255,.08);color:rgba(242,242,244,.55)}
 body.page-dark .foot h5,body.page-dark .foot .fbrand{color:#F2F2F4}
 body.page-dark .foot .fbrand .gm{background:#F2F2F4}

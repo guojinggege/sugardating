@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { channels } from "@/lib/mock";
 import { Pin, Chev, Spark } from "./icons";
+import type { Channel } from "@/lib/types";
 import type { RegionGroup } from "@/lib/queries";
 
 interface Props {
@@ -13,13 +14,14 @@ interface Props {
 export default function Nav({ regionGroups }: Props) {
   const [open, setOpen] = useState(false);
   const [locOpen, setLocOpen] = useState(false);
+  const [expandedChannel, setExpandedChannel] = useState<string | null>(null);
   const locRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const sp = useSearchParams();
   const currentRegion = sp.get("region");
   const locLabel = currentRegion ?? "全部地区";
 
-  // 点击外部 / Esc 关下拉
+  // 点击外部 / Esc 关下拉(loc)
   useEffect(() => {
     if (!locOpen) return;
     const onDown = (e: MouseEvent) => {
@@ -91,11 +93,15 @@ export default function Nav({ regionGroups }: Props) {
         <Link href="/" className="brand"><span className="gm"><Spark /></span>Sugardating</Link>
         <nav className="navlinks">
           {channels.map((c) => (
-            <Link key={c.slug} href={`/${c.slug}`}>
-              {c.flag === "live" && <span className="dl" />}
-              {c.flag === "ai" && <span className="ai-tag">AI</span>}
-              {c.label}
-            </Link>
+            c.children?.length ? (
+              <NavDropdownItem key={c.slug} channel={c} />
+            ) : (
+              <Link key={c.slug} href={`/${c.slug}`}>
+                {c.flag === "live" && <span className="dl" />}
+                {c.flag === "ai" && <span className="ai-tag">AI</span>}
+                {c.label}
+              </Link>
+            )
           ))}
         </nav>
         <div className="navright">
@@ -114,10 +120,99 @@ export default function Nav({ regionGroups }: Props) {
         </div>
       </div>
       <div className={open ? "mobile-menu open" : "mobile-menu"}>
-        {channels.map((c) => (<Link key={c.slug} href={`/${c.slug}`} onClick={() => setOpen(false)}>{c.label}</Link>))}
+        {channels.map((c) => (
+          c.children?.length ? (
+            <div key={c.slug} className="mm-group">
+              <button
+                type="button"
+                className="mm-group-h"
+                aria-expanded={expandedChannel === c.slug}
+                onClick={() => setExpandedChannel((cur) => cur === c.slug ? null : c.slug)}
+              >
+                {c.label}
+                <svg viewBox="0 0 24 24" className={"mm-chev" + (expandedChannel === c.slug ? " open" : "")} aria-hidden>
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              {expandedChannel === c.slug && (
+                <div className="mm-children">
+                  <Link href={`/${c.slug}`} onClick={() => setOpen(false)}>全部{c.label}</Link>
+                  {c.children.map((cc) => (
+                    <Link
+                      key={cc.slug}
+                      href={`/${c.slug}?type=${cc.slug}`}
+                      onClick={() => setOpen(false)}
+                    >
+                      {cc.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link key={c.slug} href={`/${c.slug}`} onClick={() => setOpen(false)}>{c.label}</Link>
+          )
+        ))}
         <Link href="/membership" onClick={() => setOpen(false)}>开通会员</Link>
         <Link href="/login" onClick={() => setOpen(false)}>登录</Link>
       </div>
     </header>
+  );
+}
+
+// 桌面端有 children 的频道:hover 展开下拉
+function NavDropdownItem({ channel }: { channel: Channel }) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<number | null>(null);
+
+  const onEnter = () => {
+    if (closeTimer.current) { window.clearTimeout(closeTimer.current); closeTimer.current = null; }
+    setOpen(true);
+  };
+  const onLeave = () => {
+    // 留 160ms 让鼠标从父跳到子项
+    closeTimer.current = window.setTimeout(() => setOpen(false), 160);
+  };
+  useEffect(() => () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  }, []);
+
+  return (
+    <div
+      className="nav-dd"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      onFocus={onEnter}
+      onBlur={(e) => {
+        // 焦点真正离开整个 dd 才关
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) onLeave();
+      }}
+    >
+      <Link
+        href={`/${channel.slug}`}
+        className={"nav-dd-trigger" + (open ? " open" : "")}
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        {channel.label}
+        <svg viewBox="0 0 24 24" className="nav-dd-chev" aria-hidden>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </Link>
+      {open && channel.children && (
+        <div className="nav-dd-pop" role="menu">
+          {channel.children.map((cc) => (
+            <Link
+              key={cc.slug}
+              role="menuitem"
+              href={`/${channel.slug}?type=${cc.slug}`}
+              onClick={() => setOpen(false)}
+            >
+              {cc.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

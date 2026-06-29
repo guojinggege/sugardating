@@ -1,6 +1,7 @@
 export type Tier = "basic" | "pro" | "elite";
 
-export interface Channel { slug: string; label: string; flag?: "live" | "ai"; }
+export interface ChannelChild { slug: string; label: string; }
+export interface Channel { slug: string; label: string; flag?: "live" | "ai"; children?: ChannelChild[]; }
 export interface Creator {
   slug: string; name: string; category: string; specialty: string;
   region: string; price: string; tier: Tier; subs: string; followers: string; works: string;

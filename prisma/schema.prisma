@@ -1,13 +1,20 @@
-// Lumina — Prisma schema (SQLite, local-dev)
-// 仅核心几张表：User / Creator / Category / Region / Work / TierPlan
+// Lumina — Prisma schema (PostgreSQL, 用于 Neon + Vercel)
+// 表结构与本地 SQLite 阶段保持一致;只把 provider 切到 postgresql、
+// 之前用 String 存 JSON 的两个字段(benefits)改成原生 Json(Postgres jsonb)
+//
+// "枚举型"字段(role / type / visibility / tier / period / status / etc.)
+// 仍然用 String — 不用 Prisma enum,加一个值不需要 schema migration
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon 通过 PgBouncer(pooler)接 url,但 migration/introspection 要直连
+  // → directUrl 走非 pooler 端点
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -74,7 +81,7 @@ model TierPlan {
   name      String // basic | pro | elite
   label     String // 入门 / 进阶 / Elite
   price     String // "S$6"
-  benefits  String // JSON 字符串(SQLite 无原生数组)
+  benefits  Json   // 字符串数组,原生 jsonb 存
   creatorId String
 
   creator Creator @relation(fields: [creatorId], references: [id])
@@ -111,7 +118,7 @@ model MembershipPlan {
   period    String   // week | month | quarter | year
   price     Int      // 分(SGD cents)
   currency  String   @default("SGD")
-  benefits  String   // JSON 字符串(SQLite 无 array)
+  benefits  Json     // 字符串数组,原生 jsonb 存
   bestValue Boolean  @default(false)
   sortKey   Int      @default(0)
   createdAt DateTime @default(now())

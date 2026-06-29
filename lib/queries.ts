@@ -137,7 +137,7 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorDetail | nu
       name: t.name,
       label: t.label,
       price: t.price,
-      benefits: JSON.parse(t.benefits) as string[],
+      benefits: (t.benefits as string[]) ?? [],
     })),
   };
 }
@@ -234,7 +234,7 @@ export async function listMembershipPlans(period: MembershipPeriod): Promise<Pla
       period: p.period as MembershipPeriod,
       price: p.price,
       currency: p.currency,
-      benefits: JSON.parse(p.benefits) as string[],
+      benefits: (p.benefits as string[]) ?? [],
       bestValue: p.bestValue,
       savingsPct,
     };

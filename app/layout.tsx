@@ -4,6 +4,10 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { listRegionsGrouped } from "@/lib/queries";
 
+// Layout 调 listRegionsGrouped() 拉 DB → 必须全应用走 SSR,
+// 否则 build 时会尝试 prerender 未标 dynamic 的页面,触发 Prisma 在 build 阶段连 DB
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "拾光 — 华语与亚裔创作者发现平台",
   description: "发现摄影、视频、艺术服务等领域的华语与亚裔创作者，订阅他们的作品。",

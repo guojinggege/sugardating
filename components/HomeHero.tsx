@@ -1,42 +1,26 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import Img from "./Img";
 import Placeholder from "./Placeholder";
 
-// Hero 文案 — 国际化品牌定位,英文为主
-// bgIndex 指向 photos[] 数组(lib/images.ts sort 后顺序);第一张沿用 SugarGirl 同图
-const slides = [
-  {
-    k: "Sugardating · International",
-    h: "Discover Genuine Connections Across Borders",
-    p: "Connecting verified Sugargirls with members worldwide through meaningful conversations, shared experiences and premium social connections.",
-    cta: "Explore Sugargirls",
-    href: "/male-artists",
-    bgIndex: 6,
-  },
-  {
-    k: "Sugardating · Verified",
-    h: "Real People. Real Experiences.",
-    p: "From elegant first meetings to long-term travel companionship — find your match across countries, time zones and interests.",
-    cta: "Join Now",
-    href: "/register",
-    bgIndex: 0,
-  },
-];
+// 两张 slide,文案统一从 i18n 取
+const SLIDES = [
+  { key: "slide1", href: "/male-artists", bgIndex: 6 },
+  { key: "slide2", href: "/register",     bgIndex: 0 },
+] as const;
 
 export default function HomeHero({ photos = [] }: { photos?: string[] }) {
+  const t = useTranslations("home.hero");
   const [i, setI] = useState(0);
-  const n = slides.length;
+  const n = SLIDES.length;
 
   useEffect(() => {
-    const t = setInterval(() => setI((p) => (p + 1) % n), 6500);
-    return () => clearInterval(t);
+    const tm = setInterval(() => setI((p) => (p + 1) % n), 6500);
+    return () => clearInterval(tm);
   }, [n]);
 
-  // Nav transparency on home: overlay over hero, solid after scroll.
-  // body 上的 class 切换样式;Nav 组件本身保持不动。
-  // scroll 事件用 rAF 节流,高频 scroll 不会反复写 DOM。
   useEffect(() => {
     document.body.classList.add("home-immersive");
     let raf = 0;
@@ -46,8 +30,6 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
       const y = window.scrollY;
       if (y > 40) document.body.classList.add("nav-scrolled");
       else document.body.classList.remove("nav-scrolled");
-      // Parallax: hero bg layer drifts at 0.35× scroll speed
-      // 限定在 hero 自身高度内,避免 bg 飘出页面后仍然 transform 浪费 GPU
       if (stackEl && heroEl) {
         const max = heroEl.offsetHeight;
         const offset = Math.min(Math.max(y, 0), max) * 0.35;
@@ -69,13 +51,18 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
     };
   }, []);
 
-  const s = slides[i];
+  const s = SLIDES[i];
+  const title = t(`${s.key}.title`);
+  const sub = t(`${s.key}.subtitle`);
+  const eyebrow = t(`${s.key}.eyebrow`);
+  const cta = t(`${s.key}.cta`);
 
   return (
     <section className="hh" aria-roledescription="carousel">
       <div className="hh-stack">
-        {slides.map((slide, idx) => {
+        {SLIDES.map((slide, idx) => {
           const photo = photos.length > 0 ? photos[slide.bgIndex % photos.length] : undefined;
+          const slideTitle = t(`${slide.key}.title`);
           return (
             <div
               key={idx}
@@ -83,8 +70,8 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
               aria-hidden={idx !== i}
             >
               {photo
-                ? <Img src={photo} alt={slide.h} sizes="100vw" priority={idx === 0} />
-                : <Placeholder label={`Hero 占位图 ${idx + 1}\n（上线替换为授权素材）`} fill />}
+                ? <Img src={photo} alt={slideTitle} sizes="100vw" priority={idx === 0} />
+                : <Placeholder label={`Hero ${idx + 1}`} fill />}
             </div>
           );
         })}
@@ -93,27 +80,27 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
 
       <div className="hh-inner">
         <div className="hh-cap">
-          <span className="hh-eye"><i />{s.k}</span>
-          <h1 className="hh-title">{s.h}</h1>
-          <p className="hh-sub">{s.p}</p>
+          <span className="hh-eye"><i />{eyebrow}</span>
+          <h1 className="hh-title">{title}</h1>
+          <p className="hh-sub">{sub}</p>
           <form className="hh-search" role="search" onSubmit={(e) => e.preventDefault()}>
             <svg className="hh-mag" viewBox="0 0 24 24" aria-hidden>
               <circle cx="11" cy="11" r="7" />
               <path d="M21 21l-4-4" />
             </svg>
-            <input placeholder="Search by city, interest or language…" aria-label="Search" />
-            <Link href={s.href} className="btn btn-w hh-cta">{s.cta}</Link>
+            <input placeholder={t("searchPlaceholder")} aria-label={t("searchLabel")} />
+            <Link href={s.href} className="btn btn-w hh-cta">{cta}</Link>
           </form>
         </div>
 
         <div className="hh-foot">
-          <div className="hh-dots" role="tablist" aria-label="Switch slide">
-            {slides.map((_, idx) => (
+          <div className="hh-dots" role="tablist" aria-label={t("switchSlide")}>
+            {SLIDES.map((_, idx) => (
               <button
                 key={idx}
                 role="tab"
                 className={"hh-dot" + (idx === i ? " on" : "")}
-                aria-label={`Slide ${idx + 1}`}
+                aria-label={t("slideAria", { n: idx + 1 })}
                 aria-selected={idx === i}
                 onClick={() => setI(idx)}
               />

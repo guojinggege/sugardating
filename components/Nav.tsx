@@ -2,16 +2,25 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { channels } from "@/lib/mock";
 import { Pin, Chev, Spark } from "./icons";
 import type { Channel } from "@/lib/types";
 import type { RegionGroup } from "@/lib/queries";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 interface Props {
   regionGroups: RegionGroup[];
 }
 
 export default function Nav({ regionGroups }: Props) {
+  const tNav = useTranslations("nav");
+  const tCh = useTranslations("nav.channels");
+  const tAS = useTranslations("nav.artServicesChildren");
+  const tGroups = useTranslations("nav.loc.groups");
+  const tA = useTranslations("nav.actions");
+  const tM = useTranslations("nav.mobile");
+
   const [open, setOpen] = useState(false);
   const [locOpen, setLocOpen] = useState(false);
   const [expandedChannel, setExpandedChannel] = useState<string | null>(null);
@@ -19,9 +28,8 @@ export default function Nav({ regionGroups }: Props) {
   const router = useRouter();
   const sp = useSearchParams();
   const currentRegion = sp.get("region");
-  const locLabel = currentRegion ?? "全部地区";
+  const locLabel = currentRegion ?? tNav("loc.allRegions");
 
-  // 点击外部 / Esc 关下拉(loc)
   useEffect(() => {
     if (!locOpen) return;
     const onDown = (e: MouseEvent) => {
@@ -36,7 +44,6 @@ export default function Nav({ regionGroups }: Props) {
     };
   }, [locOpen]);
 
-  // 选城市:更新 ?region= 并跳到 /creators(无论从哪个页面点)
   const selectRegion = (city: string | null) => {
     setLocOpen(false);
     const params = new URLSearchParams();
@@ -66,12 +73,12 @@ export default function Nav({ regionGroups }: Props) {
                   className={!currentRegion ? "on" : ""}
                   onClick={() => selectRegion(null)}
                 >
-                  全部地区
+                  {tNav("loc.allRegions")}
                 </button>
               </div>
               {regionGroups.map((g) => (
                 <div key={g.key} className="loc-grp">
-                  <div className="loc-grp-h">{g.label}</div>
+                  <div className="loc-grp-h">{tGroups(g.key)}</div>
                   {g.cities.map((city) => (
                     <button
                       key={city}
@@ -94,27 +101,35 @@ export default function Nav({ regionGroups }: Props) {
         <nav className="navlinks">
           {channels.map((c) => (
             c.children?.length ? (
-              <NavDropdownItem key={c.slug} channel={c} />
+              <NavDropdownItem
+                key={c.slug}
+                channel={c}
+                label={tCh(c.slug)}
+                childLabel={(slug) => tAS(slug)}
+              />
             ) : (
               <Link key={c.slug} href={`/${c.slug}`}>
                 {c.flag === "live" && <span className="dl" />}
                 {c.flag === "ai" && <span className="ai-tag">AI</span>}
-                {c.label}
+                {tCh(c.slug)}
               </Link>
             )
           ))}
         </nav>
         <div className="navright">
-          <button className="ic" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg></button>
+          <LanguageSwitcher />
+          <button className="ic" aria-label={tA("search")}>
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
+          </button>
           <Link href="/membership" className="btn btn-out btn-mship">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden style={{ marginRight: 4 }}>
               <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
             </svg>
-            开通会员
+            {tA("membership")}
           </Link>
-          <Link href="/login" className="btn btn-out">登录</Link>
-          <Link href="/register" className="btn btn-ink">成为创作者</Link>
-          <button className="hamburger" aria-label="菜单" onClick={() => setOpen((v) => !v)}>
+          <Link href="/login" className="btn btn-out">{tA("login")}</Link>
+          <Link href="/register" className="btn btn-ink">{tA("register")}</Link>
+          <button className="hamburger" aria-label={tA("menu")} onClick={() => setOpen((v) => !v)}>
             <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
         </div>
@@ -129,39 +144,49 @@ export default function Nav({ regionGroups }: Props) {
                 aria-expanded={expandedChannel === c.slug}
                 onClick={() => setExpandedChannel((cur) => cur === c.slug ? null : c.slug)}
               >
-                {c.label}
+                {tCh(c.slug)}
                 <svg viewBox="0 0 24 24" className={"mm-chev" + (expandedChannel === c.slug ? " open" : "")} aria-hidden>
                   <path d="M6 9l6 6 6-6" />
                 </svg>
               </button>
               {expandedChannel === c.slug && (
                 <div className="mm-children">
-                  <Link href={`/${c.slug}`} onClick={() => setOpen(false)}>全部{c.label}</Link>
+                  <Link href={`/${c.slug}`} onClick={() => setOpen(false)}>
+                    {tM("allOf", { label: tCh(c.slug) })}
+                  </Link>
                   {c.children.map((cc) => (
                     <Link
                       key={cc.slug}
                       href={`/${c.slug}#${cc.slug}`}
                       onClick={() => setOpen(false)}
                     >
-                      {cc.label}
+                      {tAS(cc.slug)}
                     </Link>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <Link key={c.slug} href={`/${c.slug}`} onClick={() => setOpen(false)}>{c.label}</Link>
+            <Link key={c.slug} href={`/${c.slug}`} onClick={() => setOpen(false)}>{tCh(c.slug)}</Link>
           )
         ))}
-        <Link href="/membership" onClick={() => setOpen(false)}>开通会员</Link>
-        <Link href="/login" onClick={() => setOpen(false)}>登录</Link>
+        <Link href="/membership" onClick={() => setOpen(false)}>{tA("membership")}</Link>
+        <Link href="/login" onClick={() => setOpen(false)}>{tA("login")}</Link>
+        <div className="mm-lang"><LanguageSwitcher /></div>
       </div>
     </header>
   );
 }
 
-// 桌面端有 children 的频道:hover 展开下拉
-function NavDropdownItem({ channel }: { channel: Channel }) {
+function NavDropdownItem({
+  channel,
+  label,
+  childLabel,
+}: {
+  channel: Channel;
+  label: string;
+  childLabel: (slug: string) => string;
+}) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<number | null>(null);
 
@@ -170,7 +195,6 @@ function NavDropdownItem({ channel }: { channel: Channel }) {
     setOpen(true);
   };
   const onLeave = () => {
-    // 留 160ms 让鼠标从父跳到子项
     closeTimer.current = window.setTimeout(() => setOpen(false), 160);
   };
   useEffect(() => () => {
@@ -184,7 +208,6 @@ function NavDropdownItem({ channel }: { channel: Channel }) {
       onMouseLeave={onLeave}
       onFocus={onEnter}
       onBlur={(e) => {
-        // 焦点真正离开整个 dd 才关
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) onLeave();
       }}
     >
@@ -194,7 +217,7 @@ function NavDropdownItem({ channel }: { channel: Channel }) {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        {channel.label}
+        {label}
         <svg viewBox="0 0 24 24" className="nav-dd-chev" aria-hidden>
           <path d="M6 9l6 6 6-6" />
         </svg>
@@ -208,7 +231,7 @@ function NavDropdownItem({ channel }: { channel: Channel }) {
               href={`/${channel.slug}#${cc.slug}`}
               onClick={() => setOpen(false)}
             >
-              {cc.label}
+              {childLabel(cc.slug)}
             </Link>
           ))}
         </div>

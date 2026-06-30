@@ -1,0 +1,253 @@
+{
+  "nav": {
+    "loc": {
+      "allRegions": "全部地区",
+      "groups": {
+        "se-asia": "东南亚",
+        "east-asia": "东亚",
+        "overseas": "海外"
+      }
+    },
+    "channels": {
+      "photography": "动态推荐",
+      "video": "视频专区",
+      "art-services": "定制服务",
+      "male-artists": "Sugargirl",
+      "ai-artists": "在线伴侣",
+      "live": "直播平台",
+      "community": "社区"
+    },
+    "artServicesChildren": {
+      "dating": "约会",
+      "travel": "旅游",
+      "shoot": "拍摄",
+      "video-chat": "视频聊天"
+    },
+    "actions": {
+      "search": "搜索",
+      "menu": "菜单",
+      "membership": "开通会员",
+      "login": "登录",
+      "register": "成为创作者"
+    },
+    "mobile": {
+      "allOf": "全部{label}"
+    }
+  },
+  "footer": {
+    "tagline": "面向 Sugargirl 与亚裔创作者的国际化发现与订阅平台。覆盖新加坡、香港、台北、吉隆坡、首尔、曼谷、伦敦、悉尼。",
+    "browse": "浏览",
+    "platform": "平台",
+    "about": "关于",
+    "links": {
+      "feed": "动态推荐",
+      "video": "视频专区",
+      "services": "定制服务",
+      "sugargirls": "Sugargirl",
+      "ai": "在线伴侣",
+      "live": "直播平台",
+      "community": "社区",
+      "rankings": "排行榜",
+      "studio": "创作者中心",
+      "help": "帮助中心",
+      "guidelines": "社区准则",
+      "terms": "条款",
+      "privacy": "隐私"
+    },
+    "copyright": "© {year} Sugardating. 保留所有权利.",
+    "langs": "English · 中文"
+  },
+  "languageSwitcher": {
+    "label": "语言",
+    "english": "EN",
+    "chinese": "中文"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "eyebrow": "Sugardating · 国际化",
+        "title": "跨越国界,发现真挚的连接",
+        "subtitle": "Sugardating 连接经过认证的 Sugargirl 与世界各地的会员,以高质量的对话、共享的体验和优质的社交连接为核心。",
+        "cta": "浏览 Sugargirl"
+      },
+      "slide2": {
+        "eyebrow": "Sugardating · 真人认证",
+        "title": "真实的人,真实的相遇。",
+        "subtitle": "从优雅的初次见面到长期的旅伴关系——按国家、时区与兴趣匹配你的对象。",
+        "cta": "立即加入"
+      },
+      "searchPlaceholder": "按城市、兴趣或语言搜索…",
+      "searchLabel": "搜索",
+      "switchSlide": "切换轮播",
+      "slideAria": "第 {n} 张"
+    },
+    "whyChoose": {
+      "title": "为什么选择 Sugardating",
+      "subtitle": "与众不同之处",
+      "items": {
+        "international": {
+          "title": "国际化社群",
+          "desc": "来自欧洲、北美和东南亚的会员,跨越时区与语言相互连接。"
+        },
+        "verified": {
+          "title": "真人实名认证",
+          "desc": "每一位 Sugargirl 都经过身份核实。没有机器人,没有伪装——只有你可以信任的真实的人。"
+        },
+        "multiple": {
+          "title": "多元连接方式",
+          "desc": "文字、语音、视频或线下见面——选择最适合你的节奏与深度。"
+        },
+        "privacy": {
+          "title": "隐私优先",
+          "desc": "加密通讯、精细的可见性控制,一键切换隐身模式。"
+        },
+        "quality": {
+          "title": "高质量匹配",
+          "desc": "依据兴趣、语言、生活方式与地理位置精准推荐——不是噪音。"
+        },
+        "crossborder": {
+          "title": "跨境社交网络",
+          "desc": "跨越文化与大陆建立关系——从周日的咖啡通话,到一趟说走就走的周末旅行。"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "如何开始",
+      "subtitle": "几分钟即可上手",
+      "steps": {
+        "create": {
+          "title": "创建你的账户",
+          "desc": "一分钟免费注册,设置你的兴趣与偏好。"
+        },
+        "browse": {
+          "title": "浏览 Sugargirl",
+          "desc": "按国家、城市与兴趣探索经过认证的资料。"
+        },
+        "start": {
+          "title": "开启对话",
+          "desc": "发送消息、预约视频聊天,或者一起策划一次旅行。"
+        },
+        "build": {
+          "title": "建立真实的连接",
+          "desc": "按你自己的节奏与方式,发展真挚的关系。"
+        }
+      }
+    },
+    "experiences": {
+      "title": "热门体验",
+      "subtitle": "四种连接方式",
+      "learnMore": "了解更多",
+      "items": {
+        "dating": {
+          "title": "约会",
+          "desc": "为真正合得来的人设计的一对一精选介绍。"
+        },
+        "travel": {
+          "title": "旅游",
+          "desc": "和一位熟悉本地的伴侣一起探索新城市的最佳去处。"
+        },
+        "shoot": {
+          "title": "拍摄",
+          "desc": "时尚、生活方式、艺术及更多类型的合作拍摄。"
+        },
+        "video-chat": {
+          "title": "视频聊天",
+          "desc": "跨越大陆与时区的实时对话。"
+        }
+      }
+    },
+    "featured": {
+      "title": "本周精选 Sugargirl",
+      "subtitle": "本周编辑精挑细选",
+      "viewAll": "查看全部"
+    },
+    "highlights": {
+      "title": "平台数据",
+      "subtitle": "被一个不断增长的社群信任",
+      "items": {
+        "members": { "eye": "会员", "label": "全球注册" },
+        "sugargirls": { "eye": "Sugargirl", "label": "身份核实资料" },
+        "countries": { "eye": "国家", "label": "覆盖 4 大洲" },
+        "daily": { "eye": "每日", "label": "24 小时内的新连接" }
+      }
+    },
+    "testimonials": {
+      "title": "来自社群的故事",
+      "subtitle": "听听会员与 Sugargirl 怎么说",
+      "items": {
+        "james": {
+          "name": "James",
+          "location": "英国 伦敦",
+          "quote": "Sugardating 让我遇见了原本根本不会遇见的、有思考力的、经过认证的人。视频聊天让第一次对话就显得非常真实。"
+        },
+        "sofia": {
+          "name": "Sofia",
+          "location": "新加坡",
+          "quote": "我最欣赏的是隐私控制和认证流程。我感觉安全,而且能控制谁看到我的资料。"
+        },
+        "daniel": {
+          "name": "Daniel",
+          "location": "德国 柏林",
+          "quote": "通过旅行功能策划了一次曼谷之旅——从头到尾都很优雅。"
+        },
+        "yuna": {
+          "name": "Yuna",
+          "location": "日本 东京",
+          "quote": "我六个月前以 Sugargirl 的身份加入,已经和来自三个大洲的会员建立了真正有意义的连接。"
+        },
+        "marcus": {
+          "name": "Marcus",
+          "location": "美国 纽约",
+          "quote": "从第一天起就是高品质的体验。这是我用过最好的社群。"
+        },
+        "eva": {
+          "name": "Eva",
+          "location": "法国 巴黎",
+          "quote": "对话给人有意而为之的感觉,而不是交易。在同类平台上,这非常少见。"
+        }
+      }
+    },
+    "faq": {
+      "title": "常见问题",
+      "subtitle": "你想了解的都在这里",
+      "items": {
+        "what": {
+          "q": "Sugardating 是什么?",
+          "a": "Sugardating 是一个国际化社交平台,连接来自亚洲各地经过认证的 Sugargirl 与全球会员,提供高质量对话、旅行陪伴与优质社交体验。"
+        },
+        "verified": {
+          "q": "Sugargirl 是如何认证的?",
+          "a": "每一位 Sugargirl 都需完成身份核实流程:真实照片、政府身份证件以及有效手机号经过验证后,资料才会上线。"
+        },
+        "free": {
+          "q": "平台可以免费加入吗?",
+          "a": "可以——创建账户是免费的。高级功能,例如进阶筛选、无限消息和认证徽章,需要会员。"
+        },
+        "privacy": {
+          "q": "隐私是如何保护的?",
+          "a": "消息端到端加密。你可以控制谁看到你的资料、照片与在线状态。一键隐身模式可以完全隐藏你的活动。"
+        },
+        "cancel": {
+          "q": "可以随时取消会员吗?",
+          "a": "可以。你可以随时在账户设置中取消。之后你的资料会继续以免费版形式保留。"
+        },
+        "start": {
+          "q": "如何开启对话?",
+          "a": "浏览 Sugargirl 的资料,了解她们的兴趣与可联系时间,然后发送消息。也支持语音留言与视频聊天。"
+        }
+      }
+    },
+    "bottomCta": {
+      "eyebrow": "立即开始",
+      "title": "今天就开启你的旅程",
+      "desc": "在 Sugardating 上发现真挚的国际连接。经过认证的资料、加密聊天与一个等你加入的全球社群。",
+      "primary": "免费加入",
+      "secondary": "浏览 Sugargirl",
+      "imageAlt": "Sugardating 社群"
+    }
+  },
+  "meta": {
+    "title": "Sugardating — 国际化 Sugargirl 发现平台",
+    "description": "发现来自亚洲及全球经过认证的 Sugargirl,高质量对话、旅行陪伴与优质社交连接。"
+  }
+}

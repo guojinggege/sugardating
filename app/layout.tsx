@@ -3,20 +3,29 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { listRegionsGrouped } from "@/lib/queries";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
-// Layout 调 listRegionsGrouped() 拉 DB → 必须全应用走 SSR,
-// 否则 build 时会尝试 prerender 未标 dynamic 的页面,触发 Prisma 在 build 阶段连 DB
+// Layout 调 listRegionsGrouped() 拉 DB → 必须全应用走 SSR
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Sugardating — 华语与亚裔创作者发现平台",
-  description: "动态推荐、视频专区、专属服务、SugarGirl、在线伴侣 — 发现华语与亚裔创作者，订阅他们的作品。",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("title"), description: t("description") };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const regionGroups = await listRegionsGrouped();
+  const [regionGroups, locale, messages] = await Promise.all([
+    listRegionsGrouped(),
+    getLocale(),
+    getMessages(),
+  ]);
+
+  // 语言对应的 html lang 值
+  const htmlLang = locale === "zh" ? "zh-Hans" : "en";
+
   return (
-    <html lang="zh-Hans">
+    <html lang={htmlLang}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -26,9 +35,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
-        <Nav regionGroups={regionGroups} />
-        <main>{children}</main>
-        <Footer />
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Nav regionGroups={regionGroups} />
+          <main>{children}</main>
+          <Footer />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

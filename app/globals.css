@@ -99,6 +99,31 @@ img{display:block;max-width:100%}
 .navright{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
 .navright .btn{padding:8px 13px;font-size:13.5px}
 .navright .btn-mship{padding-left:11px;padding-right:13px}
+
+/* Language Switcher (Nav 右上角 + Mobile menu 底部) */
+.lang-switch{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--page);border:1px solid var(--line2);border-radius:8px;height:34px}
+.lang-switch .lang-btn{background:transparent;border:0;padding:2px 6px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:5px;transition:color .2s,background .2s;font-family:inherit;line-height:1.4}
+.lang-switch .lang-btn:hover{color:var(--ink)}
+.lang-switch .lang-btn.on{color:var(--ink);background:var(--card)}
+.lang-switch .lang-btn:disabled{cursor:default}
+.lang-switch .lang-sep{color:var(--line);font-size:12px;user-select:none}
+.lang-switch[data-pending]{opacity:.7}
+
+/* dark theme variant */
+body.page-dark .lang-switch{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+body.page-dark .lang-switch .lang-btn{color:rgba(242,242,244,.6)}
+body.page-dark .lang-switch .lang-btn:hover{color:#F2F2F4}
+body.page-dark .lang-switch .lang-btn.on{color:#F2F2F4;background:rgba(255,255,255,.12)}
+body.page-dark .lang-switch .lang-sep{color:rgba(255,255,255,.2)}
+
+/* hero immersive (transparent nav over hero): 让按钮在 hero 上仍清晰 */
+body.home-immersive:not(.nav-scrolled) .nav .lang-switch{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn{color:rgba(255,255,255,.7)}
+body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn:hover{color:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn.on{color:#fff;background:rgba(255,255,255,.2)}
+
+/* mobile-menu 内: 顶到末尾居中显示 */
+.mm-lang{padding:14px 16px;border-top:1px solid var(--line);display:flex;justify-content:center;margin-top:8px}
 .ic{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--line2);display:grid;place-items:center;flex:0 0 36px}
 .ic svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.9}
 .ic:hover{border-color:#c9c9d0}
@@ -386,6 +411,14 @@ img{display:block;max-width:100%}
   .hamburger svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8}
   .navright .btn-out{display:none}   /* 登录 + 开通会员 隐藏,改到 mobile-menu 里 */
   .mobile-menu.open{display:flex}
+  /* 同时把首页 4-col grid 降级:Tablet 2-col,避免每列太窄 */
+  .why{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ctype{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,1fr);gap:0 0;padding:28px 0}
+  .stats .sv{border-right:none;border-bottom:1px solid var(--line);padding:18px 24px}
+  .stats .sv:nth-last-child(-n+2){border-bottom:none}
+  .stats .sv:nth-child(odd){border-right:1px solid var(--line)}
 }
 @media(max-width:860px){
   .hero{height:400px}.slide .cap h2{font-size:28px}
@@ -396,6 +429,13 @@ img{display:block;max-width:100%}
   .kpi{grid-template-columns:repeat(2,1fr)}
   .foot-in{grid-template-columns:1fr 1fr;gap:22px}.foot .about{grid-column:1/-1}
   .cta{padding:24px}
+  /* Mobile: 单列堆叠首页所有 section */
+  .why{grid-template-columns:1fr;gap:12px}
+  .ctype{grid-template-columns:1fr;gap:12px}
+  .steps{grid-template-columns:1fr;gap:12px}
+  .stats{grid-template-columns:1fr}
+  .stats .sv{border-right:none!important;border-bottom:1px solid var(--line);padding:18px 24px}
+  .stats .sv:last-child{border-bottom:none}
 }
 /* ============================================================
    /photography 黑金 feed 主题 (body.page-dark)
@@ -557,7 +597,9 @@ body.home-immersive main{padding-top:0}
 
 /* 为什么加入 — 3 列卡片 */
 /* auto-fit:3 个 / 4 个 / 5 个 item 都能在桌面一行排,屏幕窄就自动换行 */
-.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
+/* Why Choose: 固定 3 列 (6 项 → 3×2 网格,不会出现末行孤卡)
+   断点: ≥1024 → 3 列 / 720-1023 → 2 列 / <720 → 1 列 */
+.why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
 .wy{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px;height:100%;transition:transform .3s ease,border-color .3s ease}
 .wy:hover{transform:translateY(-3px);border-color:#dadae0}
 .wy-ic{width:48px;height:48px;border-radius:12px;background:var(--page);display:grid;place-items:center;margin-bottom:22px}
@@ -582,7 +624,8 @@ body.home-immersive main{padding-top:0}
 
 /* ---- 内容类型大卡网格 ---- */
 /* auto-fit:4 / 5 个 experience 都能整齐排列 */
-.ctype{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+/* Popular Experiences: 固定 4 列 (4 项,无孤卡) */
+.ctype{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch}
 .ctype .ct{position:relative;display:block;aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;background:#e6e6ea;color:#fff;transition:transform .25s ease}
 .ctype .ct:hover{transform:translateY(-3px)}
 .ctype .ct .gr{position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.2) 55%,rgba(0,0,0,.85));z-index:1;pointer-events:none}
@@ -617,7 +660,8 @@ body.home-immersive main{padding-top:0}
 .banner .bn-r{flex:0 0 320px;height:260px;position:relative;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.04)}
 
 /* ---- How It Works 4-step timeline ---- */
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+/* How It Works: 固定 4 列 (4 步,无孤卡) */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;align-items:stretch}
 .step{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 26px;height:100%;transition:transform .3s ease,border-color .3s ease;position:relative}
 .step:hover{transform:translateY(-3px);border-color:#dadae0}
 .step-n{font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-style:italic;font-size:30px;font-weight:600;color:var(--accent);line-height:1;margin-bottom:14px;display:inline-block}

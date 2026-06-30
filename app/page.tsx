@@ -10,14 +10,15 @@ import FAQ from "@/components/Home/FAQ";
 import { Arrow } from "@/components/icons";
 import { listCreators } from "@/lib/queries";
 import { photos, pick } from "@/lib/images";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-// ─── Why Choose Sugardating ────────────────────────────────────────
-const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
+// ─── Why Choose Sugardating(6 项 — 3×2 网格,确保末行不孤立)
+// 内容只在 messages/*.json,这里只留 key + 图标
+const whyChooseKeys: { key: string; icon: React.ReactNode }[] = [
   {
-    title: "International Community",
-    desc: "Members from Europe, North America and Southeast Asia, connecting across time zones and languages.",
+    key: "international",
     icon: (
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9" />
@@ -26,8 +27,7 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    title: "Verified Real People",
-    desc: "Every Sugargirl is identity-checked. No bots, no catfishes — just real people you can trust.",
+    key: "verified",
     icon: (
       <svg viewBox="0 0 24 24">
         <path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" />
@@ -36,8 +36,7 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    title: "Multiple Ways to Connect",
-    desc: "Chat, voice, video or in-person — choose the pace and depth that fits your style.",
+    key: "multiple",
     icon: (
       <svg viewBox="0 0 24 24">
         <path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" />
@@ -45,8 +44,7 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    title: "Privacy First",
-    desc: "Encrypted messaging, granular visibility controls and one-tap incognito mode.",
+    key: "privacy",
     icon: (
       <svg viewBox="0 0 24 24">
         <rect x="4" y="11" width="16" height="10" rx="2" />
@@ -55,8 +53,7 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    title: "Quality Matching",
-    desc: "Recommendations tuned by interests, languages, lifestyle and location — not by noise.",
+    key: "quality",
     icon: (
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="8" />
@@ -66,8 +63,7 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    title: "Cross-border Networking",
-    desc: "Build relationships across cultures and continents — from a Sunday coffee call to a weekend abroad.",
+    key: "crossborder",
     icon: (
       <svg viewBox="0 0 24 24">
         <path d="M4 12h16" />
@@ -78,32 +74,24 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
   },
 ];
 
-// ─── How It Works ──────────────────────────────────────────────────
-const howItWorks = [
-  { title: "Create Your Account",  desc: "Sign up free in under a minute. Set your interests and preferences." },
-  { title: "Browse Sugargirls",    desc: "Explore verified profiles by country, city and interest." },
-  { title: "Start the Conversation", desc: "Send a message, schedule a video chat, or plan a trip together." },
-  { title: "Build Real Connections", desc: "Develop genuine relationships at your own pace, on your own terms." },
-];
+const howKeys = ["create", "browse", "start", "build"] as const;
 
-// ─── Popular Experiences ───────────────────────────────────────────
-const experiences = [
-  { href: "/art-services#dating",     title: "Dating",      desc: "Curated 1-on-1 introductions designed for genuine compatibility." },
-  { href: "/art-services#travel",     title: "Travel",      desc: "Explore new cities with a local companion who knows the best spots." },
-  { href: "/art-services#shoot",      title: "Photography", desc: "Collaborative shoots — fashion, lifestyle, art and beyond." },
-  { href: "/art-services#video-chat", title: "Video Chat",  desc: "Real-time conversations across continents and time zones." },
-];
+const expKeys = [
+  { key: "dating",     href: "/art-services#dating" },
+  { key: "travel",     href: "/art-services#travel" },
+  { key: "shoot",      href: "/art-services#shoot" },
+  { key: "video-chat", href: "/art-services#video-chat" },
+] as const;
 
-// ─── Platform Highlights ───────────────────────────────────────────
-const highlights = [
-  { eye: "Members",    num: "48,200+", label: "Registered worldwide" },
-  { eye: "Sugargirls", num: "1,860+",  label: "Identity-verified profiles" },
-  { eye: "Countries",  num: "24",      label: "Across 4 continents" },
-  { eye: "Daily",      num: "12,400+", label: "Connections every 24 hours" },
-];
+const highlightKeys = [
+  { key: "members",    num: "48,200+" },
+  { key: "sugargirls", num: "1,860+" },
+  { key: "countries",  num: "24" },
+  { key: "daily",      num: "12,400+" },
+] as const;
 
 export default async function Home() {
-  const creators = await listCreators();
+  const [creators, t] = await Promise.all([listCreators(), getTranslations("home")]);
 
   return (
     <>
@@ -113,15 +101,15 @@ export default async function Home() {
         {/* 1. Why Choose Sugardating */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="Why Choose Sugardating" count="What sets us apart" />
+            <SectionHeader title={t("whyChoose.title")} count={t("whyChoose.subtitle")} />
           </Reveal>
           <div className="why">
-            {whyChoose.map((w, i) => (
-              <Reveal key={w.title} delay={i * 80}>
+            {whyChooseKeys.map((w, i) => (
+              <Reveal key={w.key} delay={i * 80}>
                 <div className="wy">
                   <div className="wy-ic">{w.icon}</div>
-                  <h3>{w.title}</h3>
-                  <p>{w.desc}</p>
+                  <h3>{t(`whyChoose.items.${w.key}.title`)}</h3>
+                  <p>{t(`whyChoose.items.${w.key}.desc`)}</p>
                 </div>
               </Reveal>
             ))}
@@ -131,15 +119,15 @@ export default async function Home() {
         {/* 2. How It Works */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="How It Works" count="Get started in minutes" />
+            <SectionHeader title={t("howItWorks.title")} count={t("howItWorks.subtitle")} />
           </Reveal>
           <div className="steps">
-            {howItWorks.map((s, i) => (
-              <Reveal key={s.title} delay={i * 80}>
+            {howKeys.map((k, i) => (
+              <Reveal key={k} delay={i * 80}>
                 <div className="step">
                   <div className="step-n">{String(i + 1).padStart(2, "0")}</div>
-                  <h3>{s.title}</h3>
-                  <p>{s.desc}</p>
+                  <h3>{t(`howItWorks.steps.${k}.title`)}</h3>
+                  <p>{t(`howItWorks.steps.${k}.desc`)}</p>
                 </div>
               </Reveal>
             ))}
@@ -149,18 +137,18 @@ export default async function Home() {
         {/* 3. Popular Experiences */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="Popular Experiences" count="Four ways to connect" />
+            <SectionHeader title={t("experiences.title")} count={t("experiences.subtitle")} />
           </Reveal>
           <div className="ctype">
-            {experiences.map((t, i) => (
-              <Reveal key={t.title} delay={i * 80}>
-                <Link href={t.href} className="ct">
-                  <Img src={pick(i, 5)!} alt={t.title} sizes="(max-width: 860px) 50vw, 25vw" />
+            {expKeys.map((e, i) => (
+              <Reveal key={e.key} delay={i * 80}>
+                <Link href={e.href} className="ct">
+                  <Img src={pick(i, 5)!} alt={t(`experiences.items.${e.key}.title`)} sizes="(max-width: 860px) 50vw, 25vw" />
                   <div className="gr" />
                   <div className="info">
-                    <h3>{t.title}</h3>
-                    <p>{t.desc}</p>
-                    <span className="go">Learn more <Arrow /></span>
+                    <h3>{t(`experiences.items.${e.key}.title`)}</h3>
+                    <p>{t(`experiences.items.${e.key}.desc`)}</p>
+                    <span className="go">{t("experiences.learnMore")} <Arrow /></span>
                   </div>
                 </Link>
               </Reveal>
@@ -172,10 +160,10 @@ export default async function Home() {
         <section className="sec">
           <Reveal>
             <SectionHeader
-              title="Featured Sugargirls"
-              count="Hand-picked this week"
+              title={t("featured.title")}
+              count={t("featured.subtitle")}
               moreHref="/male-artists"
-              moreText="View all"
+              moreText={t("featured.viewAll")}
             />
           </Reveal>
           <Reveal>
@@ -186,15 +174,15 @@ export default async function Home() {
         {/* 5. Platform Highlights */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="Platform Highlights" count="Trusted by a growing community" />
+            <SectionHeader title={t("highlights.title")} count={t("highlights.subtitle")} />
           </Reveal>
           <Reveal>
             <div className="stats">
-              {highlights.map((s) => (
-                <div key={s.eye} className="sv">
-                  <span className="accent">{s.eye}</span>
+              {highlightKeys.map((s) => (
+                <div key={s.key} className="sv">
+                  <span className="accent">{t(`highlights.items.${s.key}.eye`)}</span>
                   <b><Stat value={s.num} /></b>
-                  <span>{s.label}</span>
+                  <span>{t(`highlights.items.${s.key}.label`)}</span>
                 </div>
               ))}
             </div>
@@ -204,7 +192,7 @@ export default async function Home() {
         {/* 6. Testimonials */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="Stories from the Community" count="What members and Sugargirls say" />
+            <SectionHeader title={t("testimonials.title")} count={t("testimonials.subtitle")} />
           </Reveal>
           <Reveal>
             <Testimonials />
@@ -214,7 +202,7 @@ export default async function Home() {
         {/* 7. FAQ */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="Frequently Asked Questions" count="Everything you might want to know" />
+            <SectionHeader title={t("faq.title")} count={t("faq.subtitle")} />
           </Reveal>
           <Reveal>
             <FAQ />
@@ -226,16 +214,16 @@ export default async function Home() {
           <Reveal>
             <div className="banner">
               <div className="bn-l">
-                <span className="bn-eye"><i />Get Started</span>
-                <h2>Start Your Journey Today</h2>
-                <p>Discover meaningful international connections on Sugardating. Verified profiles, encrypted chat and a global community waiting to meet you.</p>
+                <span className="bn-eye"><i />{t("bottomCta.eyebrow")}</span>
+                <h2>{t("bottomCta.title")}</h2>
+                <p>{t("bottomCta.desc")}</p>
                 <div className="bn-acts">
-                  <Link href="/register" className="btn btn-w">Join Free</Link>
-                  <Link href="/male-artists" className="btn btn-g">Explore Sugargirls</Link>
+                  <Link href="/register" className="btn btn-w">{t("bottomCta.primary")}</Link>
+                  <Link href="/male-artists" className="btn btn-g">{t("bottomCta.secondary")}</Link>
                 </div>
               </div>
               <div className="bn-r">
-                <Img src={pick(0, 7)!} alt="Sugardating community" sizes="(max-width: 860px) 100vw, 320px" />
+                <Img src={pick(0, 7)!} alt={t("bottomCta.imageAlt")} sizes="(max-width: 860px) 100vw, 320px" />
               </div>
             </div>
           </Reveal>

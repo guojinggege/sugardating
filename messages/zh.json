@@ -364,5 +364,120 @@
       "join": "开通会员",
       "login": "已有账号 · 登录"
     }
+  },
+  "creatorProfile": {
+    "hero": {
+      "verified": "已认证",
+      "online": "在线",
+      "yearsOld": "岁",
+      "defaultBio": "热爱生活与摄影 · 长期分享旅行 vlog 与日常"
+    },
+    "actions": {
+      "follow": "关注",
+      "following": "已关注",
+      "chat": "立即聊天",
+      "bookDate": "预约约会",
+      "videoCall": "视频聊天",
+      "save": "收藏",
+      "share": "分享",
+      "linkCopied": "已复制链接"
+    },
+    "stats": {
+      "ariaLabel": "创作者数据",
+      "followers": "粉丝",
+      "following": "关注",
+      "posts": "动态",
+      "videos": "视频",
+      "photos": "图片",
+      "saved": "收藏",
+      "joinedAt": "加入时间",
+      "completion": "资料完成度"
+    },
+    "tabs": {
+      "ariaLabel": "内容导航",
+      "feed": "动态",
+      "videos": "视频",
+      "gallery": "相册",
+      "services": "服务",
+      "reviews": "评价",
+      "about": "关于 Ta"
+    },
+    "sections": {
+      "feed": "动态",
+      "videos": "视频",
+      "gallery": "相册",
+      "services": "服务",
+      "reviews": "用户评价",
+      "about": "关于 Ta"
+    },
+    "feed": {
+      "end": "—— 没有更多动态了 ——",
+      "save": "收藏",
+      "share": "分享",
+      "comment": "评论",
+      "copied": "已复制"
+    },
+    "videos": {
+      "views": "浏览",
+      "daysAgo": "天前"
+    },
+    "gallery": {
+      "all": "全部",
+      "openLarge": "查看大图",
+      "close": "关闭",
+      "prev": "上一张",
+      "next": "下一张"
+    },
+    "services": {
+      "book": "立即预约",
+      "items": {
+        "dating": {
+          "title": "约会",
+          "desc": "线下精致约会 · 城市内 1v1 · 提前 24 小时预约"
+        },
+        "travel": {
+          "title": "旅游",
+          "desc": "短途 / 长途旅伴 · 本地玩法 + 摄影记录"
+        },
+        "shoot": {
+          "title": "拍摄",
+          "desc": "时尚 / 写真 / 街拍 · 摄影师沟通配合"
+        },
+        "video-chat": {
+          "title": "视频聊天",
+          "desc": "1v1 视频沟通 · 适合远距离了解"
+        }
+      }
+    },
+    "reviews": {
+      "empty": "还没有评价,来留下第一条吧。",
+      "loadMore": "加载更多评价",
+      "writeNew": "写一条评价"
+    },
+    "about": {
+      "interests": "兴趣爱好",
+      "languages": "会说语言",
+      "city": "所在城市",
+      "frequent": "常去国家",
+      "travelPlans": "旅行计划",
+      "joinedAt": "加入时间"
+    },
+    "sidebar": {
+      "guesses": "猜你喜欢",
+      "online": "在线 Sugargirl",
+      "hot": "热门创作者",
+      "recent": "最近加入",
+      "followers": "粉丝",
+      "support": "支持 Ta",
+      "supportDesc": "用一笔小额打赏告诉创作者:我喜欢你的内容。"
+    },
+    "related": {
+      "guess": "猜你喜欢",
+      "similar": "相似 Sugargirl",
+      "recent": "最近浏览",
+      "hot": "热门推荐",
+      "prev": "上一张",
+      "next": "下一张"
+    }
   }
 }

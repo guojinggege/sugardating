@@ -364,5 +364,120 @@
       "join": "Become a Member",
       "login": "Already have an account? Sign in"
     }
+  },
+  "creatorProfile": {
+    "hero": {
+      "verified": "Verified",
+      "online": "Online",
+      "yearsOld": "yrs",
+      "defaultBio": "Lover of life and photography. Slow living, travel vlogs, daily moments."
+    },
+    "actions": {
+      "follow": "Follow",
+      "following": "Following",
+      "chat": "Chat Now",
+      "bookDate": "Book a Date",
+      "videoCall": "Video Call",
+      "save": "Save",
+      "share": "Share",
+      "linkCopied": "Link copied"
+    },
+    "stats": {
+      "ariaLabel": "Creator stats",
+      "followers": "Followers",
+      "following": "Following",
+      "posts": "Posts",
+      "videos": "Videos",
+      "photos": "Photos",
+      "saved": "Saved",
+      "joinedAt": "Joined",
+      "completion": "Profile"
+    },
+    "tabs": {
+      "ariaLabel": "Content navigation",
+      "feed": "Feed",
+      "videos": "Videos",
+      "gallery": "Gallery",
+      "services": "Services",
+      "reviews": "Reviews",
+      "about": "About"
+    },
+    "sections": {
+      "feed": "Feed",
+      "videos": "Videos",
+      "gallery": "Gallery",
+      "services": "Services",
+      "reviews": "Reviews",
+      "about": "About"
+    },
+    "feed": {
+      "end": "— end of feed —",
+      "save": "Save",
+      "share": "Share",
+      "comment": "Comment",
+      "copied": "Copied"
+    },
+    "videos": {
+      "views": "views",
+      "daysAgo": "days ago"
+    },
+    "gallery": {
+      "all": "All",
+      "openLarge": "View full size",
+      "close": "Close",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "services": {
+      "book": "Book Now",
+      "items": {
+        "dating": {
+          "title": "Dating",
+          "desc": "Premium 1-on-1 dates in your city. 24h advance booking."
+        },
+        "travel": {
+          "title": "Travel",
+          "desc": "Short or long-trip companion. Local insider experiences + photo notes."
+        },
+        "shoot": {
+          "title": "Photo Shoot",
+          "desc": "Fashion / portrait / street. Collaborative work with your photographer."
+        },
+        "video-chat": {
+          "title": "Video Chat",
+          "desc": "1-on-1 video conversation. Perfect for long-distance connections."
+        }
+      }
+    },
+    "reviews": {
+      "empty": "No reviews yet — be the first to leave one.",
+      "loadMore": "Load more reviews",
+      "writeNew": "Write a review"
+    },
+    "about": {
+      "interests": "Interests",
+      "languages": "Languages",
+      "city": "City",
+      "frequent": "Frequent destinations",
+      "travelPlans": "Travel plans",
+      "joinedAt": "Joined"
+    },
+    "sidebar": {
+      "guesses": "Recommended for you",
+      "online": "Online Sugargirls",
+      "hot": "Top Creators",
+      "recent": "Newly joined",
+      "followers": "followers",
+      "support": "Support this creator",
+      "supportDesc": "Send a small tip to let the creator know you enjoy their work."
+    },
+    "related": {
+      "guess": "You may also like",
+      "similar": "Similar Sugargirls",
+      "recent": "Recently viewed",
+      "hot": "Popular now",
+      "prev": "Previous",
+      "next": "Next"
+    }
   }
 }

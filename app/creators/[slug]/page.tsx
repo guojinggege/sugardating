@@ -1,144 +1,163 @@
 import { notFound } from "next/navigation";
-import Img from "@/components/Img";
-import Placeholder from "@/components/Placeholder";
-import WorkTile from "@/components/WorkTile";
-import { Tick } from "@/components/icons";
-import { getCreatorBySlug, listCommentsByCreator } from "@/lib/queries";
+import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 import { pick } from "@/lib/images";
-import TipButton from "./TipButton";
-import CommentForm from "./CommentForm";
+import { getCreatorBySlug, listCommentsByCreator, listCreators } from "@/lib/queries";
+import {
+  makeFeed, makeVideos, makeGallery, makeServices,
+  deriveStats, deriveAbout,
+} from "@/lib/creatorProfileMock";
 
-function timeAgo(d: Date): string {
-  const diff = Date.now() - d.getTime();
-  const min = 60_000, hour = 60 * min, day = 24 * hour;
-  if (diff < min) return "刚刚";
-  if (diff < hour) return `${Math.floor(diff / min)} 分钟前`;
-  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
-  if (diff < 30 * day) return `${Math.floor(diff / day)} 天前`;
-  return d.toLocaleDateString("zh-CN");
-}
+import CreatorHero from "@/components/Creator/CreatorHero";
+import CreatorStats from "@/components/Creator/CreatorStats";
+import CreatorTabs from "@/components/Creator/CreatorTabs";
+import FeedList from "@/components/Creator/FeedList";
+import VideoGrid from "@/components/Creator/VideoGrid";
+import GalleryGrid from "@/components/Creator/GalleryGrid";
+import ServiceCards from "@/components/Creator/ServiceCards";
+import ReviewList from "@/components/Creator/ReviewList";
+import AboutBlock from "@/components/Creator/AboutBlock";
+import RightSidebar from "@/components/Creator/RightSidebar";
+import RelatedCreators from "@/components/Creator/RelatedCreators";
+import CommentForm from "./CommentForm";
 
 export const dynamic = "force-dynamic";
 
-// 从 slug 派生稳定 offset,确保同一创作者每次访问的封面/头像/作品图都不变
+// 从 slug 派生稳定 offset
 function offsetFromSlug(slug: string): number {
   let h = 0;
   for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const detail = await getCreatorBySlug(params.slug);
+  if (!detail) return { title: "Creator · Sugardating" };
+  return {
+    title: `${detail.creator.name} · Sugardating`,
+    description: detail.bio || `${detail.creator.name} on Sugardating`,
+  };
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
-  const [detail, comments] = await Promise.all([
+  const [detail, comments, allCreators, t] = await Promise.all([
     getCreatorBySlug(params.slug),
     listCommentsByCreator(params.slug),
+    listCreators(),
+    getTranslations("creatorProfile"),
   ]);
   if (!detail) notFound();
-  const { creator: c, bio, works, tiers } = detail;
-  const imageWorks = works.filter((w) => w.type === "image");
-  const videoWorks = works.filter((w) => w.type === "video");
-  const subscriberWorks = 0; // seed 当前全是 public
+  const { creator: c, bio } = detail;
+
   const off = offsetFromSlug(c.slug);
-  const cover  = pick(0, off);
-  const avatar = pick(1, off);
+  const cover  = pick(0, off)     ?? "/images/placeholder.png";
+  const avatar = pick(1, off + 1) ?? "/images/placeholder.png";
+
+  // 派生数据 (deterministic)
+  const stats    = deriveStats(c.slug, c.subs, c.followers, c.works);
+  const feed     = makeFeed(c.slug);
+  const videos   = makeVideos(c.slug);
+  const gallery  = makeGallery(c.slug);
+  const services = makeServices();
+  const about    = deriveAbout(c.slug, bio, c.region, stats.joinedAt);
+  const tags     = about.interests.slice(0, 6);
+
+  // 右侧 sidebar + 底部 related 用 — 排除当前 creator
+  const others = allCreators.filter((x) => x.slug !== c.slug);
+  const photoFor = (slug: string, off2: number) => {
+    let h = 0;
+    for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
+    return pick(0, Math.abs(h) + off2) ?? "/images/placeholder.png";
+  };
+  const pickCreators = (n: number, skip = 0) =>
+    others.slice(skip, skip + n).map((cr) => ({
+      creator: cr,
+      photo: photoFor(cr.slug, 7),
+    }));
 
   return (
-    <div className="container">
-      <div className="pf-cover">
-        {cover
-          ? <Img src={cover} alt={`${c.name} 封面`} sizes="100vw" priority />
-          : <Placeholder label="封面图 占位" fill />}
-      </div>
-      <div className="pf-head">
-        <div className="pf-ava">
-          {avatar
-            ? <Img src={avatar} alt={`${c.name} 头像`} sizes="120px" />
-            : <Placeholder label="头像" fill />}
-        </div>
-        <div className="pf-id">
-          <div className="nm">{c.name} <Tick /></div>
-          <div className="meta"><span>{c.region}</span><span>{c.category} · {c.specialty}</span><span>中文 / English</span></div>
-        </div>
-        <div className="pf-act">
-          <button className="btn btn-out">＋ 关注</button>
-          <TipButton slug={c.slug} />
-          <button className="btn btn-ink">订阅 {c.price}/月</button>
-        </div>
-      </div>
-      <p className="pf-bio">{bio}</p>
-      <div className="pf-stats">
-        <div><b>{c.subs}</b><span>订阅者</span></div>
-        <div><b>{c.followers}</b><span>关注</span></div>
-        <div><b>{c.works}</b><span>作品</span></div>
-      </div>
+    <div className="cr-page">
+      {/* 1. Hero (cover + avatar + info + 6 actions) */}
+      <CreatorHero
+        creator={c}
+        bio={about.bio}
+        cover={cover}
+        avatar={avatar}
+        age={24 + (off % 6)}
+        languages={about.languages}
+        tags={tags}
+        online
+      />
 
-      <div className="tabs">
-        <div className="tab on">公开作品</div>
-        <div className="tab">订阅内容 · {subscriberWorks}</div>
-        <div className="tab">订阅档位</div>
-      </div>
+      <div className="container cr-container">
+        {/* 2. Stats strip */}
+        <CreatorStats data={stats} />
 
-      <div className="work-sub">
-        <h3>图片作品</h3>
-        <span className="c">{imageWorks.length} 件</span>
-      </div>
-      {imageWorks.length === 0 ? (
-        <div className="work-empty">暂无图片作品</div>
-      ) : (
-        <div className="feed">
-          {imageWorks.map((w, i) => <WorkTile key={w.id} w={w} photoSrc={pick(i, off + 2)} />)}
+        {/* 3. Sticky Tabs */}
+        <div className="cr-tabs-wrap">
+          <CreatorTabs />
         </div>
-      )}
 
-      <div className="work-sub">
-        <h3>视频作品</h3>
-        <span className="c">{videoWorks.length} 件</span>
-      </div>
-      {videoWorks.length === 0 ? (
-        <div className="work-empty">暂无视频作品</div>
-      ) : (
-        <div className="feed">
-          {videoWorks.map((w, i) => <WorkTile key={w.id} w={w} video photoSrc={pick(i, off + 6)} />)}
+        {/* 4. 2-col content */}
+        <div className="cr-body">
+          <div className="cr-main">
+            <section id="feed" className="cr-section">
+              <h3 className="cr-section-h">{t("sections.feed")}</h3>
+              <FeedList authorName={c.name} authorAvatar={avatar} posts={feed} />
+            </section>
+
+            <section id="videos" className="cr-section">
+              <h3 className="cr-section-h">{t("sections.videos")}</h3>
+              <VideoGrid videos={videos} />
+            </section>
+
+            <section id="gallery" className="cr-section">
+              <h3 className="cr-section-h">{t("sections.gallery")}</h3>
+              <GalleryGrid items={gallery} />
+            </section>
+
+            <section id="services" className="cr-section">
+              <h3 className="cr-section-h">{t("sections.services")}</h3>
+              <ServiceCards services={services} />
+            </section>
+
+            <section id="reviews" className="cr-section">
+              <h3 className="cr-section-h">{t("sections.reviews")}</h3>
+              <ReviewList reviews={comments} />
+              <div className="cr-review-form">
+                <h4 className="cr-form-h">{t("reviews.writeNew")}</h4>
+                <CommentForm slug={c.slug} />
+              </div>
+            </section>
+
+            <section id="about" className="cr-section">
+              <h3 className="cr-section-h">{t("sections.about")}</h3>
+              <AboutBlock about={about} />
+            </section>
+          </div>
+
+          {/* Right sticky sidebar */}
+          <RightSidebar
+            creatorSlug={c.slug}
+            guesses={pickCreators(4, 0)}
+            online={pickCreators(4, 4)}
+            hot={pickCreators(4, 2)}
+            recent={pickCreators(4, 6)}
+          />
         </div>
-      )}
 
-      <div className="tiers">
-        {tiers.map((t) => {
-          const isElite = t.name === "elite";
-          const btnClass = t.name === "basic" ? "btn btn-out" : "btn btn-ink";
-          return (
-            <div key={t.name} className={isElite ? "tier elite" : "tier"}>
-              <div className="tn">{t.label}</div>
-              <div className="tp">{t.price}<small>/月</small></div>
-              <ul>{t.benefits.map((b) => <li key={b}>{b}</li>)}</ul>
-              <button className={btnClass} style={{ justifyContent: "center" }}>选择</button>
-            </div>
-          );
-        })}
+        {/* 5. Bottom related carousel */}
+        <RelatedCreators
+          sets={[
+            { key: "guess",   items: pickCreators(10, 0) },
+            { key: "similar", items: pickCreators(10, 2) },
+            { key: "recent",  items: pickCreators(10, 4) },
+            { key: "hot",     items: pickCreators(10, 1) },
+          ]}
+        />
+
+        <div style={{ height: 60 }} />
       </div>
-      <section className="cmts">
-        <div className="work-sub">
-          <h3>评论</h3>
-          <span className="c">{comments.length} 条</span>
-        </div>
-        {comments.length === 0 ? (
-          <div className="work-empty">还没有评论,来说第一句吧。</div>
-        ) : (
-          <ul className="cmt-list">
-            {comments.map((cm) => (
-              <li key={cm.id} className="cmt">
-                <div className="cmt-h">
-                  <b>{cm.authorName}</b>
-                  <span>{timeAgo(cm.createdAt)}</span>
-                </div>
-                <p>{cm.content}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-        <CommentForm slug={c.slug} />
-      </section>
-
-      <div style={{ height: 40 }} />
     </div>
   );
 }

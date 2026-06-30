@@ -1030,3 +1030,67 @@ body.home-immersive main{padding-top:0}
 .cr-related-info{padding:10px 12px 12px}
 .cr-related-name{font-size:13.5px;font-weight:700;color:var(--ink);letter-spacing:-.005em}
 .cr-related-meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+/* ============================================================
+   Guest Mode: Login Modal + User Menu (Auth UI)
+   复用 .modal-backdrop / .modal 基底
+   ============================================================ */
+
+/* ----- Login Modal (复用 .modal-backdrop + .modal,加 auth-modal 变体) ----- */
+.auth-modal{max-width:440px;padding:34px 30px;position:relative;text-align:center}
+.auth-modal-x{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:var(--page);color:var(--ink);border:0;font-size:20px;cursor:pointer;display:grid;place-items:center;line-height:1;transition:background .15s}
+.auth-modal-x:hover{background:var(--line)}
+.auth-modal-h{padding:6px 0 18px}
+.auth-modal-ic{width:56px;height:56px;margin:0 auto 14px;border-radius:16px;background:var(--page);display:grid;place-items:center}
+.auth-modal-ic svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.auth-modal-h h3{font-size:21px;font-weight:800;margin:0 0 8px;letter-spacing:-.015em;color:var(--ink)}
+.auth-modal-h p{font-size:13.5px;line-height:1.6;color:var(--ink2);margin:0;max-width:340px;margin:0 auto}
+.auth-modal-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.auth-modal-acts .btn{justify-content:center;padding:11px;font-size:14px}
+.auth-modal-cancel{margin:14px auto 0;background:none;border:0;color:var(--muted);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;padding:6px 14px;border-radius:8px;transition:color .15s,background .15s;display:block}
+.auth-modal-cancel:hover{color:var(--ink);background:var(--page)}
+.auth-modal-note{font-size:11.5px;line-height:1.55;color:var(--muted);margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);text-align:center}
+@media(max-width:640px){
+  .auth-modal{padding:28px 22px}
+  .auth-modal-acts{grid-template-columns:1fr}
+}
+
+/* ----- User Menu (Nav 头像 + dropdown) ----- */
+.user-menu{position:relative;display:inline-flex}
+.user-trigger{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line2);background:var(--card);cursor:pointer;padding:0;display:grid;place-items:center;transition:border-color .18s,transform .15s}
+.user-trigger:hover{border-color:var(--ink);transform:translateY(-1px)}
+.user-trigger[aria-expanded="true"]{border-color:var(--ink)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-style:italic;line-height:1}
+
+.user-pop{position:absolute;top:calc(100% + 8px);right:0;min-width:240px;background:rgba(255,255,255,.96);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:0 18px 50px -16px rgba(0,0,0,.22),0 0 0 1px rgba(0,0,0,.02);z-index:60;animation:user-pop-in .22s ease-out;transform-origin:top right}
+@keyframes user-pop-in{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.user-pop-h{display:flex;align-items:center;gap:10px;padding:10px 12px 12px}
+.user-pop-avatar{width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:17px;font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-style:italic;flex:0 0 40px}
+.user-pop-name{font-size:14px;font-weight:700;color:var(--ink)}
+.user-pop-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+.user-pop-divider{height:1px;background:var(--line);margin:4px 6px}
+.user-pop-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 12px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--ink);background:none;border:0;cursor:pointer;font-family:inherit;text-decoration:none;transition:background .15s}
+.user-pop-item:hover{background:var(--page)}
+.user-pop-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}
+.user-pop-item:hover svg{color:var(--ink)}
+.user-pop-logout{color:#e11d48}
+.user-pop-logout svg{color:#e11d48!important}
+
+/* dark theme variants — page-dark 用户菜单 */
+body.page-dark .user-trigger{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14)}
+body.page-dark .user-trigger:hover{border-color:#F2F2F4;background:rgba(255,255,255,.1)}
+body.page-dark .user-avatar{background:#F2F2F4;color:#0a0a0c}
+body.page-dark .user-pop{background:rgba(18,18,20,.92);border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
+body.page-dark .user-pop-divider{background:rgba(255,255,255,.08)}
+body.page-dark .user-pop-item{color:rgba(242,242,244,.85)}
+body.page-dark .user-pop-item:hover{background:rgba(255,255,255,.06)}
+body.page-dark .user-pop-name{color:#F2F2F4}
+body.page-dark .user-pop-avatar{background:#F2F2F4;color:#0a0a0c}
+
+/* home-immersive transparent variant */
+body.home-immersive:not(.nav-scrolled) .nav .user-trigger{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .user-trigger:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4)}
+body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:var(--ink)}
+
+/* mobile menu user 容器 */
+.mm-user{padding:10px 16px;display:flex;justify-content:flex-start}

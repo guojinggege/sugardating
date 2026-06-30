@@ -1,7 +1,7 @@
 // 服务 4 宫格:约会 / 旅游 / 拍摄 / 视频聊天
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ServiceItem } from "@/lib/creatorProfileMock";
+import ServiceCtaButton from "./ServiceCtaButton";
 
 // 4 个服务的 icon (内联 SVG)
 const ICONS: Record<ServiceItem["key"], React.ReactNode> = {
@@ -33,10 +33,7 @@ export default async function ServiceCards({ services }: { services: ServiceItem
               <b>{s.price}</b>
               <span>· {s.duration}</span>
             </div>
-            <Link href="/membership" className="cr-service-cta">
-              {t("book")}
-              <svg viewBox="0 0 24 24" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </Link>
+            <ServiceCtaButton label={t("book")} />
           </div>
         </article>
       ))}

@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
+import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import { addTip } from "./actions";
 
 const PRESETS = [2, 5, 10];
 
 export default function TipButton({ slug }: { slug: string }) {
+  const requireLogin = useRequireLogin();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState<number | "custom">(5);
   const [custom, setCustom] = useState("");
@@ -57,7 +59,7 @@ export default function TipButton({ slug }: { slug: string }) {
 
   return (
     <>
-      <button type="button" className="btn btn-out" onClick={() => setOpen(true)}>
+      <button type="button" className="btn btn-out" onClick={() => { if (requireLogin()) setOpen(true); }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4 }}>
           <path d="M12 21s-7-5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 16 12 21 12 21z" />
         </svg>

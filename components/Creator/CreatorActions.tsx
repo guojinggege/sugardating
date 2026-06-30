@@ -1,14 +1,19 @@
 "use client";
 // Hero 右侧 6 个操作按钮: 关注 / 立即聊天 / 预约约会 / 视频聊天 / 收藏 / 分享
-// MVP: 仅 client 本地状态,无后端 (follow/save 是 toggle,其它是占位 CTA)
+// 写操作 (follow/save/chat/book/videoCall) 走 requireLogin gate
+// 分享不需要登录 (只是复制 URL)
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRequireLogin } from "@/components/Auth/AuthProvider";
 
 export default function CreatorActions({ creatorName }: { creatorName: string }) {
   const t = useTranslations("creatorProfile.actions");
+  const requireLogin = useRequireLogin();
   const [following, setFollowing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareMsg, setShareMsg] = useState(false);
+
+  const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
 
   const onShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -27,7 +32,7 @@ export default function CreatorActions({ creatorName }: { creatorName: string })
     <div className="cr-acts">
       <button
         type="button"
-        onClick={() => setFollowing((v) => !v)}
+        onClick={guard(() => setFollowing((v) => !v))}
         className={"cr-act cr-act-primary" + (following ? " on" : "")}
       >
         {following ? (
@@ -42,21 +47,21 @@ export default function CreatorActions({ creatorName }: { creatorName: string })
           </>
         )}
       </button>
-      <button type="button" className="cr-act">
+      <button type="button" className="cr-act" onClick={guard(() => {})}>
         <svg viewBox="0 0 24 24" aria-hidden><path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" /></svg>
         {t("chat")}
       </button>
-      <button type="button" className="cr-act">
+      <button type="button" className="cr-act" onClick={guard(() => {})}>
         <svg viewBox="0 0 24 24" aria-hidden><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 11h18" /></svg>
         {t("bookDate")}
       </button>
-      <button type="button" className="cr-act">
+      <button type="button" className="cr-act" onClick={guard(() => {})}>
         <svg viewBox="0 0 24 24" aria-hidden><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M16 10l5-3v10l-5-3z" /></svg>
         {t("videoCall")}
       </button>
       <button
         type="button"
-        onClick={() => setSaved((v) => !v)}
+        onClick={guard(() => setSaved((v) => !v))}
         aria-label={t("save")}
         title={t("save")}
         className={"cr-act cr-act-ic" + (saved ? " on" : "")}

@@ -62,6 +62,24 @@
     "english": "English",
     "chinese": "中文"
   },
+  "auth": {
+    "modal": {
+      "title": "登录后继续",
+      "desc": "登录或注册 Sugardating,即可继续使用关注、聊天、收藏、预约等完整功能。",
+      "login": "立即登录",
+      "register": "免费注册",
+      "close": "关闭",
+      "note": "演示用 · 点击登录或注册将以 Demo 身份进入,真实认证后续接入。"
+    },
+    "menu": {
+      "openMenu": "打开用户菜单",
+      "loggedIn": "已登录",
+      "profile": "个人中心",
+      "messages": "消息",
+      "notifications": "通知",
+      "logout": "退出登录"
+    }
+  },
   "home": {
     "hero": {
       "slide1": {

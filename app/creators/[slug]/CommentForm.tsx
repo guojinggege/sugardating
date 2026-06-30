@@ -1,14 +1,17 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
+import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import { addComment } from "./actions";
 
 export default function CommentForm({ slug }: { slug: string }) {
+  const requireLogin = useRequireLogin();
   const ref = useRef<HTMLFormElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!requireLogin()) return;
     setError(null);
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {

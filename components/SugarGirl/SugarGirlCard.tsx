@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { SugarGirlEntry, SugarTag } from "@/lib/sugarGirlMock";
 
 const TAG_STYLE: Record<SugarTag, string> = {
@@ -13,11 +14,13 @@ const TAG_STYLE: Record<SugarTag, string> = {
 
 export default function SugarGirlCard({ entry }: { entry: SugarGirlEntry }) {
   const t = useTranslations("sugarGirl.card");
+  const requireLogin = useRequireLogin();
   const [fav, setFav] = useState(false);
 
   const onFav = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!requireLogin()) return;
     setFav((v) => !v);
   };
 

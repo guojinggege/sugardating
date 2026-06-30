@@ -62,6 +62,24 @@
     "english": "English",
     "chinese": "中文"
   },
+  "auth": {
+    "modal": {
+      "title": "Sign in to continue",
+      "desc": "Sign in or register with Sugardating to unlock follow, chat, save, booking and more.",
+      "login": "Sign In",
+      "register": "Sign Up Free",
+      "close": "Close",
+      "note": "Demo only — both buttons sign you in as a Demo user. Real auth coming next."
+    },
+    "menu": {
+      "openMenu": "Open user menu",
+      "loggedIn": "Signed in",
+      "profile": "Profile",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "logout": "Sign out"
+    }
+  },
   "home": {
     "hero": {
       "slide1": {

@@ -7,6 +7,8 @@ import { channels } from "@/lib/mock";
 import { Spark } from "./icons";
 import type { Channel } from "@/lib/types";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useAuth } from "./Auth/AuthProvider";
+import UserMenu from "./Auth/UserMenu";
 
 export default function Nav() {
   const pathname = usePathname();
@@ -17,6 +19,7 @@ export default function Nav() {
 
   const [open, setOpen] = useState(false);
   const [expandedChannel, setExpandedChannel] = useState<string | null>(null);
+  const { isAuthenticated, hydrated } = useAuth();
 
   // 当前激活的频道:基于路径前缀(/photography → photography)
   const activeSlug = pathname.split("/")[1] || "";
@@ -63,8 +66,16 @@ export default function Nav() {
             </svg>
             {tA("membership")}
           </Link>
-          <Link href="/login" className="nav-btn nav-btn-out">{tA("login")}</Link>
-          <Link href="/register" className="nav-btn nav-btn-ink">{tA("register")}</Link>
+          {/* Guest vs Auth — 首屏 SSR 默认 guest,hydrate 后切换。
+              hydrated=false 时也按 guest 渲染避免视觉 flash */}
+          {hydrated && isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <>
+              <Link href="/login" className="nav-btn nav-btn-out">{tA("login")}</Link>
+              <Link href="/register" className="nav-btn nav-btn-ink">{tA("register")}</Link>
+            </>
+          )}
           <LanguageSwitcher />
           <button className="hamburger" aria-label={tA("menu")} onClick={() => setOpen((v) => !v)}>
             <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
@@ -108,8 +119,14 @@ export default function Nav() {
           )
         ))}
         <Link href="/membership" onClick={() => setOpen(false)}>{tA("membership")}</Link>
-        <Link href="/login" onClick={() => setOpen(false)}>{tA("login")}</Link>
-        <Link href="/register" onClick={() => setOpen(false)}>{tA("register")}</Link>
+        {hydrated && isAuthenticated ? (
+          <div className="mm-user"><UserMenu /></div>
+        ) : (
+          <>
+            <Link href="/login" onClick={() => setOpen(false)}>{tA("login")}</Link>
+            <Link href="/register" onClick={() => setOpen(false)}>{tA("register")}</Link>
+          </>
+        )}
         <div className="mm-lang"><LanguageSwitcher /></div>
       </div>
     </header>

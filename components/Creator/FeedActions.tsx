@@ -1,7 +1,9 @@
 "use client";
 // 单个 post 底部的 4 个操作: 点赞 / 收藏 / 分享 / 评论
+// 点赞 / 收藏 / 评论 走 requireLogin gate;分享只复制链接,不需要登录
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRequireLogin } from "@/components/Auth/AuthProvider";
 
 interface Props {
   postId: string;
@@ -11,16 +13,26 @@ interface Props {
 
 export default function FeedActions({ postId, likes: initialLikes, comments }: Props) {
   const t = useTranslations("creatorProfile.feed");
+  const requireLogin = useRequireLogin();
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const [copied, setCopied] = useState(false);
 
   const onLike = () => {
+    if (!requireLogin()) return;
     setLiked((v) => {
       setLikes((n) => n + (v ? -1 : 1));
       return !v;
     });
+  };
+  const onSave = () => {
+    if (!requireLogin()) return;
+    setSaved((v) => !v);
+  };
+  const onComment = () => {
+    if (!requireLogin()) return;
+    // TODO: 跳转 / 弹评论框
   };
   const onShare = async () => {
     const url = typeof window !== "undefined" ? `${window.location.href}#${postId}` : "";
@@ -39,13 +51,13 @@ export default function FeedActions({ postId, likes: initialLikes, comments }: P
         </svg>
         <span className="tabular-nums">{likes.toLocaleString("en-US")}</span>
       </button>
-      <button type="button" className="cr-pa" aria-label={t("comment")}>
+      <button type="button" onClick={onComment} className="cr-pa" aria-label={t("comment")}>
         <svg viewBox="0 0 24 24" aria-hidden>
           <path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" />
         </svg>
         <span className="tabular-nums">{comments}</span>
       </button>
-      <button type="button" onClick={() => setSaved((v) => !v)} className={"cr-pa" + (saved ? " on" : "")} aria-pressed={saved}>
+      <button type="button" onClick={onSave} className={"cr-pa" + (saved ? " on" : "")} aria-pressed={saved}>
         <svg viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} aria-hidden>
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>

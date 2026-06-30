@@ -10,11 +10,11 @@
     },
     "channels": {
       "photography": "Feed",
-      "video": "Videos",
-      "art-services": "Custom Services",
       "male-artists": "Sugargirls",
-      "ai-artists": "Online Companions",
-      "live": "Live",
+      "art-services": "Custom Services",
+      "video": "Videos",
+      "ai-artists": "AI Companions",
+      "live": "Watch Live",
       "community": "Community"
     },
     "artServicesChildren": {
@@ -28,7 +28,7 @@
       "menu": "Menu",
       "membership": "Membership",
       "login": "Sign In",
-      "register": "Join as Creator"
+      "register": "Apply Now"
     },
     "mobile": {
       "allOf": "All {label}"
@@ -59,7 +59,7 @@
   },
   "languageSwitcher": {
     "label": "Language",
-    "english": "EN",
+    "english": "English",
     "chinese": "中文"
   },
   "home": {

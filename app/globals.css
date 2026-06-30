@@ -28,122 +28,152 @@ img{display:block;max-width:100%}
 .ph.fill{position:absolute;inset:0;border-radius:0;border:none}
 .ph .ph-l{font-size:12px;color:#82828c;font-weight:600;text-align:center;padding:8px;line-height:1.4;white-space:pre-line;z-index:1}
 
-/* ---------- nav ---------- */
+/* ==========================================================================
+   NAV  (sticky header,高度 ~84px,左侧 logo 24-32px 边距,右侧四件套统一高度 40px)
+   ========================================================================== */
 .nav{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line)}
-.nav-in{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;flex-wrap:nowrap;gap:10px;padding:13px 20px}
-.loc-wrap{position:relative}
-.loc{display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;background:var(--page);border:1px solid var(--line2);font-weight:600;font-size:13.5px;white-space:nowrap;flex:0 0 auto}
-.loc .pin{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.9}
-.loc .chev{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.4;transition:transform .2s}
-.loc:hover{border-color:#c9c9d0}
-.loc[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.nav-in{
+  display:flex;align-items:center;flex-wrap:nowrap;gap:28px;
+  /* 28px = 24-32 范围;left/right 同 padding 保证视觉对称 */
+  padding:0 28px;
+  min-height:84px;
+}
 
-/* 城市下拉面板 */
-.loc-pop{
-  position:absolute;top:calc(100% + 8px);left:0;
-  min-width:240px;
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:8px;
-  box-shadow:0 12px 40px -8px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.02);
-  z-index:60;
-  max-height:min(72vh,520px);
-  overflow-y:auto;
-}
-.loc-pop button{
-  display:block;width:100%;text-align:left;
-  padding:9px 12px;border-radius:8px;
-  font-size:14px;font-weight:500;color:var(--ink2);
-  font-family:inherit;
-}
-.loc-pop button:hover{background:var(--page);color:var(--ink)}
-.loc-pop button.on{background:var(--ink);color:#fff;font-weight:600}
-.loc-all{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px}
-.loc-all button{font-weight:600;color:var(--ink)}
-.loc-grp + .loc-grp{margin-top:4px}
-.loc-grp-h{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px}
-/* Sugardating wordmark — 比中文双字宽,降字号 + 紧字距 + 缩 logo box,让 nav 一行不挤 */
-.brand{display:flex;align-items:center;gap:7px;font-weight:700;font-size:17px;letter-spacing:-.028em;white-space:nowrap;flex:0 0 auto}
-.brand .gm{width:25px;height:25px;border-radius:7px;background:var(--ink);display:grid;place-items:center;flex:0 0 25px}
-.brand .gm svg{width:17px;height:17px;fill:#fff}
-/* navlinks: 占据 nav 中段所有剩余宽度,内部链接 nowrap;
-   极端宽度下静默横向滚动而不重叠 */
-.navlinks{display:flex;gap:2px;margin-left:6px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+/* Logo + 品牌字 — 与浏览器左侧 28px 安全边距,字号 22px,logo box 36px */
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:22px;letter-spacing:-.025em;white-space:nowrap;flex:0 0 auto;color:var(--ink);line-height:1}
+.brand .gm{width:36px;height:36px;border-radius:10px;background:var(--ink);display:grid;place-items:center;flex:0 0 36px}
+.brand .gm svg{width:22px;height:22px;fill:#fff}
+.brand .brand-name{font-family:var(--ui);letter-spacing:-.025em}
+
+/* 频道链接 — 16px / 600,水平间距 4px(.navlinks gap),内部 padding 给 24px 视觉间距 */
+.navlinks{display:flex;align-items:center;gap:4px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;margin-left:8px}
 .navlinks::-webkit-scrollbar{display:none}
-.navlinks a{padding:7px 10px;border-radius:8px;font-weight:600;font-size:13.5px;color:var(--ink2);display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto}
-.navlinks a:hover{background:var(--page);color:var(--ink)}
-.navlinks a.on{color:var(--ink)}
-.navlinks .dl{width:6px;height:6px;border-radius:50%;background:var(--live)}
-.navlinks .ai-tag{font-size:9px;font-weight:800;color:#fff;background:var(--ink);padding:2px 5px;border-radius:4px}
+.nav-link{
+  position:relative;display:flex;align-items:center;gap:7px;
+  padding:10px 14px;border-radius:10px;
+  font-weight:600;font-size:16px;letter-spacing:-.005em;
+  color:var(--ink2);white-space:nowrap;flex:0 0 auto;
+  transition:color .2s ease;
+}
+.nav-link:hover{color:var(--ink)}
+.nav-link.on{color:var(--ink)}
+/* 下划线动画:hover 从 0 → 100% width,active 直接 100% */
+.nav-link::after{
+  content:"";position:absolute;left:14px;right:14px;bottom:6px;
+  height:2px;background:var(--ink);border-radius:2px;
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .25s ease;
+}
+.nav-link:hover::after{transform:scaleX(.5)}
+.nav-link.on::after{transform:scaleX(1)}
 
-/* 频道下拉(目前用在"专属服务"上) */
+.nav-link .dl{width:6px;height:6px;border-radius:50%;background:var(--live);box-shadow:0 0 0 3px rgba(229,72,77,.15)}
+.nav-link .ai-tag{font-size:9px;font-weight:800;color:#fff;background:var(--ink);padding:2px 5px;border-radius:4px;letter-spacing:.04em}
+
+/* 频道下拉 (定制服务) — 用 .nav-link 同基线,加 chevron */
 .nav-dd{position:relative;flex:0 0 auto}
-.nav-dd-trigger{display:flex;align-items:center;gap:3px;padding:7px 8px 7px 10px;border-radius:8px;font-weight:600;font-size:13.5px;color:var(--ink2);white-space:nowrap;cursor:pointer}
-.nav-dd-trigger:hover,.nav-dd-trigger.open{background:var(--page);color:var(--ink)}
-.nav-dd-chev{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.4;opacity:.7;transition:transform .2s}
-.nav-dd-trigger.open .nav-dd-chev{transform:rotate(180deg);opacity:1}
+.nav-dd-trigger{padding-right:30px}
+.nav-dd-chev{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.4;opacity:.6;
+  transition:transform .25s ease,opacity .2s;
+}
+.nav-dd-trigger.open .nav-dd-chev{transform:translateY(-50%) rotate(180deg);opacity:1}
+.nav-dd-trigger.open{color:var(--ink)}
 .nav-dd-pop{
-  position:absolute;top:calc(100% + 6px);left:0;
-  min-width:160px;
+  position:absolute;top:calc(100% + 4px);left:0;
+  min-width:170px;
   background:var(--card);
   border:1px solid var(--line);
   border-radius:12px;
   padding:6px;
-  box-shadow:0 12px 36px -8px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.02);
-  z-index:60;
-  display:flex;flex-direction:column;gap:2px;
+  box-shadow:0 16px 50px -16px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.02);
+  z-index:60;display:flex;flex-direction:column;gap:2px;
+  animation:nav-pop-in .22s ease-out;
 }
-.nav-dd-pop a{display:block;padding:8px 12px;border-radius:8px;font-weight:500;font-size:13.5px;color:var(--ink2);white-space:nowrap}
+.nav-dd-pop a{display:block;padding:9px 14px;border-radius:8px;font-weight:500;font-size:14.5px;color:var(--ink2);white-space:nowrap;transition:background .15s,color .15s}
 .nav-dd-pop a:hover{background:var(--page);color:var(--ink)}
-.navright{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
-.navright .btn{padding:8px 13px;font-size:13.5px}
-.navright .btn-mship{padding-left:11px;padding-right:13px}
 
-/* Language Switcher (Nav 右上角 + Mobile menu 底部) */
-.lang-switch{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--page);border:1px solid var(--line2);border-radius:8px;height:34px}
-.lang-switch .lang-btn{background:transparent;border:0;padding:2px 6px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:5px;transition:color .2s,background .2s;font-family:inherit;line-height:1.4}
-.lang-switch .lang-btn:hover{color:var(--ink)}
-.lang-switch .lang-btn.on{color:var(--ink);background:var(--card)}
-.lang-switch .lang-btn:disabled{cursor:default}
-.lang-switch .lang-sep{color:var(--line);font-size:12px;user-select:none}
-.lang-switch[data-pending]{opacity:.7}
+@keyframes nav-pop-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 
-/* dark theme variant */
-body.page-dark .lang-switch{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
-body.page-dark .lang-switch .lang-btn{color:rgba(242,242,244,.6)}
-body.page-dark .lang-switch .lang-btn:hover{color:#F2F2F4}
-body.page-dark .lang-switch .lang-btn.on{color:#F2F2F4;background:rgba(255,255,255,.12)}
-body.page-dark .lang-switch .lang-sep{color:rgba(255,255,255,.2)}
+/* 右侧:Membership / Sign In / Apply Now / Language */
+.navright{display:flex;align-items:center;gap:10px;flex:0 0 auto;margin-left:auto}
 
-/* hero immersive (transparent nav over hero): 让按钮在 hero 上仍清晰 */
-body.home-immersive:not(.nav-scrolled) .nav .lang-switch{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
-body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn{color:rgba(255,255,255,.7)}
-body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn:hover{color:#fff}
-body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn.on{color:#fff;background:rgba(255,255,255,.2)}
+/* 统一按钮 — 三个右侧按钮共用 .nav-btn:同高度(40)、同圆角(10)、同字号(14.5)、同 padding */
+.nav-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:40px;padding:0 18px;
+  border-radius:10px;
+  font-weight:600;font-size:14.5px;letter-spacing:-.005em;
+  white-space:nowrap;font-family:inherit;line-height:1;
+  transition:background .2s ease,border-color .2s ease,color .2s ease,transform .15s ease,box-shadow .2s ease;
+}
+.nav-btn:hover{transform:translateY(-1px)}
+.nav-btn:active{transform:translateY(0)}
+.nav-btn-out{background:var(--card);border:1px solid var(--line2);color:var(--ink)}
+.nav-btn-out:hover{border-color:var(--ink);background:var(--card)}
+.nav-btn-ink{background:var(--ink);color:#fff;border:1px solid var(--ink)}
+.nav-btn-ink:hover{background:#000;border-color:#000;box-shadow:0 8px 22px -8px rgba(0,0,0,.35)}
+.nav-btn-mship svg{color:var(--accent)}
 
-/* mobile-menu 内: 顶到末尾居中显示 */
-.mm-lang{padding:14px 16px;border-top:1px solid var(--line);display:flex;justify-content:center;margin-top:8px}
-.ic{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--line2);display:grid;place-items:center;flex:0 0 36px}
-.ic svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.9}
-.ic:hover{border-color:#c9c9d0}
+/* ----- Language Switcher (icon + dropdown) ----- */
+.lang-dd{position:relative;display:inline-flex}
+.lang-trigger{
+  width:40px;height:40px;border-radius:10px;
+  background:var(--card);border:1px solid var(--line2);
+  display:grid;place-items:center;cursor:pointer;color:var(--ink);
+  transition:background .2s,border-color .2s,color .2s;
+}
+.lang-trigger:hover,.lang-trigger[aria-expanded="true"]{border-color:var(--ink);background:var(--card)}
+.lang-trigger svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.lang-trigger:disabled{opacity:.6;cursor:default}
+
+.lang-pop{
+  position:absolute;top:calc(100% + 8px);right:0;
+  min-width:172px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(22px) saturate(160%);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid var(--line);
+  border-radius:14px;padding:6px;
+  box-shadow:0 18px 50px -16px rgba(0,0,0,.22),0 0 0 1px rgba(0,0,0,.02);
+  z-index:60;display:flex;flex-direction:column;gap:1px;
+  transform-origin:top right;
+  animation:lang-pop-in .24s ease-out;
+}
+@keyframes lang-pop-in{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.lang-opt{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;text-align:left;
+  background:transparent;border:0;padding:10px 14px;
+  font-size:14.5px;font-weight:500;color:var(--ink);
+  border-radius:9px;font-family:inherit;cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.lang-opt:hover{background:var(--page)}
+.lang-opt.on{font-weight:700;color:var(--ink);background:var(--page)}
+.lang-check{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:0 0 14px}
+
+/* Mobile menu accordion */
+.hamburger{display:none}
+.mobile-menu{display:none;flex-direction:column;gap:2px;padding:10px 20px 18px;border-top:1px solid var(--line)}
+.mobile-menu > a,.mobile-menu .mm-group-h{padding:12px 12px;border-radius:10px;font-weight:600;font-size:15.5px;color:var(--ink2);font-family:inherit}
+.mobile-menu > a:hover,.mobile-menu .mm-group-h:hover{background:var(--page);color:var(--ink)}
+.mm-group{display:flex;flex-direction:column}
+.mm-group-h{display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;width:100%;text-align:left}
+.mm-chev{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;opacity:.55;transition:transform .2s}
+.mm-chev.open{transform:rotate(180deg);opacity:.9}
+.mm-children{display:flex;flex-direction:column;gap:1px;padding:2px 0 6px 16px;border-left:1px solid var(--line);margin-left:14px}
+.mm-children a{padding:10px 12px;border-radius:8px;font-size:14.5px;font-weight:500;color:var(--ink2)}
+.mm-children a:hover{background:var(--page);color:var(--ink)}
+.mm-lang{padding:14px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-start;margin-top:8px}
+
+/* 兼容旧调用方:全站 .btn 仍可用(底部 CTA / banner 等),但 Nav 已切到 .nav-btn */
 .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;padding:9px 16px;border-radius:10px;white-space:nowrap}
 .btn-ink{background:var(--ink);color:#fff}.btn-ink:hover{background:var(--ink2)}
 .btn-out{background:var(--card);border:1px solid var(--line2)}.btn-out:hover{border-color:#c9c9d0}
 .btn-w{background:#fff;color:var(--ink)}.btn-w:hover{background:#e9e9ec}
 .btn-g{background:rgba(255,255,255,.12);color:#fff}
-.hamburger{display:none}
-.mobile-menu{display:none;flex-direction:column;gap:2px;padding:8px 16px 16px;border-top:1px solid var(--line)}
-.mobile-menu a{padding:11px 12px;border-radius:9px;font-weight:600;font-size:15px;color:var(--ink2)}
-.mobile-menu a:hover{background:var(--page);color:var(--ink)}
-/* mobile menu 里有 children 的频道:可展开 accordion */
-.mm-group{display:flex;flex-direction:column}
-.mm-group-h{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;font-weight:600;font-size:15px;color:var(--ink2);font-family:inherit;background:none;border:none;cursor:pointer;width:100%;text-align:left}
-.mm-group-h:hover{background:var(--page);color:var(--ink)}
-.mm-chev{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;opacity:.55;transition:transform .2s}
-.mm-chev.open{transform:rotate(180deg);opacity:.9}
-.mm-children{display:flex;flex-direction:column;gap:1px;padding:2px 0 6px 16px;border-left:1px solid var(--line);margin-left:14px}
-.mm-children a{padding:9px 12px;font-size:14px;font-weight:500;color:var(--ink2)}
 
 /* ---------- hero carousel ---------- */
 .hero{position:relative;height:500px;overflow:hidden;background:#e6e6ea}
@@ -405,11 +435,19 @@ body.home-immersive:not(.nav-scrolled) .nav .lang-switch .lang-btn.on{color:#fff
 
 /* ---------- responsive ---------- */
 /* Nav 在 <=1024px(常见笔记本)切换为汉堡,避免 7 个频道 + 4 个右侧按钮 + 品牌挤一行 */
+@media(max-width:1280px){
+  /* 桌面缩小 → 收紧 nav 内的水平间距,避免 7 频道 + 4 按钮换行 */
+  .nav-in{gap:18px;padding:0 24px;min-height:80px}
+  .navlinks{gap:2px}
+  .nav-link{padding:10px 11px;font-size:15px}
+  .nav-dd-trigger{padding-right:26px}
+  .nav-dd-chev{right:10px}
+}
 @media(max-width:1024px){
   .navlinks{display:none}
-  .hamburger{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--page);border:1px solid var(--line2);flex:0 0 36px}
+  .hamburger{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--line2);flex:0 0 40px;color:var(--ink)}
   .hamburger svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8}
-  .navright .btn-out{display:none}   /* 登录 + 开通会员 隐藏,改到 mobile-menu 里 */
+  .navright .nav-btn-out{display:none}   /* Membership + Sign In 隐藏,改到 mobile-menu 里 */
   .mobile-menu.open{display:flex}
   /* 同时把首页 4-col grid 降级:Tablet 2-col,避免每列太窄 */
   .why{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -446,31 +484,38 @@ body.page-dark .nav{background:rgba(10,10,12,.82);backdrop-filter:blur(18px) sat
 body.page-dark .nav .brand{color:#F2F2F4}
 body.page-dark .nav .brand .gm{background:#F2F2F4}
 body.page-dark .nav .brand .gm svg{fill:#0a0a0c}
-body.page-dark .nav .loc{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:#F2F2F4}
-body.page-dark .nav .loc .pin{stroke:#F2F2F4}
-body.page-dark .nav .loc .chev{stroke:rgba(255,255,255,.55)}
-body.page-dark .nav .navlinks a{color:rgba(242,242,244,.78)}
-body.page-dark .nav .navlinks a:hover{color:#F2F2F4;background:rgba(255,255,255,.08)}
-body.page-dark .nav .navlinks .ai-tag{background:rgba(255,255,255,.85);color:#0a0a0c}
-body.page-dark .nav .ic{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
-body.page-dark .nav .ic svg{stroke:#F2F2F4}
-body.page-dark .nav .hamburger{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
-body.page-dark .nav .hamburger svg{stroke:#F2F2F4}
-body.page-dark .nav .navright .btn-out{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F2F2F4}
-body.page-dark .nav .navright .btn-ink{background:#F2F2F4;color:#0a0a0c}
-body.page-dark .nav .navright .btn-ink:hover{background:#fff}
-body.page-dark .nav .btn-mship svg{color:var(--accent)}
-body.page-dark .nav .loc-pop{background:#161618;border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
-body.page-dark .nav .loc-pop button{color:rgba(242,242,244,.85)}
-body.page-dark .nav .loc-pop button:hover{background:rgba(255,255,255,.06);color:#F2F2F4}
-body.page-dark .nav .loc-pop button.on{background:#F2F2F4;color:#0a0a0c}
-body.page-dark .nav .loc-all{border-bottom-color:rgba(255,255,255,.08)}
-body.page-dark .nav .loc-grp-h{color:rgba(167,167,174,.65)}
-body.page-dark .nav .nav-dd-trigger:hover,
-body.page-dark .nav .nav-dd-trigger.open{background:rgba(255,255,255,.08);color:#F2F2F4}
-body.page-dark .nav .nav-dd-pop{background:#161618;border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
+
+/* nav-link 深色 */
+body.page-dark .nav .nav-link{color:rgba(242,242,244,.78)}
+body.page-dark .nav .nav-link:hover,
+body.page-dark .nav .nav-link.on{color:#F2F2F4}
+body.page-dark .nav .nav-link::after{background:#F2F2F4}
+body.page-dark .nav .nav-link .ai-tag{background:rgba(255,255,255,.88);color:#0a0a0c}
+
+/* hamburger 深色 */
+body.page-dark .hamburger{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.1)!important;color:#F2F2F4!important}
+body.page-dark .hamburger svg{stroke:#F2F2F4}
+
+/* nav-btn 深色 */
+body.page-dark .nav .nav-btn-out{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F2F2F4}
+body.page-dark .nav .nav-btn-out:hover{border-color:#F2F2F4;background:rgba(255,255,255,.1)}
+body.page-dark .nav .nav-btn-ink{background:#F2F2F4;color:#0a0a0c;border-color:#F2F2F4}
+body.page-dark .nav .nav-btn-ink:hover{background:#fff;border-color:#fff}
+body.page-dark .nav .nav-btn-mship svg{color:var(--accent)}
+
+/* nav-dd-pop 深色 */
+body.page-dark .nav .nav-dd-pop{background:rgba(22,22,24,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
 body.page-dark .nav .nav-dd-pop a{color:rgba(242,242,244,.85)}
 body.page-dark .nav .nav-dd-pop a:hover{background:rgba(255,255,255,.06);color:#F2F2F4}
+
+/* lang-dd 深色 */
+body.page-dark .lang-trigger{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#F2F2F4}
+body.page-dark .lang-trigger:hover,body.page-dark .lang-trigger[aria-expanded="true"]{border-color:#F2F2F4;background:rgba(255,255,255,.1)}
+body.page-dark .lang-pop{background:rgba(18,18,20,.92);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);border-color:rgba(255,255,255,.1);box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
+body.page-dark .lang-opt{color:rgba(242,242,244,.85)}
+body.page-dark .lang-opt:hover{background:rgba(255,255,255,.06);color:#F2F2F4}
+body.page-dark .lang-opt.on{background:rgba(255,255,255,.08);color:#F2F2F4}
+body.page-dark .lang-check{stroke:var(--accent)}
 body.page-dark .foot{background:#0d0d10;border-top-color:rgba(255,255,255,.08);color:rgba(242,242,244,.55)}
 body.page-dark .foot h5,body.page-dark .foot .fbrand{color:#F2F2F4}
 body.page-dark .foot .fbrand .gm{background:#F2F2F4}
@@ -538,28 +583,26 @@ body.home-immersive .nav{
 body.home-immersive:not(.nav-scrolled) .nav .brand{color:#fff}
 body.home-immersive:not(.nav-scrolled) .nav .brand .gm{background:#fff}
 body.home-immersive:not(.nav-scrolled) .nav .brand .gm svg{fill:var(--ink)}
-body.home-immersive:not(.nav-scrolled) .nav .loc{
-  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-}
-body.home-immersive:not(.nav-scrolled) .nav .loc .pin{stroke:#fff}
-body.home-immersive:not(.nav-scrolled) .nav .loc .chev{stroke:rgba(255,255,255,.7)}
-body.home-immersive:not(.nav-scrolled) .nav .navlinks a{color:rgba(255,255,255,.82)}
-body.home-immersive:not(.nav-scrolled) .nav .navlinks a:hover{color:#fff;background:rgba(255,255,255,.12)}
-body.home-immersive:not(.nav-scrolled) .nav .navlinks .ai-tag{background:rgba(255,255,255,.85);color:var(--ink)}
-body.home-immersive:not(.nav-scrolled) .nav .ic{
-  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-}
-body.home-immersive:not(.nav-scrolled) .nav .ic svg{stroke:#fff}
-body.home-immersive:not(.nav-scrolled) .nav .navright .btn-out{
+body.home-immersive:not(.nav-scrolled) .nav .nav-link{color:rgba(255,255,255,.82)}
+body.home-immersive:not(.nav-scrolled) .nav .nav-link:hover,
+body.home-immersive:not(.nav-scrolled) .nav .nav-link.on{color:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .nav-link::after{background:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .nav-link .ai-tag{background:rgba(255,255,255,.85);color:var(--ink)}
+body.home-immersive:not(.nav-scrolled) .nav .nav-btn-out{
   background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#fff;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
 }
-body.home-immersive:not(.nav-scrolled) .nav .navright .btn-ink{background:#fff;color:var(--ink)}
-body.home-immersive:not(.nav-scrolled) .nav .navright .btn-ink:hover{background:#e9e9ec}
-body.home-immersive:not(.nav-scrolled) .nav .hamburger{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+body.home-immersive:not(.nav-scrolled) .nav .nav-btn-out:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.4)}
+body.home-immersive:not(.nav-scrolled) .nav .nav-btn-ink{background:#fff;color:var(--ink);border-color:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .nav-btn-ink:hover{background:#e9e9ec;border-color:#e9e9ec}
+body.home-immersive:not(.nav-scrolled) .nav .hamburger{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
 body.home-immersive:not(.nav-scrolled) .nav .hamburger svg{stroke:#fff}
+body.home-immersive:not(.nav-scrolled) .nav .lang-trigger{
+  background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+body.home-immersive:not(.nav-scrolled) .nav .lang-trigger:hover,
+body.home-immersive:not(.nav-scrolled) .nav .lang-trigger[aria-expanded="true"]{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4)}
 
 /* 滚动后的实底态: 玻璃质感的白底 */
 body.home-immersive.nav-scrolled .nav{

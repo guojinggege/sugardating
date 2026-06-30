@@ -1,134 +1,71 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { channels } from "@/lib/mock";
-import { Pin, Chev, Spark } from "./icons";
+import { Spark } from "./icons";
 import type { Channel } from "@/lib/types";
-import type { RegionGroup } from "@/lib/queries";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-interface Props {
-  regionGroups: RegionGroup[];
-}
-
-export default function Nav({ regionGroups }: Props) {
-  const tNav = useTranslations("nav");
+export default function Nav() {
+  const pathname = usePathname();
   const tCh = useTranslations("nav.channels");
   const tAS = useTranslations("nav.artServicesChildren");
-  const tGroups = useTranslations("nav.loc.groups");
   const tA = useTranslations("nav.actions");
   const tM = useTranslations("nav.mobile");
 
   const [open, setOpen] = useState(false);
-  const [locOpen, setLocOpen] = useState(false);
   const [expandedChannel, setExpandedChannel] = useState<string | null>(null);
-  const locRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
-  const sp = useSearchParams();
-  const currentRegion = sp.get("region");
-  const locLabel = currentRegion ?? tNav("loc.allRegions");
 
-  useEffect(() => {
-    if (!locOpen) return;
-    const onDown = (e: MouseEvent) => {
-      if (locRef.current && !locRef.current.contains(e.target as Node)) setLocOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLocOpen(false); };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [locOpen]);
-
-  const selectRegion = (city: string | null) => {
-    setLocOpen(false);
-    const params = new URLSearchParams();
-    if (city) params.set("region", city);
-    const qs = params.toString();
-    router.push(`/creators${qs ? `?${qs}` : ""}`);
-  };
+  // 当前激活的频道:基于路径前缀(/photography → photography)
+  const activeSlug = pathname.split("/")[1] || "";
 
   return (
     <header className="nav">
       <div className="nav-in">
-        <div className="loc-wrap" ref={locRef}>
-          <button
-            className="loc"
-            type="button"
-            aria-haspopup="listbox"
-            aria-expanded={locOpen}
-            onClick={() => setLocOpen((v) => !v)}
-          >
-            <Pin />{locLabel}<Chev />
-          </button>
-          {locOpen && (
-            <div className="loc-pop" role="listbox">
-              <div className="loc-all">
-                <button
-                  type="button"
-                  className={!currentRegion ? "on" : ""}
-                  onClick={() => selectRegion(null)}
-                >
-                  {tNav("loc.allRegions")}
-                </button>
-              </div>
-              {regionGroups.map((g) => (
-                <div key={g.key} className="loc-grp">
-                  <div className="loc-grp-h">{tGroups(g.key)}</div>
-                  {g.cities.map((city) => (
-                    <button
-                      key={city}
-                      type="button"
-                      role="option"
-                      aria-selected={currentRegion === city}
-                      className={currentRegion === city ? "on" : ""}
-                      onClick={() => selectRegion(city)}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <Link href="/" className="brand"><span className="gm"><Spark /></span>Sugardating</Link>
+        <Link href="/" className="brand">
+          <span className="gm"><Spark /></span>
+          <span className="brand-name">Sugardating</span>
+        </Link>
         <nav className="navlinks">
-          {channels.map((c) => (
-            c.children?.length ? (
-              <NavDropdownItem
+          {channels.map((c) => {
+            const isActive = c.slug === activeSlug;
+            const label = tCh(c.slug);
+            if (c.children?.length) {
+              return (
+                <NavDropdownItem
+                  key={c.slug}
+                  channel={c}
+                  label={label}
+                  childLabel={(slug) => tAS(slug)}
+                  active={isActive}
+                />
+              );
+            }
+            return (
+              <Link
                 key={c.slug}
-                channel={c}
-                label={tCh(c.slug)}
-                childLabel={(slug) => tAS(slug)}
-              />
-            ) : (
-              <Link key={c.slug} href={`/${c.slug}`}>
+                href={`/${c.slug}`}
+                className={"nav-link" + (isActive ? " on" : "")}
+              >
                 {c.flag === "live" && <span className="dl" />}
                 {c.flag === "ai" && <span className="ai-tag">AI</span>}
-                {tCh(c.slug)}
+                <span className="nav-text">{label}</span>
               </Link>
-            )
-          ))}
+            );
+          })}
         </nav>
         <div className="navright">
-          <LanguageSwitcher />
-          <button className="ic" aria-label={tA("search")}>
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
-          </button>
-          <Link href="/membership" className="btn btn-out btn-mship">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden style={{ marginRight: 4 }}>
+          <Link href="/membership" className="nav-btn nav-btn-out nav-btn-mship">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
             </svg>
             {tA("membership")}
           </Link>
-          <Link href="/login" className="btn btn-out">{tA("login")}</Link>
-          <Link href="/register" className="btn btn-ink">{tA("register")}</Link>
+          <Link href="/login" className="nav-btn nav-btn-out">{tA("login")}</Link>
+          <Link href="/register" className="nav-btn nav-btn-ink">{tA("register")}</Link>
+          <LanguageSwitcher />
           <button className="hamburger" aria-label={tA("menu")} onClick={() => setOpen((v) => !v)}>
             <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
@@ -172,6 +109,7 @@ export default function Nav({ regionGroups }: Props) {
         ))}
         <Link href="/membership" onClick={() => setOpen(false)}>{tA("membership")}</Link>
         <Link href="/login" onClick={() => setOpen(false)}>{tA("login")}</Link>
+        <Link href="/register" onClick={() => setOpen(false)}>{tA("register")}</Link>
         <div className="mm-lang"><LanguageSwitcher /></div>
       </div>
     </header>
@@ -182,10 +120,12 @@ function NavDropdownItem({
   channel,
   label,
   childLabel,
+  active,
 }: {
   channel: Channel;
   label: string;
   childLabel: (slug: string) => string;
+  active: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<number | null>(null);
@@ -213,11 +153,11 @@ function NavDropdownItem({
     >
       <Link
         href={`/${channel.slug}`}
-        className={"nav-dd-trigger" + (open ? " open" : "")}
+        className={"nav-link nav-dd-trigger" + (open ? " open" : "") + (active ? " on" : "")}
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        {label}
+        <span className="nav-text">{label}</span>
         <svg viewBox="0 0 24 24" className="nav-dd-chev" aria-hidden>
           <path d="M6 9l6 6 6-6" />
         </svg>

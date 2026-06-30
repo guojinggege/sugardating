@@ -1,20 +1,21 @@
 import { Channel, Creator, Work, LiveItem, Post } from "./types";
 
 // 所有频道入口（导航 + 路由）
-// 注: URL slug 保留旧值(不破坏既有链接),只改 label
+// 顺序: 动态推荐 → SugarGirl → 定制服务 → 视频专区 → AI 在线伴侣 → 观看直播 → 互动社区
+// URL slug 保留旧值,label 走 i18n,这里 label 仅作 fallback
 export const channels: Channel[] = [
   { slug: "photography",  label: "动态推荐" },
-  { slug: "video",        label: "视频专区" },
+  { slug: "male-artists", label: "SugarGirl" },
   { slug: "art-services", label: "定制服务", children: [
     { slug: "dating",     label: "约会" },
     { slug: "travel",     label: "旅游" },
     { slug: "shoot",      label: "拍摄" },
     { slug: "video-chat", label: "视频聊天" },
   ]},
-  { slug: "male-artists", label: "SugarGirl" },
-  { slug: "ai-artists",   label: "在线伴侣", flag: "ai" },
-  { slug: "live",         label: "直播平台", flag: "live" },
-  { slug: "community",    label: "社区" },
+  { slug: "video",        label: "视频专区" },
+  { slug: "ai-artists",   label: "AI 在线伴侣", flag: "ai" },
+  { slug: "live",         label: "观看直播", flag: "live" },
+  { slug: "community",    label: "互动社区" },
 ];
 
 export const regions = ["新加坡", "香港", "台北", "吉隆坡", "曼谷", "首尔", "东京", "伦敦", "悉尼", "马尼拉", "胡志明市"];

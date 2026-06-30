@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { listRegionsGrouped } from "@/lib/queries";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
-// Layout 调 listRegionsGrouped() 拉 DB → 必须全应用走 SSR
+// 子页面调 DB(如 listCreators, listSugarGirls 等),全应用走 SSR
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,8 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [regionGroups, locale, messages] = await Promise.all([
-    listRegionsGrouped(),
+  const [locale, messages] = await Promise.all([
     getLocale(),
     getMessages(),
   ]);
@@ -36,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Nav regionGroups={regionGroups} />
+          <Nav />
           <main>{children}</main>
           <Footer />
         </NextIntlClientProvider>

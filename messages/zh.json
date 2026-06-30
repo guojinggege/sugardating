@@ -10,12 +10,12 @@
     },
     "channels": {
       "photography": "动态推荐",
-      "video": "视频专区",
-      "art-services": "定制服务",
       "male-artists": "Sugargirl",
-      "ai-artists": "在线伴侣",
-      "live": "直播平台",
-      "community": "社区"
+      "art-services": "定制服务",
+      "video": "视频专区",
+      "ai-artists": "AI 在线伴侣",
+      "live": "观看直播",
+      "community": "互动社区"
     },
     "artServicesChildren": {
       "dating": "约会",
@@ -28,7 +28,7 @@
       "menu": "菜单",
       "membership": "开通会员",
       "login": "登录",
-      "register": "成为创作者"
+      "register": "我要入驻"
     },
     "mobile": {
       "allOf": "全部{label}"
@@ -59,7 +59,7 @@
   },
   "languageSwitcher": {
     "label": "语言",
-    "english": "EN",
+    "english": "English",
     "chinese": "中文"
   },
   "home": {

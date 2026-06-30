@@ -4,11 +4,25 @@ import Link from "next/link";
 import Img from "./Img";
 import Placeholder from "./Placeholder";
 
-// 只保留 2 张:第一张是创作者发现入口,第二张直接复用 SugarGirl 频道 hero 那张图
-// bgIndex 指向 photos[] 数组(lib/images.ts sort 后顺序);bgIndex=6 与 /male-artists hero 的 pick(0,6) 同图
+// Hero 文案 — 国际化品牌定位,英文为主
+// bgIndex 指向 photos[] 数组(lib/images.ts sort 后顺序);第一张沿用 SugarGirl 同图
 const slides = [
-  { k: "编辑精选",               h: "用镜头，留住一片风景",         p: "发现记录山海与城市的创作者,订阅他们的视角。", cta: "浏览创作者",      href: "/creators",     bgIndex: 0 },
-  { k: "Sugardating · Collection", h: "精选 200 位真人优质 SugarGirl", p: "国家、城市、兴趣可筛选,按你的节奏发现。",     cta: "浏览 SugarGirl",  href: "/male-artists", bgIndex: 6 },
+  {
+    k: "Sugardating · International",
+    h: "Discover Genuine Connections Across Borders",
+    p: "Connecting verified Sugargirls with members worldwide through meaningful conversations, shared experiences and premium social connections.",
+    cta: "Explore Sugargirls",
+    href: "/male-artists",
+    bgIndex: 6,
+  },
+  {
+    k: "Sugardating · Verified",
+    h: "Real People. Real Experiences.",
+    p: "From elegant first meetings to long-term travel companionship — find your match across countries, time zones and interests.",
+    cta: "Join Now",
+    href: "/register",
+    bgIndex: 0,
+  },
 ];
 
 export default function HomeHero({ photos = [] }: { photos?: string[] }) {
@@ -77,19 +91,19 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
               <circle cx="11" cy="11" r="7" />
               <path d="M21 21l-4-4" />
             </svg>
-            <input placeholder="搜索创作者、风格或地区…" aria-label="搜索" />
+            <input placeholder="Search by city, interest or language…" aria-label="Search" />
             <Link href={s.href} className="btn btn-w hh-cta">{s.cta}</Link>
           </form>
         </div>
 
         <div className="hh-foot">
-          <div className="hh-dots" role="tablist" aria-label="切换 banner">
+          <div className="hh-dots" role="tablist" aria-label="Switch slide">
             {slides.map((_, idx) => (
               <button
                 key={idx}
                 role="tab"
                 className={"hh-dot" + (idx === i ? " on" : "")}
-                aria-label={`第 ${idx + 1} 张`}
+                aria-label={`Slide ${idx + 1}`}
                 aria-selected={idx === i}
                 onClick={() => setI(idx)}
               />

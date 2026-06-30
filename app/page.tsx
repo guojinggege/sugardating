@@ -1,53 +1,60 @@
 import Link from "next/link";
 import HomeHero from "@/components/HomeHero";
 import SectionHeader from "@/components/SectionHeader";
-import LiveCard from "@/components/LiveCard";
-import WorkTile from "@/components/WorkTile";
 import Img from "@/components/Img";
-import Placeholder from "@/components/Placeholder";
 import Reveal from "@/components/Reveal";
 import Stat from "@/components/Stat";
 import CreatorRail from "@/components/CreatorRail";
 import { Arrow } from "@/components/icons";
-import { works, liveNow } from "@/lib/mock";
 import { listCreators } from "@/lib/queries";
 import { photos, pick } from "@/lib/images";
 
 export const dynamic = "force-dynamic";
 
-const contentTypes = [
-  { slug: "photography",  title: "动态推荐", desc: "基于你的兴趣每天发现新内容与新创作者。" },
-  { slug: "video",        title: "视频专区", desc: "短片、Vlog、直播回放——会动的故事与时间。" },
-  { slug: "art-services", title: "专属服务", desc: "约拍、咨询、定制——可委托的私享合作。" },
-  { slug: "male-artists", title: "SugarGirl", desc: "精选女性创作者频道。" },
-  { slug: "ai-artists",   title: "在线伴侣", desc: "随时上线、轻松对话的精选伴侣 — 文字 / 语音 / 视频自由切换。" },
-];
-
-const stats = [
-  { eye: "创作者", num: "2,840+", label: "正在 Sugardating 发布作品" },
-  { eye: "地区",   num: "11",     label: "香港 / 新加坡 / 台北 / 东京 …" },
-  { eye: "门类",   num: "5",      label: "动态推荐 / 视频专区 / 专属服务 / SugarGirl / 在线伴侣" },
-  { eye: "模式",   num: "订阅制", label: "支持你长期的创作" },
-];
-
-const whyItems = [
+// ─── Why Choose Sugardating ────────────────────────────────────────
+const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
   {
-    title: "直接连接支持者",
-    desc: "粉丝订阅你的创作，收入直接、可持续。",
+    title: "International Community",
+    desc: "Members from Europe, North America and Southeast Asia, connecting across time zones and languages.",
     icon: (
-      <svg viewBox="0 0 24 24"><path d="M12 21s-7-5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 16 12 21 12 21z" /></svg>
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+      </svg>
     ),
   },
   {
-    title: "属于你的主页",
-    desc: "完整作品集、订阅档位、直播，一处经营。",
+    title: "Verified Real People",
+    desc: "Every Sugargirl is identity-checked. No bots, no catfishes — just real people you can trust.",
     icon: (
-      <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-6h4v6" /></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" />
+        <path d="M9 12l2.2 2.2L15 10.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     ),
   },
   {
-    title: "被对的人发现",
-    desc: "按门类、地区、风格被精准发现，不被算法埋没。",
+    title: "Multiple Ways to Connect",
+    desc: "Chat, voice, video or in-person — choose the pace and depth that fits your style.",
+    icon: (
+      <svg viewBox="0 0 24 24">
+        <path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Privacy First",
+    desc: "Encrypted messaging, granular visibility controls and one-tap incognito mode.",
+    icon: (
+      <svg viewBox="0 0 24 24">
+        <rect x="4" y="11" width="16" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+      </svg>
+    ),
+  },
+  {
+    title: "Quality Matching",
+    desc: "Recommendations tuned by interests, languages, lifestyle and location — not by noise.",
     icon: (
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="8" />
@@ -58,6 +65,44 @@ const whyItems = [
   },
 ];
 
+// ─── How It Works ──────────────────────────────────────────────────
+const howItWorks = [
+  { title: "Create Your Account",  desc: "Sign up free in under a minute. Set your interests and preferences." },
+  { title: "Browse Sugargirls",    desc: "Explore verified profiles by country, city and interest." },
+  { title: "Start the Conversation", desc: "Send a message, schedule a video chat, or plan a trip together." },
+  { title: "Build Real Connections", desc: "Develop genuine relationships at your own pace, on your own terms." },
+];
+
+// ─── Popular Experiences ───────────────────────────────────────────
+const experiences = [
+  { href: "/art-services#dating",     title: "Dating",      desc: "Curated 1-on-1 introductions designed for genuine compatibility." },
+  { href: "/art-services#travel",     title: "Travel",      desc: "Explore new cities with a local companion who knows the best spots." },
+  { href: "/art-services#shoot",      title: "Photography", desc: "Collaborative shoots — fashion, lifestyle, art and beyond." },
+  { href: "/art-services#video-chat", title: "Video Chat",  desc: "Real-time conversations across continents and time zones." },
+];
+
+// ─── Why Join Sugardating ──────────────────────────────────────────
+const memberBenefits = [
+  "Global access to verified Sugargirl profiles",
+  "Identity-checked community — no bots, no catfishes",
+  "Encrypted, private messaging",
+  "Multiple formats — chat, video, travel and in-person",
+];
+const sugargirlBenefits = [
+  "International exposure to premium members",
+  "Diverse, high-quality conversations",
+  "Full control over your profile and visibility",
+  "Build lasting, meaningful connections",
+];
+
+// ─── Platform Highlights ───────────────────────────────────────────
+const highlights = [
+  { eye: "Members",    num: "48,200+", label: "Registered worldwide" },
+  { eye: "Sugargirls", num: "1,860+",  label: "Identity-verified profiles" },
+  { eye: "Countries",  num: "24",      label: "Across 4 continents" },
+  { eye: "Daily",      num: "12,400+", label: "Connections every 24 hours" },
+];
+
 export default async function Home() {
   const creators = await listCreators();
 
@@ -66,22 +111,13 @@ export default async function Home() {
       <HomeHero photos={photos} />
       <div className="container">
 
-        {/* 1. 我们是什么 */}
-        <section className="sec about-sec">
-          <Reveal>
-            <div className="about">
-              <span className="eye"><i />关于我们</span>
-              <h2>华语与亚裔创作者的家</h2>
-              <p>Sugardating 是一个面向全球华语与亚裔创作者的发现与订阅平台。动态推荐、视频专区、专属服务、SugarGirl、在线伴侣——在这里展示作品，与支持你的人直接连接。</p>
-            </div>
-          </Reveal>
-        </section>
-
-        {/* 2. 为什么加入 */}
+        {/* 1. Why Choose Sugardating */}
         <section className="sec">
-          <Reveal><SectionHeader title="为什么加入" count="平台对创作者的意义" /></Reveal>
+          <Reveal>
+            <SectionHeader title="Why Choose Sugardating" count="What sets us apart" />
+          </Reveal>
           <div className="why">
-            {whyItems.map((w, i) => (
+            {whyChoose.map((w, i) => (
               <Reveal key={w.title} delay={i * 80}>
                 <div className="wy">
                   <div className="wy-ic">{w.icon}</div>
@@ -93,23 +129,54 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 3. 按内容类型浏览 */}
+        {/* 2. How It Works */}
         <section className="sec">
-          <Reveal><SectionHeader title="按内容类型浏览" count="找到你感兴趣的方向" /></Reveal>
+          <Reveal>
+            <SectionHeader title="How It Works" count="Get started in minutes" />
+          </Reveal>
+          <div className="steps">
+            {howItWorks.map((s, i) => (
+              <Reveal key={s.title} delay={i * 80}>
+                <div className="step">
+                  <div className="step-n">{String(i + 1).padStart(2, "0")}</div>
+                  <h3>{s.title}</h3>
+                  <p>{s.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* 3. Featured Sugargirls */}
+        <section className="sec">
+          <Reveal>
+            <SectionHeader
+              title="Featured Sugargirls"
+              count="Hand-picked this week"
+              moreHref="/male-artists"
+              moreText="View all"
+            />
+          </Reveal>
+          <Reveal>
+            <CreatorRail items={creators} photos={photos} />
+          </Reveal>
+        </section>
+
+        {/* 4. Popular Experiences */}
+        <section className="sec">
+          <Reveal>
+            <SectionHeader title="Popular Experiences" count="Ways to connect" />
+          </Reveal>
           <div className="ctype">
-            {contentTypes.map((t, i) => (
-              <Reveal key={t.slug} delay={i * 80}>
-                <Link href={`/${t.slug}`} className="ct">
-                  {pick(i, 5) ? (
-                    <Img src={pick(i, 5)!} alt={t.title} sizes="(max-width: 860px) 50vw, 20vw" />
-                  ) : (
-                    <Placeholder label={`${t.title}\n占位图`} fill />
-                  )}
+            {experiences.map((t, i) => (
+              <Reveal key={t.title} delay={i * 80}>
+                <Link href={t.href} className="ct">
+                  <Img src={pick(i, 5)!} alt={t.title} sizes="(max-width: 860px) 50vw, 25vw" />
                   <div className="gr" />
                   <div className="info">
                     <h3>{t.title}</h3>
                     <p>{t.desc}</p>
-                    <span className="go">进入 <Arrow /></span>
+                    <span className="go">Learn more <Arrow /></span>
                   </div>
                 </Link>
               </Reveal>
@@ -117,32 +184,43 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 4. 精选创作者(横向滑廊) */}
+        {/* 5. Why Join Sugardating */}
         <section className="sec">
-          <Reveal><SectionHeader title="精选创作者" count={`${creators.length} 位 · 持续更新`} moreHref="/creators" moreText="全部创作者" /></Reveal>
           <Reveal>
-            <CreatorRail items={creators} photos={photos} />
+            <SectionHeader title="Why Join Sugardating" count="For everyone in the community" />
           </Reveal>
-        </section>
-
-        {/* 5. 热门作品 */}
-        <section className="sec">
-          <Reveal><SectionHeader title="热门作品" moreHref="/creators" moreText="更多" /></Reveal>
-          <div className="feed">
-            {works.map((w, i) => (
-              <Reveal key={w.id} delay={i * 60}>
-                <WorkTile w={w} photoSrc={pick(i, 2)} />
-              </Reveal>
-            ))}
+          <div className="why-join">
+            <Reveal>
+              <div className="join-col">
+                <div className="join-eye"><i />For Members</div>
+                <h3>Discover, connect, explore.</h3>
+                <ul>
+                  {memberBenefits.map((b) => <li key={b}>{b}</li>)}
+                </ul>
+                <Link href="/register" className="btn btn-ink join-cta">Join as a Member</Link>
+              </div>
+            </Reveal>
+            <Reveal delay={120}>
+              <div className="join-col join-col--gold">
+                <div className="join-eye"><i />For Sugargirls</div>
+                <h3>Get discovered, on your terms.</h3>
+                <ul>
+                  {sugargirlBenefits.map((b) => <li key={b}>{b}</li>)}
+                </ul>
+                <Link href="/register" className="btn btn-ink join-cta">Apply as a Sugargirl</Link>
+              </div>
+            </Reveal>
           </div>
         </section>
 
-        {/* 6. 平台数据 */}
+        {/* 6. Platform Highlights */}
         <section className="sec">
-          <Reveal><SectionHeader title="平台数据" count="截至本月" /></Reveal>
+          <Reveal>
+            <SectionHeader title="Platform Highlights" count="Trusted by a growing community" />
+          </Reveal>
           <Reveal>
             <div className="stats">
-              {stats.map((s) => (
+              {highlights.map((s) => (
                 <div key={s.eye} className="sv">
                   <span className="accent">{s.eye}</span>
                   <b><Stat value={s.num} /></b>
@@ -153,33 +231,23 @@ export default async function Home() {
           </Reveal>
         </section>
 
-        {/* 7. 创作者入驻 banner */}
+        {/* 7. Footer CTA */}
         <section className="sec">
           <Reveal>
             <div className="banner">
               <div className="bn-l">
-                <span className="bn-eye"><i />创作者入驻</span>
-                <h2>把你的作品，变成可持续的收入</h2>
-                <p>开放主页、设置订阅、开直播，与支持者直接连接。几分钟上线，你的内容始终归你所有。</p>
+                <span className="bn-eye"><i />Get Started</span>
+                <h2>Start Your Journey Today</h2>
+                <p>Join thousands of members building meaningful international connections on Sugardating. Verified profiles, encrypted chat, and a global community waiting to meet you.</p>
                 <div className="bn-acts">
-                  <Link href="/register" className="btn btn-w">免费开通主页</Link>
-                  <Link href="/studio" className="btn btn-g">创作者权益</Link>
+                  <Link href="/register" className="btn btn-w">Join Free</Link>
+                  <Link href="/male-artists" className="btn btn-g">Explore Sugargirls</Link>
                 </div>
               </div>
               <div className="bn-r">
-                {pick(0, 7)
-                  ? <Img src={pick(0, 7)!} alt="创作者中心" sizes="(max-width: 860px) 100vw, 320px" />
-                  : <Placeholder label="创作者中心 占位" fill />}
+                <Img src={pick(0, 7)!} alt="Sugardating community" sizes="(max-width: 860px) 100vw, 320px" />
               </div>
             </div>
-          </Reveal>
-        </section>
-
-        {/* 8. 直播(放叙事尾部,作为"现在就能看的"收口) */}
-        <section className="sec">
-          <Reveal><SectionHeader title="正在直播" live count="12 位创作者直播中" moreHref="/live" moreText="直播平台" /></Reveal>
-          <Reveal>
-            <div className="live-row">{liveNow.map((l, i) => <LiveCard key={l.slug} l={l} photoSrc={pick(i, 3)} />)}</div>
           </Reveal>
         </section>
 

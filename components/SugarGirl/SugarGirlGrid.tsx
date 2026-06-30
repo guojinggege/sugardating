@@ -1,15 +1,15 @@
 "use client";
 // SugarGirl 频道页主区编排:
-//   FeaturedCarousel (顶部横向)
+//   FeaturedAvatarCarousel  (横向圆形头像)
 //   ↓
-//   Sidebar (sticky 左) + [ FilterBar(sticky 顶) + Grid + LoadMore + Paywall ] (右)
+//   Sidebar (sticky 左) + [ FilterBar(sticky 顶, 2 行) + Grid + LoadMore + Paywall ] (右)
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import FeaturedCarousel from "./FeaturedCarousel";
+import FeaturedAvatarCarousel from "./FeaturedAvatarCarousel";
 import SugarGirlCard from "./SugarGirlCard";
-import SugarGirlFilterBar, { DEFAULT_FILTERS, isDefaultFilters } from "./SugarGirlFilterBar";
-import type { SugarFilters } from "./SugarGirlFilterBar";
+import FilterBar, { DEFAULT_FILTERS, isDefaultFilters } from "./FilterBar";
+import type { SugarFilters } from "./FilterBar";
 import SugarGirlSidebar from "./SugarGirlSidebar";
 import type { QuickKey } from "./SugarGirlSidebar";
 import { ageRanges, heightRanges } from "@/lib/sugarGirlMock";
@@ -18,15 +18,34 @@ import type { SugarGirlEntry } from "@/lib/sugarGirlMock";
 const PAGE_SIZE = 12;
 const PAGE_STEP = 8;
 
+// PersonTag composite → entry predicate
+function matchesPersonTag(e: SugarGirlEntry, tag: SugarFilters["personTag"]): boolean {
+  switch (tag) {
+    case "online":   return e.online;
+    case "verified": return e.tags.includes("Verified");
+    case "new":      return e.tags.includes("New");
+    case "vip":      return e.tags.includes("VIP");
+    case "trending": return e.popularity >= 7000;
+    case "all":
+    default:         return true;
+  }
+}
+
 export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }) {
   const t = useTranslations("sugarGirl");
   const [filters, setFilters] = useState<SugarFilters>(DEFAULT_FILTERS);
   const [activeQuick, setActiveQuick] = useState<QuickKey>("all");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
-  const featured = useMemo(() => entries.filter((e) => e.featured), [entries]);
+  // Featured for avatar carousel — 取 featured: true,按 popularity 排,最多 12 张
+  const featuredAvatars = useMemo(() => {
+    return [...entries]
+      .filter((e) => e.featured)
+      .sort((a, b) => b.popularity - a.popularity)
+      .slice(0, 12);
+  }, [entries]);
 
-  // 主目录过滤集 — scope=featured 时只看 featured,否则全集
+  // 应用 scope
   const pool = useMemo(
     () => (filters.scope === "featured" ? entries.filter((e) => e.featured) : entries),
     [entries, filters.scope]
@@ -37,30 +56,32 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
     const htR  = heightRanges.find((r) => r.key === filters.heightKey);
 
     const list = pool.filter((e) => {
-      if (filters.region   !== "all" && e.region   !== filters.region)   return false;
-      if (filters.country  !== "all" && e.country  !== filters.country)  return false;
-      if (filters.city     !== "all" && e.city     !== filters.city)     return false;
-      if (filters.language !== "all" && !e.languages.includes(filters.language)) return false;
-      if (filters.bodyType !== "all" && e.bodyType !== filters.bodyType) return false;
-      if (filters.category !== "all" && !e.categories.includes(filters.category)) return false;
-      if (filters.tag      !== "all" && !e.tags.includes(filters.tag))   return false;
+      // Sidebar 兼容:region (大区)
+      if (filters.region !== "all" && e.region !== filters.region) return false;
+      // FilterBar Row 1: country / city
+      if (filters.country !== "all" && e.country !== filters.country) return false;
+      if (filters.city !== "all" && e.city !== filters.city) return false;
+      // FilterBar Row 2: service / personTag (composite)
       if (filters.interaction !== "all" && !e.interactions.includes(filters.interaction)) return false;
-      if (filters.online === "yes" && !e.online) return false;
-      if (filters.online === "no"  &&  e.online) return false;
-      if (filters.verified === "yes" && !e.tags.includes("Verified")) return false;
+      if (!matchesPersonTag(e, filters.personTag)) return false;
+      // More 弹层: age / height / language / onlineMore
+      if (filters.language !== "all" && !e.languages.includes(filters.language)) return false;
+      if (filters.onlineMore === "yes" && !e.online) return false;
       if (ageR && "min" in ageR && (e.age < (ageR as { min: number; max: number }).min || e.age > (ageR as { min: number; max: number }).max)) return false;
       if (htR  && "min" in htR  && (e.height < (htR as { min: number; max: number }).min || e.height > (htR as { min: number; max: number }).max)) return false;
+      // distance: 数据未接入,不过滤
       return true;
     });
 
     if (filters.sort === "popular") {
       list.sort((a, b) => b.popularity - a.popularity);
     } else if (filters.sort === "recommended") {
-      // 推荐优先:featured 排前,其余按 popularity desc
       list.sort((a, b) => {
         if (a.featured !== b.featured) return a.featured ? -1 : 1;
         return b.popularity - a.popularity;
       });
+    } else if (filters.sort === "top-rated") {
+      list.sort((a, b) => b.rating - a.rating);
     } else {
       // latest
       list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -73,7 +94,7 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
 
   const onFilterBarChange = (next: SugarFilters) => {
     setFilters(next);
-    setActiveQuick(isDefaultFilters(next) ? "all" : activeQuick);  // 用户手动改顶部筛选,sidebar 激活状态不动
+    setActiveQuick(isDefaultFilters(next) ? "all" : activeQuick);
     setVisible(PAGE_SIZE);
   };
 
@@ -85,13 +106,13 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-8">
-      {/* 1. 本期推荐 — 横向 carousel */}
-      {featured.length > 0 && (
-        <FeaturedCarousel items={featured} />
+      {/* 1. 推荐 SugarGirl — 横向圆形头像滚动 */}
+      {featuredAvatars.length > 0 && (
+        <FeaturedAvatarCarousel items={featuredAvatars} />
       )}
 
       {/* 2. 主目录 = Sidebar + (FilterBar + Grid) */}
-      <section id="directory" className="scroll-mt-24 pt-12 md:pt-16">
+      <section id="directory" className="scroll-mt-24 pt-10 md:pt-14">
         <div className="mb-5 flex items-end justify-between">
           <div>
             <div className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-gold">{t("directory.eyebrow")}</div>
@@ -103,7 +124,7 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
           <SugarGirlSidebar active={activeQuick} onPick={onSidebarPick} />
 
           <div className="min-w-0">
-            <SugarGirlFilterBar
+            <FilterBar
               value={filters}
               onChange={onFilterBarChange}
               resultCount={filtered.length}

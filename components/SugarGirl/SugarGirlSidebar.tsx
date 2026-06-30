@@ -3,21 +3,16 @@
 //   推荐专区 / 地区浏览 / 互动类型 / 人物标签 / 排序
 // 每项是 quick-filter shortcut:点击应用一组组合筛选条件
 import { useTranslations } from "next-intl";
-import type { SugarFilters } from "./SugarGirlFilterBar";
-import { DEFAULT_FILTERS } from "./SugarGirlFilterBar";
-import type { Region, Interaction, SugarTag } from "@/lib/sugarGirlMock";
+import type { SugarFilters } from "./FilterBar";
+import { DEFAULT_FILTERS } from "./FilterBar";
+import type { Region, Interaction } from "@/lib/sugarGirlMock";
 
 export type QuickKey =
   | "all"
-  // 推荐专区
   | "featured" | "popular" | "latest" | "online"
-  // 地区
   | "r-se-asia" | "r-east-asia" | "r-east-europe" | "r-other"
-  // 互动
   | "i-dating" | "i-travel" | "i-shoot" | "i-video-chat"
-  // 标签
   | "t-verified" | "t-new" | "t-vip" | "t-popular"
-  // 排序
   | "s-latest" | "s-popular";
 
 interface Props {
@@ -26,13 +21,12 @@ interface Props {
   counts?: Partial<Record<QuickKey, number>>;
 }
 
-// 每个 quick-filter 把当前筛选条件组合成一份完整 SugarFilters
 function buildFilters(key: QuickKey): SugarFilters {
   switch (key) {
     case "featured": return { ...DEFAULT_FILTERS, scope: "featured" };
     case "popular":  return { ...DEFAULT_FILTERS, sort: "popular" };
     case "latest":   return { ...DEFAULT_FILTERS, sort: "latest" };
-    case "online":   return { ...DEFAULT_FILTERS, online: "yes" };
+    case "online":   return { ...DEFAULT_FILTERS, personTag: "online" };
 
     case "r-se-asia":     return { ...DEFAULT_FILTERS, region: "se-asia" as Region };
     case "r-east-asia":   return { ...DEFAULT_FILTERS, region: "east-asia" as Region };
@@ -44,10 +38,10 @@ function buildFilters(key: QuickKey): SugarFilters {
     case "i-shoot":      return { ...DEFAULT_FILTERS, interaction: "shoot" as Interaction };
     case "i-video-chat": return { ...DEFAULT_FILTERS, interaction: "video-chat" as Interaction };
 
-    case "t-verified": return { ...DEFAULT_FILTERS, tag: "Verified" as SugarTag };
-    case "t-new":      return { ...DEFAULT_FILTERS, tag: "New" as SugarTag };
-    case "t-vip":      return { ...DEFAULT_FILTERS, tag: "VIP" as SugarTag };
-    case "t-popular":  return { ...DEFAULT_FILTERS, sort: "popular" };
+    case "t-verified": return { ...DEFAULT_FILTERS, personTag: "verified" };
+    case "t-new":      return { ...DEFAULT_FILTERS, personTag: "new" };
+    case "t-vip":      return { ...DEFAULT_FILTERS, personTag: "vip" };
+    case "t-popular":  return { ...DEFAULT_FILTERS, personTag: "trending" };
 
     case "s-latest":   return { ...DEFAULT_FILTERS, sort: "latest" };
     case "s-popular":  return { ...DEFAULT_FILTERS, sort: "popular" };
@@ -92,7 +86,6 @@ export default function SugarGirlSidebar({ active, onPick, counts = {} }: Props)
   return (
     <aside className="lg:sticky lg:top-[100px] lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:pr-2 [scrollbar-width:thin]">
       <div className="rounded-2xl border border-feed-line bg-feed-surface p-3 backdrop-blur md:p-4">
-        {/* 一键回到全部 */}
         <button
           type="button"
           onClick={() => onPick("all", buildFilters("all"))}

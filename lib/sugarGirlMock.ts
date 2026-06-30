@@ -28,24 +28,25 @@ export type Region = "se-asia" | "east-asia" | "east-europe" | "other";
 
 export interface SugarGirlEntry {
   id: string;
-  name: string;        // 昵称
+  name: string;
   age: number;
-  city: string;        // 中文城市
-  country: string;     // 中文国家/地区
-  region: Region;      // 大区
-  height: number;      // cm
+  city: string;
+  country: string;
+  region: Region;
+  height: number;
   bodyType: BodyType;
-  languages: string[]; // 显示用 (中文/English/日本語/한국어/...)
+  languages: string[];
   online: boolean;
-  intro: string;       // 一句话简介 (展示在卡片)
-  bio: string;         // 1-2 行长简介
+  intro: string;
+  bio: string;
   tags: SugarTag[];
   categories: SugarCategory[];
   interactions: Interaction[];
-  popularity: number;  // sort by popular 用
-  createdAt: string;   // ISO,sort by latest 用
-  cover: string;       // 卡片大图 url
-  featured: boolean;   // 顶部 featured 区显示
+  popularity: number;
+  rating: number;       // 4.50 - 5.00,推导自 popularity,用于"高评分"排序
+  createdAt: string;
+  cover: string;
+  featured: boolean;
 }
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -61,13 +62,22 @@ const CITY_META: Record<string, { country: string; region: Region }> = {
   胡志明市: { country: "越南",       region: "se-asia" },
   香港:     { country: "中国香港",   region: "east-asia" },
   台北:     { country: "中国台湾",   region: "east-asia" },
+  上海:     { country: "中国",       region: "east-asia" },
   东京:     { country: "日本",       region: "east-asia" },
   首尔:     { country: "韩国",       region: "east-asia" },
   伦敦:     { country: "英国",       region: "other" },
   悉尼:     { country: "澳大利亚",   region: "other" },
   华沙:     { country: "波兰",       region: "east-europe" },
   布拉格:   { country: "捷克",       region: "east-europe" },
+  莫斯科:   { country: "俄罗斯",     region: "east-europe" },
+  基辅:     { country: "乌克兰",     region: "east-europe" },
 };
+
+// rating: 把 popularity 映射到 4.50 - 5.00,deterministic
+function deriveRating(popularity: number): number {
+  const norm = Math.min(Math.max(popularity, 0), 10000) / 10000; // 0..1
+  return Math.round((4.5 + norm * 0.5) * 100) / 100;
+}
 
 type SeedInput = {
   id: string; name: string; age: number; city: string; height: number;
@@ -87,13 +97,15 @@ function build(s: SeedInput): SugarGirlEntry {
     height: s.height, bodyType: s.bodyType, languages: s.languages,
     online: s.online, intro: s.intro, bio: s.bio,
     tags: s.tags, categories: s.categories, interactions: s.interactions,
-    popularity: s.popularity, createdAt: iso(s.ageDays * DAY),
+    popularity: s.popularity, rating: deriveRating(s.popularity),
+    createdAt: iso(s.ageDays * DAY),
     cover: pickImg(s.imgIdx, s.imgOff ?? 0),
     featured: !!s.featured,
   };
 }
 
 export const sugarGirls: SugarGirlEntry[] = [
+  // 头 10 位均设 featured=true → FeaturedAvatarCarousel 满足 10~12 头像
   build({ id: "sg01", name: "Aria",  age: 24, city: "新加坡", height: 168, bodyType: "slim",     languages: ["中文","English"],         online: true,
     intro: "热爱旅行的双语 Foodie", bio: "热爱旅行与摄影 · 中英双语 · Foodie",
     tags: ["VIP","Verified"], categories: ["旅行","摄影"], interactions: ["dating","travel"],
@@ -113,27 +125,28 @@ export const sugarGirls: SugarGirlEntry[] = [
   build({ id: "sg05", name: "Wenxi", age: 22, city: "新加坡", height: 167, bodyType: "slim",     languages: ["中文","English"],         online: false,
     intro: "在读艺术生 · 摄影 + 平面", bio: "艺术院校在读 · 摄影 + 平面设计",
     tags: ["New","Verified"], categories: ["艺术","摄影"], interactions: ["shoot","video-chat"],
-    popularity: 4180, ageDays: 0.5, imgIdx: 4 }),
+    popularity: 4180, ageDays: 0.5, imgIdx: 4, featured: true }),
   build({ id: "sg06", name: "Sora",  age: 27, city: "东京",   height: 172, bodyType: "standard", languages: ["日本語","English"],        online: true,
     intro: "时尚 · 慢节奏 · 古典乐", bio: "时尚 / 慢节奏 / 古典乐",
     tags: ["VIP","Verified"], categories: ["时尚","音乐"], interactions: ["dating","travel"],
-    popularity: 9230, ageDays: 5, imgIdx: 5 }),
+    popularity: 9230, ageDays: 5, imgIdx: 5, featured: true }),
   build({ id: "sg07", name: "Nori",  age: 25, city: "首尔",   height: 169, bodyType: "slim",     languages: ["한국어","English"],        online: false,
     intro: "短途旅行家 · 喜欢拍胶片", bio: "短途旅行家 · 喜欢拍胶片",
     tags: ["Verified"], categories: ["旅行","摄影"], interactions: ["travel","shoot"],
-    popularity: 6420, ageDays: 6, imgIdx: 6 }),
+    popularity: 6420, ageDays: 6, imgIdx: 6, featured: true }),
   build({ id: "sg08", name: "Ivy",   age: 26, city: "香港",   height: 171, bodyType: "athletic", languages: ["中文","English"],         online: true,
     intro: "金融背景 · 红酒 + 阅读", bio: "金融背景 · 周末徒步 · 红酒 + 阅读",
     tags: ["VIP"], categories: ["运动","阅读"], interactions: ["dating","video-chat"],
-    popularity: 7860, ageDays: 7, imgIdx: 7 }),
+    popularity: 7860, ageDays: 7, imgIdx: 7, featured: true }),
   build({ id: "sg09", name: "Anika", age: 24, city: "曼谷",   height: 166, bodyType: "athletic", languages: ["ภาษาไทย","English"],       online: false,
     intro: "Yoga + 冲浪 + 海边",   bio: "热带女孩 · Yoga + 冲浪 + 海边",
     tags: ["New"], categories: ["运动","旅行"], interactions: ["travel","video-chat"],
-    popularity: 3940, ageDays: 1, imgIdx: 8 }),
+    popularity: 3940, ageDays: 1, imgIdx: 8, featured: true }),
   build({ id: "sg10", name: "Linna", age: 28, city: "吉隆坡", height: 174, bodyType: "standard", languages: ["中文","English","Bahasa Melayu"], online: true,
     intro: "极简主义建筑师",         bio: "建筑师 · 极简主义 · 长居热带",
     tags: ["Verified"], categories: ["艺术","时尚"], interactions: ["dating","shoot"],
-    popularity: 7120, ageDays: 8, imgIdx: 9 }),
+    popularity: 7120, ageDays: 8, imgIdx: 9, featured: true }),
+  // 后续 directory-only
   build({ id: "sg11", name: "Hana",  age: 23, city: "首尔",   height: 162, bodyType: "slim",     languages: ["한국어","English"],        online: true,
     intro: "插画师 · 独居一只猫",   bio: "插画师 · 独居一只猫 · 慢生活",
     tags: ["New","Verified"], categories: ["艺术","阅读"], interactions: ["dating","video-chat"],
@@ -174,7 +187,6 @@ export const sugarGirls: SugarGirlEntry[] = [
     intro: "投行 → 自由职业 · 古典乐", bio: "投行 → 自由职业 · 古典乐 / 红酒",
     tags: ["VIP","Verified"], categories: ["音乐","时尚"], interactions: ["dating","travel"],
     popularity: 9120, ageDays: 15, imgIdx: 8, imgOff: 4 }),
-  // 东欧 2 位 — 让"东欧"快速筛选不为空
   build({ id: "sg21", name: "Zofia", age: 25, city: "华沙",   height: 174, bodyType: "slim",     languages: ["Polski","English"],        online: true,
     intro: "古典钢琴 · 慢节奏",     bio: "古典钢琴 · 慢节奏 · 老电影",
     tags: ["VIP","Verified"], categories: ["音乐","艺术"], interactions: ["dating","video-chat"],
@@ -183,6 +195,19 @@ export const sugarGirls: SugarGirlEntry[] = [
     intro: "建筑摄影 · 长居欧洲",   bio: "建筑摄影师 · 长居欧洲 · 红酒",
     tags: ["Verified"], categories: ["摄影","旅行"], interactions: ["travel","shoot"],
     popularity: 6580, ageDays: 7, imgIdx: 10, imgOff: 4 }),
+  // 新增 3 位:上海(中国大陆) / 莫斯科(俄罗斯) / 基辅(乌克兰)
+  build({ id: "sg23", name: "Tina",  age: 24, city: "上海",   height: 167, bodyType: "slim",     languages: ["中文","English"],         online: true,
+    intro: "金融分析师 · 双语日常", bio: "金融分析师 · 中英双语 · 周末展览",
+    tags: ["VIP","Verified"], categories: ["艺术","时尚"], interactions: ["dating","video-chat"],
+    popularity: 8650, ageDays: 6, imgIdx: 1, imgOff: 6 }),
+  build({ id: "sg24", name: "Anya",  age: 26, city: "莫斯科", height: 175, bodyType: "standard", languages: ["Русский","English"],       online: false,
+    intro: "古典芭蕾 · 慢城生活",   bio: "古典芭蕾 · 慢城生活 · 红酒",
+    tags: ["Verified"], categories: ["音乐","艺术"], interactions: ["dating","shoot"],
+    popularity: 7920, ageDays: 9, imgIdx: 3, imgOff: 6 }),
+  build({ id: "sg25", name: "Sasha", age: 23, city: "基辅",   height: 172, bodyType: "athletic", languages: ["Українська","English"],    online: true,
+    intro: "时装模特 · 旅行 + 摄影", bio: "时装模特 · 一年三季在路上 · 摄影",
+    tags: ["New","VIP"], categories: ["时尚","旅行"], interactions: ["dating","travel","shoot"],
+    popularity: 6840, ageDays: 3, imgIdx: 5, imgOff: 6 }),
 ];
 
 // 全集供 FilterBar 渲染
@@ -190,6 +215,17 @@ export const countries = Array.from(new Set(sugarGirls.map((g) => g.country))).s
 export const cities = Array.from(new Set(sugarGirls.map((g) => g.city))).sort();
 export const allCategories: SugarCategory[] = ["旅行", "艺术", "美食", "运动", "时尚", "摄影", "音乐", "阅读"];
 export const allLanguages = Array.from(new Set(sugarGirls.flatMap((g) => g.languages))).sort();
+
+// country → 该国所有城市 (二级联动用)
+export const citiesByCountry: Record<string, string[]> = (() => {
+  const map: Record<string, string[]> = {};
+  for (const e of sugarGirls) {
+    if (!map[e.country]) map[e.country] = [];
+    if (!map[e.country].includes(e.city)) map[e.country].push(e.city);
+  }
+  for (const k of Object.keys(map)) map[k].sort();
+  return map;
+})();
 
 export const REGIONS: { key: Region; label: string; labelEn: string }[] = [
   { key: "se-asia",     label: "东南亚", labelEn: "Southeast Asia" },
@@ -212,7 +248,6 @@ export const INTERACTIONS: { key: Interaction; label: string; labelEn: string }[
   { key: "video-chat", label: "视频聊天", labelEn: "Video Chat" },
 ];
 
-// 年龄段 / 身高段 标签集合
 export const ageRanges = [
   { key: "all",   label: "全部年龄" },
   { key: "21-23", label: "21–23", min: 21, max: 23 },

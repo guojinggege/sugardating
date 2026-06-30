@@ -4,10 +4,11 @@ import Link from "next/link";
 import Img from "./Img";
 import Placeholder from "./Placeholder";
 
+// 只保留 2 张:第一张是创作者发现入口,第二张直接复用 SugarGirl 频道 hero 那张图
+// bgIndex 指向 photos[] 数组(lib/images.ts sort 后顺序);bgIndex=6 与 /male-artists hero 的 pick(0,6) 同图
 const slides = [
-  { k: "编辑精选", h: "用镜头，留住一片风景", p: "发现记录山海与城市的创作者，订阅他们的视角。", cta: "浏览创作者", href: "/creators" },
-  { k: "本周聚焦", h: "从一座山的清晨开始", p: "风光、旅拍、纪实——来自亚洲各地的创作者。", cta: "查看排行榜", href: "/rankings" },
-  { k: "创作者入驻", h: "把你的作品，变成可持续的收入", p: "开放主页、设置订阅、开直播，几分钟上线。", cta: "免费开通主页", href: "/register" },
+  { k: "编辑精选",               h: "用镜头，留住一片风景",         p: "发现记录山海与城市的创作者,订阅他们的视角。", cta: "浏览创作者",      href: "/creators",     bgIndex: 0 },
+  { k: "Sugardating · Collection", h: "精选 200 位真人优质 SugarGirl", p: "国家、城市、兴趣可筛选,按你的节奏发现。",     cta: "浏览 SugarGirl",  href: "/male-artists", bgIndex: 6 },
 ];
 
 export default function HomeHero({ photos = [] }: { photos?: string[] }) {
@@ -50,7 +51,7 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
     <section className="hh" aria-roledescription="carousel">
       <div className="hh-stack">
         {slides.map((slide, idx) => {
-          const photo = photos.length > 0 ? photos[idx % photos.length] : undefined;
+          const photo = photos.length > 0 ? photos[slide.bgIndex % photos.length] : undefined;
           return (
             <div
               key={idx}

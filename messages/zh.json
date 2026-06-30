@@ -249,5 +249,102 @@
   "meta": {
     "title": "Sugardating — 国际化 Sugargirl 发现平台",
     "description": "发现来自亚洲及全球经过认证的 Sugargirl,高质量对话、旅行陪伴与优质社交连接。"
+  },
+  "sugarGirl": {
+    "meta": {
+      "title": "SugarGirl · Sugardating",
+      "description": "精选 200 位真人优质 SugarGirl。按国家、城市、年龄、语言、体型、互动类型多维度筛选,找到与你节奏一致的她。"
+    },
+    "featured": {
+      "eyebrow": "Featured",
+      "title": "本期推荐",
+      "subtitle": "本期编辑精挑细选的 SugarGirl,横向浏览",
+      "prev": "上一张",
+      "next": "下一张"
+    },
+    "directory": {
+      "eyebrow": "Directory",
+      "title": "全部 SugarGirl"
+    },
+    "card": {
+      "online": "在线",
+      "verified": "已认证",
+      "newcomer": "新加入",
+      "favorite": "收藏",
+      "viewProfile": "查看资料"
+    },
+    "filter": {
+      "region": "地区",
+      "country": "国家",
+      "city": "城市",
+      "age": "年龄",
+      "language": "语言",
+      "height": "身高",
+      "bodyType": "体型",
+      "tag": "标签",
+      "category": "兴趣",
+      "online": "在线",
+      "verified": "认证",
+      "sort": "排序",
+      "allRegions": "全部地区",
+      "allCountries": "全部国家",
+      "allCities": "全部城市",
+      "allLanguages": "全部语言",
+      "allBodyTypes": "全部体型",
+      "allTags": "全部标签",
+      "allCategories": "全部兴趣",
+      "allOnline": "全部",
+      "onlineYes": "仅在线",
+      "onlineNo": "仅离线",
+      "allVerified": "全部",
+      "verifiedYes": "仅认证",
+      "newcomer": "新加入",
+      "verified": "已认证",
+      "sortLatest": "最新加入",
+      "sortPopular": "最受欢迎",
+      "sortRecommended": "推荐优先",
+      "clear": "清空",
+      "results": "共 {count} 位 / 总 {total} 位"
+    },
+    "sidebar": {
+      "all": "全部 SugarGirl",
+      "title": {
+        "recommend": "推荐专区",
+        "region":    "地区浏览",
+        "interact":  "互动类型",
+        "tags":      "人物标签",
+        "sort":      "排序"
+      },
+      "featured":    "本期推荐",
+      "popularRec":  "热门推荐",
+      "latestJoin":  "最新加入",
+      "onlineNow":   "在线中",
+      "seAsia":      "东南亚",
+      "eastAsia":    "东亚",
+      "eastEurope":  "东欧",
+      "other":       "其他地区",
+      "dating":      "约会",
+      "travel":      "旅游",
+      "shoot":       "拍摄",
+      "videoChat":   "视频聊天",
+      "verified":    "已认证",
+      "newComer":    "新加入",
+      "highPopular": "高人气",
+      "vip":         "VIP",
+      "sortLatest":  "最新",
+      "sortPopular": "最热门"
+    },
+    "empty": {
+      "title": "该条件下暂无 SugarGirl",
+      "cta": "清空筛选"
+    },
+    "loadMore": "加载更多",
+    "paywall": {
+      "eyebrow": "Members Only",
+      "title": "解锁完整目录",
+      "desc": "会员可查看完整 SugarGirl 目录、私信通道、隐藏照片与匹配推荐。已展示的是公开精选。",
+      "join": "开通会员",
+      "login": "已有账号 · 登录"
+    }
   }
 }

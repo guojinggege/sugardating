@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import PageBgDark from "@/components/Feed/PageBgDark";
 import SugarGirlHero from "@/components/SugarGirl/SugarGirlHero";
 import SugarGirlGrid from "@/components/SugarGirl/SugarGirlGrid";
@@ -6,10 +8,10 @@ import { pick } from "@/lib/images";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "SugarGirl · Sugardating",
-  description: "精选创作者目录 — 国家、城市、兴趣可筛选,按你的节奏发现。",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("sugarGirl.meta");
+  return { title: t("title"), description: t("description") };
+}
 
 export default function Page() {
   const heroBg = pick(0, 6) ?? "/images/placeholder.png";

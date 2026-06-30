@@ -249,5 +249,102 @@
   "meta": {
     "title": "Sugardating — International Sugargirl Discovery Platform",
     "description": "Discover verified Sugargirls across Asia and worldwide. Meaningful conversations, travel companionship and premium social connections."
+  },
+  "sugarGirl": {
+    "meta": {
+      "title": "Sugargirl Directory · Sugardating",
+      "description": "Browse 200+ verified Sugargirls. Filter by country, city, age, language, body type, interaction style and more — find the one whose pace matches yours."
+    },
+    "featured": {
+      "eyebrow": "Featured",
+      "title": "This Week's Picks",
+      "subtitle": "Hand-selected Sugargirls — swipe horizontally to browse",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "directory": {
+      "eyebrow": "Directory",
+      "title": "All Sugargirls"
+    },
+    "card": {
+      "online": "Online",
+      "verified": "Verified",
+      "newcomer": "New",
+      "favorite": "Favorite",
+      "viewProfile": "View Profile"
+    },
+    "filter": {
+      "region": "Region",
+      "country": "Country",
+      "city": "City",
+      "age": "Age",
+      "language": "Language",
+      "height": "Height",
+      "bodyType": "Body Type",
+      "tag": "Tag",
+      "category": "Interest",
+      "online": "Online",
+      "verified": "Verified",
+      "sort": "Sort",
+      "allRegions": "All regions",
+      "allCountries": "All countries",
+      "allCities": "All cities",
+      "allLanguages": "All languages",
+      "allBodyTypes": "All body types",
+      "allTags": "All tags",
+      "allCategories": "All interests",
+      "allOnline": "Any",
+      "onlineYes": "Online only",
+      "onlineNo": "Offline only",
+      "allVerified": "Any",
+      "verifiedYes": "Verified only",
+      "newcomer": "New",
+      "verified": "Verified",
+      "sortLatest": "Latest joined",
+      "sortPopular": "Most popular",
+      "sortRecommended": "Recommended",
+      "clear": "Clear",
+      "results": "{count} of {total} shown"
+    },
+    "sidebar": {
+      "all": "All Sugargirls",
+      "title": {
+        "recommend": "Recommendations",
+        "region":    "Browse by Region",
+        "interact":  "Interaction Type",
+        "tags":      "Profile Tags",
+        "sort":      "Sort"
+      },
+      "featured":    "Editor's Picks",
+      "popularRec":  "Trending",
+      "latestJoin":  "Latest to Join",
+      "onlineNow":   "Online Now",
+      "seAsia":      "Southeast Asia",
+      "eastAsia":    "East Asia",
+      "eastEurope":  "East Europe",
+      "other":       "Other Regions",
+      "dating":      "Dating",
+      "travel":      "Travel",
+      "shoot":       "Photo Shoot",
+      "videoChat":   "Video Chat",
+      "verified":    "Verified",
+      "newComer":    "Newcomers",
+      "highPopular": "High Popularity",
+      "vip":         "VIP",
+      "sortLatest":  "Latest",
+      "sortPopular": "Most Popular"
+    },
+    "empty": {
+      "title": "No Sugargirls match your filters.",
+      "cta": "Clear filters"
+    },
+    "loadMore": "Load more",
+    "paywall": {
+      "eyebrow": "Members Only",
+      "title": "Unlock the Full Directory",
+      "desc": "Members access the complete Sugargirl directory, private messaging, hidden photos and personalized matches. What you see now is the public preview.",
+      "join": "Become a Member",
+      "login": "Already have an account? Sign in"
+    }
   }
 }

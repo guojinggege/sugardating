@@ -40,9 +40,19 @@ export default function HomeHero({ photos = [] }: { photos?: string[] }) {
   useEffect(() => {
     document.body.classList.add("home-immersive");
     let raf = 0;
+    const heroEl = document.querySelector<HTMLElement>(".hh");
+    const stackEl = document.querySelector<HTMLElement>(".hh-stack");
     const apply = () => {
-      if (window.scrollY > 40) document.body.classList.add("nav-scrolled");
+      const y = window.scrollY;
+      if (y > 40) document.body.classList.add("nav-scrolled");
       else document.body.classList.remove("nav-scrolled");
+      // Parallax: hero bg layer drifts at 0.35× scroll speed
+      // 限定在 hero 自身高度内,避免 bg 飘出页面后仍然 transform 浪费 GPU
+      if (stackEl && heroEl) {
+        const max = heroEl.offsetHeight;
+        const offset = Math.min(Math.max(y, 0), max) * 0.35;
+        stackEl.style.setProperty("--parallax-y", `${offset}px`);
+      }
       raf = 0;
     };
     const onScroll = () => {

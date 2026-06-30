@@ -5,6 +5,8 @@ import Img from "@/components/Img";
 import Reveal from "@/components/Reveal";
 import Stat from "@/components/Stat";
 import CreatorRail from "@/components/CreatorRail";
+import Testimonials from "@/components/Home/Testimonials";
+import FAQ from "@/components/Home/FAQ";
 import { Arrow } from "@/components/icons";
 import { listCreators } from "@/lib/queries";
 import { photos, pick } from "@/lib/images";
@@ -63,6 +65,17 @@ const whyChoose: { title: string; desc: string; icon: React.ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    title: "Cross-border Networking",
+    desc: "Build relationships across cultures and continents — from a Sunday coffee call to a weekend abroad.",
+    icon: (
+      <svg viewBox="0 0 24 24">
+        <path d="M4 12h16" />
+        <path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8M4 12c0 4.4 3.6 8 8 8s8-3.6 8-8" />
+        <path d="M12 4c-2.5 2.2-4 5-4 8s1.5 5.8 4 8M12 4c2.5 2.2 4 5 4 8s-1.5 5.8-4 8" />
+      </svg>
+    ),
+  },
 ];
 
 // ─── How It Works ──────────────────────────────────────────────────
@@ -79,20 +92,6 @@ const experiences = [
   { href: "/art-services#travel",     title: "Travel",      desc: "Explore new cities with a local companion who knows the best spots." },
   { href: "/art-services#shoot",      title: "Photography", desc: "Collaborative shoots — fashion, lifestyle, art and beyond." },
   { href: "/art-services#video-chat", title: "Video Chat",  desc: "Real-time conversations across continents and time zones." },
-];
-
-// ─── Why Join Sugardating ──────────────────────────────────────────
-const memberBenefits = [
-  "Global access to verified Sugargirl profiles",
-  "Identity-checked community — no bots, no catfishes",
-  "Encrypted, private messaging",
-  "Multiple formats — chat, video, travel and in-person",
-];
-const sugargirlBenefits = [
-  "International exposure to premium members",
-  "Diverse, high-quality conversations",
-  "Full control over your profile and visibility",
-  "Build lasting, meaningful connections",
 ];
 
 // ─── Platform Highlights ───────────────────────────────────────────
@@ -147,25 +146,10 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 3. Featured Sugargirls */}
+        {/* 3. Popular Experiences */}
         <section className="sec">
           <Reveal>
-            <SectionHeader
-              title="Featured Sugargirls"
-              count="Hand-picked this week"
-              moreHref="/male-artists"
-              moreText="View all"
-            />
-          </Reveal>
-          <Reveal>
-            <CreatorRail items={creators} photos={photos} />
-          </Reveal>
-        </section>
-
-        {/* 4. Popular Experiences */}
-        <section className="sec">
-          <Reveal>
-            <SectionHeader title="Popular Experiences" count="Ways to connect" />
+            <SectionHeader title="Popular Experiences" count="Four ways to connect" />
           </Reveal>
           <div className="ctype">
             {experiences.map((t, i) => (
@@ -184,36 +168,22 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 5. Why Join Sugardating */}
+        {/* 4. Featured Sugargirls */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title="Why Join Sugardating" count="For everyone in the community" />
+            <SectionHeader
+              title="Featured Sugargirls"
+              count="Hand-picked this week"
+              moreHref="/male-artists"
+              moreText="View all"
+            />
           </Reveal>
-          <div className="why-join">
-            <Reveal>
-              <div className="join-col">
-                <div className="join-eye"><i />For Members</div>
-                <h3>Discover, connect, explore.</h3>
-                <ul>
-                  {memberBenefits.map((b) => <li key={b}>{b}</li>)}
-                </ul>
-                <Link href="/register" className="btn btn-ink join-cta">Join as a Member</Link>
-              </div>
-            </Reveal>
-            <Reveal delay={120}>
-              <div className="join-col join-col--gold">
-                <div className="join-eye"><i />For Sugargirls</div>
-                <h3>Get discovered, on your terms.</h3>
-                <ul>
-                  {sugargirlBenefits.map((b) => <li key={b}>{b}</li>)}
-                </ul>
-                <Link href="/register" className="btn btn-ink join-cta">Apply as a Sugargirl</Link>
-              </div>
-            </Reveal>
-          </div>
+          <Reveal>
+            <CreatorRail items={creators} photos={photos} />
+          </Reveal>
         </section>
 
-        {/* 6. Platform Highlights */}
+        {/* 5. Platform Highlights */}
         <section className="sec">
           <Reveal>
             <SectionHeader title="Platform Highlights" count="Trusted by a growing community" />
@@ -231,14 +201,34 @@ export default async function Home() {
           </Reveal>
         </section>
 
-        {/* 7. Footer CTA */}
+        {/* 6. Testimonials */}
+        <section className="sec">
+          <Reveal>
+            <SectionHeader title="Stories from the Community" count="What members and Sugargirls say" />
+          </Reveal>
+          <Reveal>
+            <Testimonials />
+          </Reveal>
+        </section>
+
+        {/* 7. FAQ */}
+        <section className="sec">
+          <Reveal>
+            <SectionHeader title="Frequently Asked Questions" count="Everything you might want to know" />
+          </Reveal>
+          <Reveal>
+            <FAQ />
+          </Reveal>
+        </section>
+
+        {/* 8. Footer CTA */}
         <section className="sec">
           <Reveal>
             <div className="banner">
               <div className="bn-l">
                 <span className="bn-eye"><i />Get Started</span>
                 <h2>Start Your Journey Today</h2>
-                <p>Join thousands of members building meaningful international connections on Sugardating. Verified profiles, encrypted chat, and a global community waiting to meet you.</p>
+                <p>Discover meaningful international connections on Sugardating. Verified profiles, encrypted chat and a global community waiting to meet you.</p>
                 <div className="bn-acts">
                   <Link href="/register" className="btn btn-w">Join Free</Link>
                   <Link href="/male-artists" className="btn btn-g">Explore Sugargirls</Link>

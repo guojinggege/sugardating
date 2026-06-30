@@ -1,7 +1,7 @@
 "use client";
 // FilterBar — 2 行布局
 //   Row 1: [地区 70%] [距离 30%]
-//   Row 2: 4 等宽: 服务类型 / 人物标签 / 分类 / 更多筛选
+//   Row 2: 4 等宽: 服务类型 / 人物标签 / 排序 / 更多筛选
 // 内部用 FilterDropdown 组件,白卡 label-on-top
 import { useTranslations } from "next-intl";
 import FilterDropdown, { FilterOption, FilterSectionTitle } from "./FilterDropdown";
@@ -12,27 +12,20 @@ import type { Interaction } from "@/lib/sugarGirlMock";
 
 export type Distance = "all" | "near" | "5km" | "10km" | "20km" | "50km";
 export type PersonTag = "online" | "verified" | "new" | "trending" | "vip";
-export type SortKey = "latest" | "recommended" | "popular" | "top-rated";
+export type SortKey = "recommended" | "latest" | "popular" | "online-now" | "top-rated";
 
 export interface SugarFilters {
-  // 主目录
   scope: "all" | "featured";
-  // 地区 dropdown (Row 1)
-  country: string;   // "all" 或国家中文名
-  city: string;      // "all" 或城市中文名 (二级)
-  // 距离 dropdown (Row 1)
+  country: string;
+  city: string;
   distance: Distance;
-  // 服务类型 dropdown (Row 2)
   interaction: Interaction | "all";
-  // 人物标签 dropdown (Row 2,composite)
   personTag: PersonTag | "all";
-  // 分类 dropdown (Row 2,= sort)
   sort: SortKey;
-  // 更多筛选 popover (Row 2)
   ageKey: string;
   heightKey: string;
   language: string;
-  onlineMore: "all" | "yes";
+  onlineMore: "all" | "yes" | "recent";
   // Sidebar 兼容字段
   region: "all" | "se-asia" | "east-asia" | "east-europe" | "other";
 }
@@ -44,7 +37,7 @@ export const DEFAULT_FILTERS: SugarFilters = {
   distance: "all",
   interaction: "all",
   personTag: "all",
-  sort: "latest",
+  sort: "recommended",   // 默认推荐优先
   ageKey: "all",
   heightKey: "all",
   language: "all",
@@ -58,7 +51,6 @@ export function isDefaultFilters(f: SugarFilters): boolean {
   );
 }
 
-// 当前 More 弹层激活的子项个数 (用于 trigger 上的角标)
 export function countMoreActive(f: SugarFilters): number {
   let n = 0;
   if (f.ageKey !== "all") n++;
@@ -77,6 +69,9 @@ const DISTANCES: { v: Distance; key: string }[] = [
   { v: "50km", key: "km50" },
 ];
 
+const PERSON_TAGS: PersonTag[] = ["online", "verified", "new", "trending", "vip"];
+const SORT_KEYS: SortKey[] = ["recommended", "latest", "popular", "online-now", "top-rated"];
+
 interface Props {
   value: SugarFilters;
   onChange: (next: SugarFilters) => void;
@@ -86,36 +81,28 @@ interface Props {
 
 export default function FilterBar({ value, onChange, resultCount, total }: Props) {
   const t  = useTranslations("sugarGirl.filter");
-  const tD = useTranslations("sugarGirl.filter.distance");
-  const tT = useTranslations("sugarGirl.filter.personTag");
-  const tS = useTranslations("sugarGirl.filter.sortLabel");
+  const tD = useTranslations("sugarGirl.filter.distances");
+  const tT = useTranslations("sugarGirl.filter.personTags");
+  const tS = useTranslations("sugarGirl.filter.sorts");
 
   const update = <K extends keyof SugarFilters>(k: K, v: SugarFilters[K]) =>
     onChange({ ...value, [k]: v });
 
-  // —— Region 显示值
   const regionDisplay =
     value.country === "all" ? t("regionPlaceholder")
     : value.city !== "all"  ? `${value.country} · ${value.city}`
     : value.country;
 
-  // —— Distance 显示
   const distanceDisplay = tD(distanceKey(value.distance));
 
-  // —— Service 显示
   const serviceDisplay = value.interaction === "all"
     ? t("anyService")
     : INTERACTIONS.find((i) => i.key === value.interaction)?.label ?? "";
 
-  // —— PersonTag 显示
-  const tagDisplay = value.personTag === "all"
-    ? t("anyTag")
-    : tT(value.personTag);
+  const tagDisplay = value.personTag === "all" ? t("anyTag") : tT(value.personTag);
 
-  // —— Sort/Category 显示
   const sortDisplay = tS(value.sort);
 
-  // —— More 角标
   const moreCount = countMoreActive(value);
   const moreDisplay = moreCount > 0 ? t("moreActive", { count: moreCount }) : t("moreAny");
 
@@ -178,7 +165,7 @@ export default function FilterBar({ value, onChange, resultCount, total }: Props
         </FilterDropdown>
       </div>
 
-      {/* Row 2: 4 equal-width */}
+      {/* Row 2: 4 equal-width — 服务 / 人物标签 / 排序 / 更多筛选 */}
       <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
         <FilterDropdown
           label={t("service")}
@@ -211,51 +198,45 @@ export default function FilterBar({ value, onChange, resultCount, total }: Props
           display={tagDisplay}
           active={value.personTag !== "all"}
         >
-          {(close) => {
-            const tags: PersonTag[] = ["online", "verified", "new", "trending", "vip"];
-            return (
-              <div className="flex flex-col gap-0.5">
+          {(close) => (
+            <div className="flex flex-col gap-0.5">
+              <FilterOption
+                active={value.personTag === "all"}
+                onSelect={() => { update("personTag", "all"); close(); }}
+              >
+                {t("anyTag")}
+              </FilterOption>
+              {PERSON_TAGS.map((tg) => (
                 <FilterOption
-                  active={value.personTag === "all"}
-                  onSelect={() => { update("personTag", "all"); close(); }}
+                  key={tg}
+                  active={value.personTag === tg}
+                  onSelect={() => { update("personTag", tg); close(); }}
                 >
-                  {t("anyTag")}
+                  {tT(tg)}
                 </FilterOption>
-                {tags.map((tg) => (
-                  <FilterOption
-                    key={tg}
-                    active={value.personTag === tg}
-                    onSelect={() => { update("personTag", tg); close(); }}
-                  >
-                    {tT(tg)}
-                  </FilterOption>
-                ))}
-              </div>
-            );
-          }}
+              ))}
+            </div>
+          )}
         </FilterDropdown>
 
         <FilterDropdown
-          label={t("category")}
+          label={t("sortBy")}
           display={sortDisplay}
-          active={value.sort !== "latest"}
+          active={value.sort !== "recommended"}
         >
-          {(close) => {
-            const sorts: SortKey[] = ["latest", "recommended", "popular", "top-rated"];
-            return (
-              <div className="flex flex-col gap-0.5">
-                {sorts.map((s) => (
-                  <FilterOption
-                    key={s}
-                    active={value.sort === s}
-                    onSelect={() => { update("sort", s); close(); }}
-                  >
-                    {tS(s)}
-                  </FilterOption>
-                ))}
-              </div>
-            );
-          }}
+          {(close) => (
+            <div className="flex flex-col gap-0.5">
+              {SORT_KEYS.map((s) => (
+                <FilterOption
+                  key={s}
+                  active={value.sort === s}
+                  onSelect={() => { update("sort", s); close(); }}
+                >
+                  {tS(s)}
+                </FilterOption>
+              ))}
+            </div>
+          )}
         </FilterDropdown>
 
         <FilterDropdown
@@ -265,9 +246,7 @@ export default function FilterBar({ value, onChange, resultCount, total }: Props
           align="right"
           panelClassName="min-w-[340px] md:min-w-[400px]"
         >
-          {() => (
-            <MorePanel value={value} onChange={onChange} />
-          )}
+          {() => <MorePanel value={value} onChange={onChange} />}
         </FilterDropdown>
       </div>
 
@@ -300,7 +279,6 @@ function distanceKey(d: Distance): string {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Region popover — 二级联动:左 country list / 右 city list
 function RegionPanel({
   country, city, onPick, labels,
 }: {
@@ -315,7 +293,6 @@ function RegionPanel({
 
   return (
     <div className="grid grid-cols-[160px,1fr] gap-2 p-1">
-      {/* 左:国家列表 */}
       <div className="flex max-h-[320px] flex-col gap-0.5 overflow-y-auto border-r border-zinc-200 pr-2">
         <FilterOption
           active={country === "all"}
@@ -333,7 +310,6 @@ function RegionPanel({
           </FilterOption>
         ))}
       </div>
-      {/* 右:城市列表 (country!=all 时显示) */}
       <div className="flex max-h-[320px] flex-col gap-0.5 overflow-y-auto">
         {country !== "all" ? (
           <>
@@ -365,14 +341,13 @@ function RegionPanel({
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// More popover — 4 个子筛选:年龄 / 身高 / 语言 / 是否在线
 function MorePanel({
   value, onChange,
 }: {
   value: SugarFilters;
   onChange: (next: SugarFilters) => void;
 }) {
-  const t  = useTranslations("sugarGirl.filter.more");
+  const tM = useTranslations("sugarGirl.filter.moreFilters");
 
   const Chip = ({
     on, onClick, children,
@@ -394,7 +369,7 @@ function MorePanel({
     <div className="flex flex-col gap-3 p-2">
       {/* 年龄 */}
       <div>
-        <FilterSectionTitle>{t("age")}</FilterSectionTitle>
+        <FilterSectionTitle>{tM("age")}</FilterSectionTitle>
         <div className="flex flex-wrap gap-1.5 px-1 pt-1.5">
           {ageRanges.map((r) => (
             <Chip
@@ -402,14 +377,14 @@ function MorePanel({
               on={value.ageKey === r.key}
               onClick={() => onChange({ ...value, ageKey: r.key })}
             >
-              {r.label}
+              {r.key === "all" ? tM("anyAge") : r.label}
             </Chip>
           ))}
         </div>
       </div>
       {/* 身高 */}
       <div>
-        <FilterSectionTitle>{t("height")}</FilterSectionTitle>
+        <FilterSectionTitle>{tM("height")}</FilterSectionTitle>
         <div className="flex flex-wrap gap-1.5 px-1 pt-1.5">
           {heightRanges.map((r) => (
             <Chip
@@ -417,20 +392,20 @@ function MorePanel({
               on={value.heightKey === r.key}
               onClick={() => onChange({ ...value, heightKey: r.key })}
             >
-              {r.label}
+              {r.key === "all" ? tM("anyHeight") : r.label}
             </Chip>
           ))}
         </div>
       </div>
       {/* 语言 */}
       <div>
-        <FilterSectionTitle>{t("language")}</FilterSectionTitle>
+        <FilterSectionTitle>{tM("language")}</FilterSectionTitle>
         <div className="flex flex-wrap gap-1.5 px-1 pt-1.5">
           <Chip
             on={value.language === "all"}
             onClick={() => onChange({ ...value, language: "all" })}
           >
-            {t("anyLanguage")}
+            {tM("anyLanguage")}
           </Chip>
           {allLanguages.map((l) => (
             <Chip
@@ -443,21 +418,27 @@ function MorePanel({
           ))}
         </div>
       </div>
-      {/* 是否在线 */}
+      {/* 在线状态 */}
       <div>
-        <FilterSectionTitle>{t("onlineState")}</FilterSectionTitle>
+        <FilterSectionTitle>{tM("onlineState")}</FilterSectionTitle>
         <div className="flex flex-wrap gap-1.5 px-1 pt-1.5">
           <Chip
             on={value.onlineMore === "all"}
             onClick={() => onChange({ ...value, onlineMore: "all" })}
           >
-            {t("any")}
+            {tM("any")}
           </Chip>
           <Chip
             on={value.onlineMore === "yes"}
             onClick={() => onChange({ ...value, onlineMore: "yes" })}
           >
-            {t("onlineOnly")}
+            {tM("onlineOnly")}
+          </Chip>
+          <Chip
+            on={value.onlineMore === "recent"}
+            onClick={() => onChange({ ...value, onlineMore: "recent" })}
+          >
+            {tM("onlineRecent")}
           </Chip>
         </div>
       </div>

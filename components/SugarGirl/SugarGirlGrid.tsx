@@ -64,9 +64,15 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
       // FilterBar Row 2: service / personTag (composite)
       if (filters.interaction !== "all" && !e.interactions.includes(filters.interaction)) return false;
       if (!matchesPersonTag(e, filters.personTag)) return false;
-      // More 弹层: age / height / language / onlineMore
+      // More 弹层: age / height / language / onlineMore (3 档:any/yes/recent)
       if (filters.language !== "all" && !e.languages.includes(filters.language)) return false;
       if (filters.onlineMore === "yes" && !e.online) return false;
+      if (filters.onlineMore === "recent") {
+        // 最近活跃 = 当前在线 OR 7 天内创建
+        const recentMs = 7 * 24 * 60 * 60 * 1000;
+        const isRecent = e.online || (Date.now() - new Date(e.createdAt).getTime()) < recentMs;
+        if (!isRecent) return false;
+      }
       if (ageR && "min" in ageR && (e.age < (ageR as { min: number; max: number }).min || e.age > (ageR as { min: number; max: number }).max)) return false;
       if (htR  && "min" in htR  && (e.height < (htR as { min: number; max: number }).min || e.height > (htR as { min: number; max: number }).max)) return false;
       // distance: 数据未接入,不过滤
@@ -82,6 +88,12 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
       });
     } else if (filters.sort === "top-rated") {
       list.sort((a, b) => b.rating - a.rating);
+    } else if (filters.sort === "online-now") {
+      // 在线优先,二级按 popularity
+      list.sort((a, b) => {
+        if (a.online !== b.online) return a.online ? -1 : 1;
+        return b.popularity - a.popularity;
+      });
     } else {
       // latest
       list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

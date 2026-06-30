@@ -214,7 +214,12 @@ export const sugarGirls: SugarGirlEntry[] = [
 export const countries = Array.from(new Set(sugarGirls.map((g) => g.country))).sort();
 export const cities = Array.from(new Set(sugarGirls.map((g) => g.city))).sort();
 export const allCategories: SugarCategory[] = ["旅行", "艺术", "美食", "运动", "时尚", "摄影", "音乐", "阅读"];
-export const allLanguages = Array.from(new Set(sugarGirls.flatMap((g) => g.languages))).sort();
+
+// 语言固定顺序(按 spec)— 不再用 data-derived sort
+export const allLanguages: string[] = [
+  "中文", "English", "ภาษาไทย", "Tiếng Việt", "Bahasa Melayu",
+  "Русский", "Українська", "Polski", "日本語", "한국어",
+];
 
 // country → 该国所有城市 (二级联动用)
 export const citiesByCountry: Record<string, string[]> = (() => {
@@ -248,15 +253,21 @@ export const INTERACTIONS: { key: Interaction; label: string; labelEn: string }[
   { key: "video-chat", label: "视频聊天", labelEn: "Video Chat" },
 ];
 
+// label 字段仅作 FilterBar 兜底显示;Chip 直接读 label,不再走 i18n
+// "all" 项的 label 在 FilterBar MorePanel 里被 i18n key 替代,以支持双语
 export const ageRanges = [
   { key: "all",   label: "全部年龄" },
+  { key: "18-20", label: "18–20", min: 18, max: 20 },
   { key: "21-23", label: "21–23", min: 21, max: 23 },
   { key: "24-26", label: "24–26", min: 24, max: 26 },
   { key: "27-29", label: "27–29", min: 27, max: 29 },
+  { key: "30+",   label: "30+",   min: 30, max: 99 },
 ];
 export const heightRanges = [
   { key: "all",     label: "全部身高" },
-  { key: "lt-165",  label: "< 165 cm",   min: 0,   max: 164 },
-  { key: "165-170", label: "165–170 cm", min: 165, max: 170 },
-  { key: "gt-170",  label: "> 170 cm",   min: 171, max: 999 },
+  { key: "lt-160",  label: "160 以下",     min: 0,   max: 159 },
+  { key: "160-165", label: "160–165 cm",   min: 160, max: 165 },
+  { key: "166-170", label: "166–170 cm",   min: 166, max: 170 },
+  { key: "171-175", label: "171–175 cm",   min: 171, max: 175 },
+  { key: "gt-175",  label: "175 以上",     min: 176, max: 999 },
 ];

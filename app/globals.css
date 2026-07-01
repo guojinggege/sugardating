@@ -1427,8 +1427,9 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
    零 absolute (仅 hero-video/veil 内部),零 margin/top 负值 (translate 处理),
    零 magic number (变量:--cr-hero-h / --cr-avatar / 都通过语义命名)
    ============================================================ */
-/* Hero Cover Motion — Fold section (video hero + embedded Floating Identity Bar) */
-.cr-fold{position:relative;isolation:isolate;background:var(--page)}
+/* Hero Cover Motion — Fold section
+   padding-bottom reserves room for Identity Bar's 50% overhang below Hero */
+.cr-fold{position:relative;isolation:isolate;background:var(--page);padding-bottom:65px}
 
 /* Hero band — 500h video banner + bottom gradient fade */
 /* Hero — 640 (spec 620-680) · Apple TV 动态封面感 */
@@ -1445,34 +1446,38 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 /* Veil — 轻暗化,底部略深 (视频可见,Bar 悬浮效果自然;不做厚重 dark scrim) */
 .cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.02) 30%,rgba(0,0,0,.35) 100%);pointer-events:none}
 /* 底部 gradient fade — 平滑过渡到 page bg,不再硬切 */
-.cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:120px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.25) 55%,var(--page) 100%);pointer-events:none}
+/* Hero 底部渐变 — 加深加高,让 Bar 座落在 soft-fade 上,与正文自然融合 */
+.cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:240px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.12) 35%,rgba(244,244,245,.45) 70%,var(--page) 100%);pointer-events:none}
 @media(max-width:1024px){.cr-fold-hero{height:540px}}
 @media(max-width:640px){.cr-fold-hero{height:440px}}
 
-/* Floating Identity Bar — absolute at bottom of Hero,full-shell width (1200-1280)
-   spec §Floating Identity Bar: 与正文 Container 一致宽度,高 120-140,glass 90/blur20/radius24 */
-.cr-fold-bar-abs{position:absolute;left:0;right:0;bottom:40px;z-index:3}
+/* Floating Identity Bar — straddle Hero 底边 50/50
+   bottom:-65 使 130px 高 Bar 一半留 Hero 内,一半探出到 body 空间
+   .cr-fold padding-bottom:65 已为下半 reserve 出空间,不会 overlap 正文 */
+.cr-fold-bar-abs{position:absolute;left:0;right:0;bottom:-65px;z-index:3}
 .cr-fold-bar{
-  /* Glass Overlay — 轻量悬浮 (spec §Identity Bar 融合:非白板,像悬浮在视频上方) */
-  background:rgba(255,255,255,.84);
+  /* 轻量 Glass — "Hero 长出来的一部分",而非独立白 Card
+     opacity .76,blur 18,border .35,shadow 极柔 (spec §减少视觉重量) */
+  background:rgba(255,255,255,.76);
   backdrop-filter:blur(18px) saturate(140%);
   -webkit-backdrop-filter:blur(18px) saturate(140%);
-  border:1px solid rgba(255,255,255,.45);
+  border:1px solid rgba(255,255,255,.35);
   border-radius:24px;
   padding:22px 32px;
   min-height:130px;
-  box-shadow:0 20px 50px -18px rgba(0,0,0,.22),0 6px 18px -8px rgba(0,0,0,.08);
+  box-shadow:0 24px 60px -22px rgba(0,0,0,.16);
   display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:32px;
   align-items:center;
 }
 @media(max-width:1024px){
-  /* Tablet & below: static flow with negative margin (bar can't stay absolute — no room) */
-  .cr-fold-bar-abs{position:relative;bottom:auto;margin-top:-110px}
+  /* Tablet & below: static flow;bar 半覆盖 Hero 底边 (margin-top 拉入) */
+  .cr-fold-bar-abs{position:relative;bottom:auto;margin-top:-90px}
   .cr-fold-bar{grid-template-columns:1fr;padding:20px 22px;min-height:0;justify-items:start;text-align:left}
   .cr-fold-actions{width:100%}
 }
 @media(max-width:640px){
-  .cr-fold-bar-abs{margin-top:-80px}
+  .cr-fold{padding-bottom:32px}
+  .cr-fold-bar-abs{margin-top:-70px}
   .cr-fold-bar{padding:16px 18px;border-radius:20px;justify-items:center;text-align:center;gap:16px}
   .cr-fold-actions{justify-content:center;display:flex;flex-wrap:wrap}
 }

@@ -480,6 +480,21 @@
       "travelPlans": "Travel plans",
       "joinedAt": "Joined"
     },
+    "availability": {
+      "title": "Availability & Trust",
+      "status": "Current status",
+      "onlineNow": "Online now",
+      "lastActive": "Last active",
+      "responseRate": "Response rate",
+      "replyTime": "Avg reply",
+      "minutes": "min",
+      "hours": "h",
+      "completedDates": "Completed dates",
+      "identity": "Identity",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "memberSince": "Member since"
+    },
     "sidebar": {
       "guesses": "Recommended for you",
       "online": "Online Sugargirls",

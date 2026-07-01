@@ -480,6 +480,21 @@
       "travelPlans": "旅行计划",
       "joinedAt": "加入时间"
     },
+    "availability": {
+      "title": "在线状态 · 信任信号",
+      "status": "当前状态",
+      "onlineNow": "在线中",
+      "lastActive": "最近活跃",
+      "responseRate": "响应率",
+      "replyTime": "平均回复",
+      "minutes": "分钟内",
+      "hours": "小时内",
+      "completedDates": "完成约会",
+      "identity": "身份认证",
+      "verified": "已认证",
+      "unverified": "未认证",
+      "memberSince": "加入时间"
+    },
     "sidebar": {
       "guesses": "猜你喜欢",
       "online": "在线 Sugargirl",

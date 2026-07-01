@@ -10,8 +10,9 @@ import Link from "next/link";
 import Img from "@/components/Img";
 import { getTranslations } from "next-intl/server";
 import type { Creator } from "@/lib/types";
-import type { VideoItem, GalleryItem } from "@/lib/creatorProfileMock";
+import type { VideoItem, GalleryItem, AvailabilityData } from "@/lib/creatorProfileMock";
 import TipButton from "@/app/creators/[slug]/TipButton";
+import AvailabilityCard from "./AvailabilityCard";
 
 interface CreatorRef {
   creator: Creator;
@@ -20,11 +21,12 @@ interface CreatorRef {
 
 interface Props {
   creatorSlug: string;
+  availability: AvailabilityData;
   guesses: CreatorRef[];
   online: CreatorRef[];
   hot: CreatorRef[];
-  videos: VideoItem[];          // 推荐视频 (取前 3)
-  recentMedia: GalleryItem[];   // Recent Media (取前 4)
+  videos: VideoItem[];
+  recentMedia: GalleryItem[];
 }
 
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
@@ -47,7 +49,7 @@ function fmtViews(n: number): string {
 }
 
 export default async function RightSidebar({
-  creatorSlug, guesses, online, hot, videos, recentMedia,
+  creatorSlug, availability, guesses, online, hot, videos, recentMedia,
 }: Props) {
   const t   = await getTranslations("creatorProfile.sidebar");
   const tSv = await getTranslations("creatorProfile.services");
@@ -76,6 +78,9 @@ export default async function RightSidebar({
 
   return (
     <aside className="cr-sidebar">
+      {/* 0 Availability + Trust — 顶部信任信号 (spec §16 缺少信任元素) */}
+      <AvailabilityCard data={availability} />
+
       {/* 1 猜你喜欢 */}
       {creatorRow(t("guesses"), guesses)}
 

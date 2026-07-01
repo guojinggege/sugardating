@@ -166,6 +166,35 @@ export function deriveStats(slug: string, subs: string, followers: string, works
   };
 }
 
+// Availability + trust 数据 (sidebar 顶部信任信号)
+export interface AvailabilityData {
+  isOnline: boolean;
+  lastActiveText: string;
+  responseRate: number;
+  replyMinutes: number;
+  completedDates: number;
+  memberSince: string;
+  identityVerified: boolean;
+}
+
+export function deriveAvailability(slug: string, memberSince: string, opts?: { online?: boolean }): AvailabilityData {
+  const off = hashSlug(slug);
+  const isOnline = opts?.online ?? (off % 3 !== 0);
+  const responseRate = 90 + (off % 10);           // 90-99
+  const replyMinutes = 5 + (off % 55);            // 5-59
+  const completedDates = 40 + (off % 400);        // 40-440
+  const lastHours = 1 + (off % 24);
+  return {
+    isOnline,
+    lastActiveText: isOnline ? "" : `${lastHours}h`,
+    responseRate,
+    replyMinutes,
+    completedDates,
+    memberSince,
+    identityVerified: true,
+  };
+}
+
 // 关于 Ta 区块
 export interface CreatorAbout {
   bio: string;

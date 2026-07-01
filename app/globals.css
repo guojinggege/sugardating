@@ -789,77 +789,120 @@ body.home-immersive main{padding-top:0}
    light 主题,黑金轻奢
    ============================================================ */
 .cr-page{background:var(--page);min-height:100vh}
-/* 最大宽 1440;padding 响应式:32 / 24 / 16 */
-.cr-container{max-width:1440px;padding-top:0}
+/* Container 1200 (spec):Airbnb/Patreon 常用宽度,信息更聚焦不发散 */
+.cr-container{max-width:1200px;padding-top:0}
 @media(min-width:1024px){.cr-container{padding-left:32px;padding-right:32px}}
-@media(max-width:640px){.cr-container{padding-left:16px;padding-right:16px}}
+@media(max-width:640px){.cr-container{padding-left:16px;padding-right:16px;padding-bottom:96px}}
 
-/* Hero — 大封面 + 头像 + 信息 + 操作 */
+/* Hero — 更强 dark overlay 让文字对比度足够 */
 .cr-hero{position:relative}
-.cr-cover{position:relative;height:240px;overflow:hidden;background:#e8e8ec}
-.cr-cover img{object-fit:cover;width:100%;height:100%}
-.cr-cover-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.18) 60%,rgba(244,244,245,.6) 100%)}
-@media(min-width:1024px){.cr-cover{height:320px}}
+.cr-cover{position:relative;height:240px;overflow:hidden;background:#0a0a0c}
+.cr-cover img{object-fit:cover;width:100%;height:100%;opacity:.92}
+.cr-cover-veil{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,
+    rgba(0,0,0,.42) 0%,
+    rgba(0,0,0,.22) 40%,
+    rgba(0,0,0,.08) 75%,
+    rgba(244,244,245,.7) 100%);
+}
+@media(min-width:1024px){.cr-cover{height:300px}}
 
-/* 关键修复:
-   移除 head 整体的 margin-top:-72px (原来会把 name/actions 一起拉进 cover 遮挡)
-   → 只让 avatar-wrap 单独浮出 cover;name/actions 从容器顶端 flex-start 对齐 */
+/* Head:1200 内 3-col,avatar 单独 overlap;name/actions 从顶对齐 */
 .cr-head{
-  max-width:1440px;margin:0 auto;
+  max-width:1200px;margin:0 auto;
   padding:24px;
-  display:grid;grid-template-columns:auto 1fr auto;gap:24px;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;
   align-items:flex-start;
   position:relative;z-index:2;
 }
-@media(min-width:1024px){.cr-head{padding-left:32px;padding-right:32px}}
+@media(min-width:1024px){.cr-head{padding-left:32px;padding-right:32px;gap:40px}}
 @media(max-width:1024px){
-  .cr-head{grid-template-columns:auto 1fr;row-gap:20px}
+  .cr-head{grid-template-columns:auto 1fr;row-gap:24px;gap:24px}
   .cr-acts{grid-column:1/-1;justify-content:flex-start}
 }
 @media(max-width:640px){
   .cr-head{grid-template-columns:1fr;justify-items:center;text-align:center;padding:16px}
-  .cr-acts{justify-content:center}
+  .cr-acts{display:none}   /* mobile 走底部固定 CTA bar */
 }
 
-.cr-ava-wrap{position:relative;flex:0 0 auto;margin-top:-72px}
-@media(max-width:640px){.cr-ava-wrap{margin-top:-56px}}
-.cr-ava{width:144px;height:144px;border-radius:50%;overflow:hidden;border:5px solid var(--page);background:#e6e6ea;box-shadow:0 18px 50px -18px rgba(0,0,0,.35)}
+.cr-ava-wrap{position:relative;flex:0 0 auto;margin-top:-80px}
+@media(max-width:640px){.cr-ava-wrap{margin-top:-64px}}
+/* Avatar 更强 shadow 提升视觉中心 (光晕感) */
+.cr-ava{width:128px;height:128px;border-radius:50%;overflow:hidden;border:4px solid var(--page);background:#e6e6ea;box-shadow:0 24px 60px -20px rgba(0,0,0,.5),0 8px 24px -8px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.04)}
 .cr-ava img{object-fit:cover;width:100%;height:100%}
-@media(min-width:768px){.cr-ava{width:160px;height:160px}}
+@media(min-width:1024px){.cr-ava{width:144px;height:144px;border-width:5px}}
 .cr-online-dot{position:absolute;right:8px;bottom:8px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid var(--page);display:inline-flex;align-items:center;justify-content:center}
 .cr-online-dot-ping{position:absolute;inset:-2px;border-radius:50%;background:#22c55e;opacity:.5;animation:cr-ping 1.6s ease-out infinite}
 @keyframes cr-ping{0%{transform:scale(.9);opacity:.55}80%,100%{transform:scale(1.7);opacity:0}}
 
-.cr-id{padding-bottom:6px;min-width:0}
+/* Info 三段视觉组 (name+badges / meta stack / bio+tags),字号层级 32/16/14/13 */
+.cr-id{padding-top:8px;min-width:0}
 .cr-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cr-name{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0;color:var(--ink);line-height:1.1}
-@media(min-width:768px){.cr-name{font-size:32px}}
-.cr-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1}
+.cr-name{font-size:26px;font-weight:800;letter-spacing:-.022em;margin:0;color:var(--ink);line-height:1.05}
+@media(min-width:1024px){.cr-name{font-size:32px}}
+.cr-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1}
 .cr-badge svg{width:11px;height:11px;fill:currentColor;stroke:currentColor;stroke-width:0}
 .cr-badge-verified{background:rgba(56,189,248,.15);color:#0284c7;border:1px solid rgba(56,189,248,.3)}
 .cr-badge-verified svg path:last-child{stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .cr-badge-sg{background:var(--ink);color:#fff;padding:4px 10px;font-style:italic;font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-size:12px}
-.cr-handle{font-size:13px;color:var(--muted);margin-top:4px}
-.cr-meta{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 0;padding:0;list-style:none;font-size:13px;color:var(--ink2)}
-.cr-meta li{display:inline-flex;align-items:center;gap:5px}
-.cr-meta svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.cr-bio{font-size:14.5px;line-height:1.65;color:var(--ink2);margin:14px 0 0;max-width:560px}
-.cr-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.cr-tag{font-size:12px;font-weight:600;color:var(--ink2);background:var(--card);border:1px solid var(--line);padding:4px 10px;border-radius:999px}
+.cr-handle{font-size:14px;color:var(--muted);margin-top:6px;font-weight:500}
 
-/* Hero actions — 6 个按钮 */
-.cr-acts{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:8px;position:relative}
-.cr-act{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 16px;border-radius:10px;font-weight:600;font-size:13.5px;font-family:inherit;background:var(--card);border:1px solid var(--line2);color:var(--ink);cursor:pointer;transition:background .18s,border-color .18s,color .18s,transform .15s}
-.cr-act:hover{border-color:var(--ink);transform:translateY(-1px)}
+/* Meta 竖直堆叠,每行一个 icon,提升扫描效率 */
+.cr-meta{display:flex;flex-direction:column;gap:8px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink2);font-weight:500}
+.cr-meta li{display:inline-flex;align-items:center;gap:10px;line-height:1.4}
+.cr-meta svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.65;flex:0 0 16px}
+
+.cr-bio{font-size:15px;line-height:1.65;color:var(--ink2);margin:16px 0 0;max-width:560px;font-weight:400}
+.cr-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cr-tag{font-size:12px;font-weight:600;color:var(--ink);background:var(--page);border:1px solid var(--line);padding:5px 12px;border-radius:999px;transition:border-color .15s,background .15s}
+.cr-tag:hover{border-color:var(--ink2);background:var(--card)}
+@media(max-width:640px){.cr-meta{align-items:center}.cr-tags{justify-content:center}}
+
+/* Hero actions — 3 层按钮 hierarchy:Primary > Secondary > Ghost / Icon
+   Primary (立即聊天) 更大更黑 → 用户第一步注意力
+   Secondary (预约/视频) 中等 outlined
+   Ghost (关注 text) + Icon (收藏/分享 40x40) 轻量 */
+.cr-acts{display:flex;flex-wrap:wrap;gap:8px;padding-top:8px;position:relative;align-items:center;max-width:340px}
+@media(min-width:1024px){.cr-acts{padding-top:16px}}
+
+.cr-act{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .15s,box-shadow .2s;letter-spacing:-.005em;line-height:1;white-space:nowrap}
 .cr-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.cr-act-primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-.cr-act-primary:hover{background:#000;border-color:#000;box-shadow:0 8px 22px -8px rgba(0,0,0,.35)}
-.cr-act-primary.on{background:var(--card);color:var(--ink);border-color:var(--ink)}
-.cr-act-ic{width:40px;padding:0;flex:0 0 40px}
-.cr-act-ic svg{width:18px;height:18px}
-.cr-act-ic.on{color:#e11d48;border-color:#e11d48}
+
+/* Primary — 立即聊天 (视觉焦点) */
+.cr-act-primary{height:44px;padding:0 22px;border-radius:12px;font-weight:700;font-size:14.5px;background:var(--ink);color:#fff;border:1px solid var(--ink);box-shadow:0 4px 14px -6px rgba(0,0,0,.35);flex:1 1 auto;min-width:140px}
+.cr-act-primary:hover{background:#000;border-color:#000;transform:translateY(-1px);box-shadow:0 10px 28px -8px rgba(0,0,0,.4)}
+.cr-act-primary svg{width:15px;height:15px}
+
+/* Secondary — 预约/视频 (outlined,标准高度) */
+.cr-act-secondary{height:40px;padding:0 16px;border-radius:12px;font-weight:600;font-size:13.5px;background:var(--card);border:1px solid var(--line2);color:var(--ink)}
+.cr-act-secondary:hover{border-color:var(--ink);transform:translateY(-1px)}
+
+/* Ghost — 关注 (最轻,文字风) */
+.cr-act-ghost{height:40px;padding:0 14px;border-radius:12px;font-weight:600;font-size:13.5px;background:transparent;border:1px solid transparent;color:var(--ink2)}
+.cr-act-ghost:hover{background:var(--card);border-color:var(--line);color:var(--ink)}
+.cr-act-ghost.on{background:var(--ink);color:#fff}
+
+/* Icon-only — 收藏/分享 */
+.cr-act-ic{width:40px;height:40px;padding:0;flex:0 0 40px;border-radius:12px;background:var(--card);border:1px solid var(--line2);color:var(--ink2)}
+.cr-act-ic:hover{border-color:var(--ink);color:var(--ink)}
+.cr-act-ic svg{width:17px;height:17px}
+.cr-act-ic.on{color:#e11d48;border-color:#e11d48;background:rgba(225,29,72,.08)}
+
 .cr-act-toast{position:absolute;top:-32px;right:0;font-size:12px;font-weight:600;color:#fff;background:var(--ink);padding:6px 12px;border-radius:8px;animation:cr-fade .2s ease-out}
 @keyframes cr-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+
+/* 移动固定底部 CTA bar — 仅 <640 显示,fixed bottom */
+.cr-mcta{display:none}
+@media(max-width:640px){
+  .cr-mcta{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.94);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-top:1px solid var(--line);box-shadow:0 -8px 24px -12px rgba(0,0,0,.12)}
+}
+.cr-mcta-ic{width:44px;height:44px;border-radius:12px;background:var(--page);border:1px solid var(--line2);color:var(--ink2);display:grid;place-items:center;flex:0 0 44px;cursor:pointer;font-family:inherit;transition:color .15s,border-color .15s}
+.cr-mcta-ic:hover{color:var(--ink);border-color:var(--ink)}
+.cr-mcta-ic.on{color:#e11d48;border-color:#e11d48;background:rgba(225,29,72,.08)}
+.cr-mcta-ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cr-mcta-secondary{flex:1;height:44px;border-radius:12px;background:var(--card);border:1px solid var(--line2);color:var(--ink);font-weight:600;font-size:14px;font-family:inherit;cursor:pointer}
+.cr-mcta-primary{flex:1.5;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-weight:700;font-size:14.5px;border:0;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px -6px rgba(0,0,0,.35)}
 
 /* Stats strip — radius 16 统一 */
 .cr-stats{margin-top:24px;display:grid;grid-template-columns:repeat(8,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 0;overflow:hidden}
@@ -880,19 +923,22 @@ body.home-immersive main{padding-top:0}
 .cr-tab{position:relative;padding:14px 16px;font-size:14.5px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .15s}
 .cr-tab:hover{color:var(--ink)}
 .cr-tab.on{color:var(--ink)}
-.cr-tab.on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2px;background:var(--ink);border-radius:2px}
+.cr-tab.on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2.5px;background:var(--accent);border-radius:2px}
+.cr-tab:hover{background:rgba(0,0,0,.03);border-radius:8px 8px 0 0}
+.cr-tab.on{color:var(--accent)}
 
 /* 2-col body */
-/* 2-col body (Desktop: main + 320 sidebar / Tablet: 单栏 sidebar 下 / Mobile: 单栏) */
-.cr-body{display:grid;grid-template-columns:1fr;gap:24px;padding-top:24px}
-@media(min-width:1024px){.cr-body{grid-template-columns:minmax(0,1fr) 320px;gap:32px}}
-.cr-main{min-width:0;display:flex;flex-direction:column;gap:24px}
+/* 2-col body 8:4 (spec):Desktop 主区 66% + sidebar 33% */
+.cr-body{display:grid;grid-template-columns:1fr;gap:32px;padding-top:32px}
+@media(min-width:1024px){.cr-body{grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:40px}}
+.cr-main{min-width:0;display:flex;flex-direction:column;gap:32px}   /* Section 32 spacing */
 .cr-section{scroll-margin-top:160px}   /* 让 tab 点击滚到位不被 sticky 挡 */
+.cr-section-h{font-size:20px;font-weight:800;letter-spacing:-.015em;margin:0 0 16px;color:var(--ink)}
 .cr-section-h{font-size:20px;font-weight:800;letter-spacing:-.015em;margin:0 0 16px;color:var(--ink)}
 
 /* Feed */
 .cr-feed{display:flex;flex-direction:column;gap:18px}
-.cr-post{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;transition:border-color .18s,box-shadow .25s}
+.cr-post{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;transition:border-color .18s,box-shadow .25s}
 .cr-post:hover{border-color:#d8d8de;box-shadow:0 6px 24px -16px rgba(0,0,0,.12)}
 .cr-post-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .cr-post-ava{width:40px;height:40px;border-radius:50%;overflow:hidden;background:#e6e6ea;flex:0 0 40px}
@@ -900,7 +946,7 @@ body.home-immersive main{padding-top:0}
 .cr-post-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.2}
 .cr-post-time{font-size:12px;color:var(--muted);margin-top:1px}
 .cr-post-text{font-size:14.5px;line-height:1.65;color:var(--ink);margin:0 0 12px;white-space:pre-wrap;word-break:break-word}
-.cr-post-grid{display:grid;gap:4px;margin-bottom:12px;border-radius:12px;overflow:hidden}
+.cr-post-grid{display:grid;gap:8px;margin-bottom:12px;border-radius:12px;overflow:hidden}
 .cr-post-grid.g-1{grid-template-columns:1fr;max-width:480px}
 .cr-post-grid.g-1 .cr-post-img{aspect-ratio:4/3}
 .cr-post-grid.g-3{grid-template-columns:repeat(3,1fr);max-width:560px}
@@ -1082,6 +1128,24 @@ body.home-immersive main{padding-top:0}
 .cr-sb-media-tile:hover{transform:scale(1.03)}
 .cr-sb-media-tile img{object-fit:cover;width:100%;height:100%;transition:transform .5s}
 .cr-sb-media-tile:hover img{transform:scale(1.06)}
+
+/* Availability trust card — Response Rate / Reply Time / Completed / Verified / Last Active */
+.cr-sb-avail{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.cr-sb-avail li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.cr-sb-avail li:last-child{border-bottom:none}
+.cr-sb-avail-ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:0 0 32px;background:var(--page)}
+.cr-sb-avail-ic svg{width:15px;height:15px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cr-sb-avail-ic.pos{background:rgba(34,197,94,.12);color:#16a34a}
+.cr-sb-avail-ic.pos svg{stroke:#16a34a}
+.cr-sb-avail-ic.gold{background:rgba(184,167,137,.15);color:var(--accent)}
+.cr-sb-avail-ic.gold svg{stroke:var(--accent)}
+.cr-sb-avail-body{flex:1;min-width:0}
+.cr-sb-avail-label{font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.cr-sb-avail-value{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.3;margin-top:1px;font-variant-numeric:tabular-nums}
+.cr-sb-avail-value.pos{color:#16a34a}
+.cr-sb-avail-dot{margin-right:5px;display:inline-flex;position:relative;width:7px;height:7px;vertical-align:baseline}
+.cr-sb-avail-dot span{position:absolute;inset:0;border-radius:50%;background:#22c55e}
+.cr-sb-avail-dot::before{content:"";position:absolute;inset:-2px;border-radius:50%;background:#22c55e;opacity:.35;animation:cr-ping 1.6s ease-out infinite}
 
 /* ============================================================
    Guest Mode: Login Modal + User Menu (Auth UI)

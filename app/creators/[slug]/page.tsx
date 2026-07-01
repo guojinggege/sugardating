@@ -8,7 +8,7 @@ import type { SugarGirlEntry } from "@/lib/sugarGirlMock";
 import type { Creator, Tier } from "@/lib/types";
 import {
   makeFeed, makeVideos, makeGallery, makeServices,
-  deriveStats, deriveAbout,
+  deriveStats, deriveAbout, deriveAvailability,
 } from "@/lib/creatorProfileMock";
 
 import CreatorHero from "@/components/Creator/CreatorHero";
@@ -22,6 +22,7 @@ import ReviewList from "@/components/Creator/ReviewList";
 import AboutBlock from "@/components/Creator/AboutBlock";
 import RightSidebar from "@/components/Creator/RightSidebar";
 import RelatedCreators from "@/components/Creator/RelatedCreators";
+import MobileCTABar from "@/components/Creator/MobileCTABar";
 import CommentForm from "./CommentForm";
 
 export const dynamic = "force-dynamic";
@@ -116,6 +117,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const gallery  = makeGallery(creator.slug);
   const services = makeServices();
   const about    = deriveAbout(creator.slug, baseBio, creator.region, stats.joinedAt);
+  const availability = deriveAvailability(creator.slug, stats.joinedAt, {
+    online: sgSource ? sgSource.online : true,
+  });
 
   // sugargirls fallback:用真实数据覆盖派生的部分
   const age       = sgSource?.age       ?? 24 + (off % 6);
@@ -196,6 +200,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
           <RightSidebar
             creatorSlug={creator.slug}
+            availability={availability}
             guesses={pickCreators(4, 0)}
             online={pickCreators(4, 4)}
             hot={pickCreators(4, 2)}
@@ -215,6 +220,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
         <div style={{ height: 60 }} />
       </div>
+
+      {/* 移动端固定底部 CTA bar (仅 <640 显示) */}
+      <MobileCTABar />
     </div>
   );
 }

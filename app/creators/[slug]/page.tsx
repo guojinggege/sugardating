@@ -10,6 +10,7 @@ import {
   makeFeed, makeVideos, makeGallery, makeServices,
   deriveStats, deriveAbout, deriveAvailability,
   deriveTrust, deriveTravel, deriveTimeline, deriveExtraStats,
+  deriveTopFans, deriveGiftLeaderboard,
 } from "@/lib/creatorProfileMock";
 
 import CreatorFold from "@/components/Creator/CreatorFold";
@@ -110,6 +111,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const travel       = deriveTravel(creator.slug, creator.region);
   const timeline     = deriveTimeline(creator.slug, creator.region);
   const extra        = deriveExtraStats(creator.slug, sgSource?.popularity);
+  const topFans      = deriveTopFans(creator.slug);
+  const giftBoard    = deriveGiftLeaderboard(creator.slug);
 
   const age         = sgSource?.age ?? 24 + (off % 6);
   const heightCm    = sgSource?.height ?? 165 + (off % 12);
@@ -178,36 +181,31 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </div>
         </div>
 
-        {/* 7) Body Grid — Feed 主 + Sidebar 右 */}
+        {/* 7) Body Grid — Feed 主 + Sidebar 右
+             Section h3 titles 移除 (spec §1:与 Tabs 重复);aria-label 保留 a11y */}
         <div className="cr-grid">
           <main className="cr-main">
-            <section id="feed" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.feed")}</h3>
+            <section id="feed" className="cr-section" aria-label={t("sections.feed")}>
               <FeedList authorName={creator.name} authorAvatar={avatar} posts={feed} />
             </section>
 
-            <section id="gallery" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.gallery")}</h3>
+            <section id="gallery" className="cr-section" aria-label={t("sections.gallery")}>
               <GalleryGrid items={gallery} />
             </section>
 
-            <section id="videos" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.videos")}</h3>
+            <section id="videos" className="cr-section" aria-label={t("sections.videos")}>
               <VideoGrid videos={videos} />
             </section>
 
-            <section id="services" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.services")}</h3>
+            <section id="services" className="cr-section" aria-label={t("sections.services")}>
               <ServiceCards services={services} />
             </section>
 
-            <section id="gifts" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.gifts")}</h3>
+            <section id="gifts" className="cr-section" aria-label={t("sections.gifts")}>
               <CreatorGiftPanel />
             </section>
 
-            <section id="reviews" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.reviews")}</h3>
+            <section id="reviews" className="cr-section" aria-label={t("sections.reviews")}>
               <ReviewList reviews={comments} overallRating={extra.rating} />
               <div className="cr-review-form">
                 <h4 className="cr-form-h">{t("reviews.writeNew")}</h4>
@@ -215,9 +213,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </div>
             </section>
 
-            {/* 关于 Ta tab 深层内容 — Dating Pref / Travel / Timeline */}
-            <section id="about" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.datingPref")}</h3>
+            {/* 关于 Ta tab 深层内容 — Dating Pref + Travel + Timeline
+                (About Card 已展示 bio/basic/interests,这里是补充详情) */}
+            <section id="about" className="cr-section" aria-label={t("sections.about")}>
+              <div className="cr-sub-h"><h4>{t("sections.datingPref")}</h4></div>
               <DatingPreference />
 
               <div className="cr-sub-h">
@@ -233,13 +232,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </main>
 
           <RightSidebar
-            creatorSlug={creator.slug}
-            availability={availability}
-            guesses={pickCreators(4, 0)}
             online={pickCreators(4, 4)}
-            hot={pickCreators(4, 2)}
-            videos={videos}
             recentMedia={gallery.slice(0, 4)}
+            recommended={pickCreators(4, 0)}
+            topFans={topFans}
+            giftBoard={giftBoard}
           />
         </div>
 

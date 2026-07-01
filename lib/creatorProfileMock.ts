@@ -268,6 +268,45 @@ export function deriveTimeline(slug: string, currentCity: string): TimelineEvent
   ];
 }
 
+// Top Fans (mock)
+export interface TopFan {
+  name: string;
+  avatarChar: string;
+  giftCount: number;
+  totalSpent: string;
+}
+const FAN_NAMES = ["James", "Daniel", "Ryan", "Marcus", "David", "Kevin", "Ethan", "Chris", "Michael"];
+export function deriveTopFans(slug: string): TopFan[] {
+  const off = hashSlug(slug);
+  return [0, 1, 2, 3, 4].map((i) => {
+    const name = FAN_NAMES[(off + i * 3) % FAN_NAMES.length];
+    return {
+      name,
+      avatarChar: name.charAt(0),
+      giftCount: 82 - i * 12 + (off % 8),
+      totalSpent: `$${(950 - i * 180 + (off % 200)).toLocaleString("en-US")}`,
+    };
+  });
+}
+
+// Gift Leaderboard (mock)
+export interface GiftRank {
+  emoji: string;
+  key: "rose" | "coffee" | "dinner" | "luxury" | "diamond";
+  count: number;
+}
+export function deriveGiftLeaderboard(slug: string): GiftRank[] {
+  const off = hashSlug(slug);
+  const seed = [
+    { emoji: "💎", key: "diamond" as const, count: 12 + (off % 8) },
+    { emoji: "👑", key: "luxury"  as const, count: 34 + (off % 15) },
+    { emoji: "🍽️", key: "dinner"  as const, count: 68 + (off % 22) },
+    { emoji: "☕", key: "coffee"  as const, count: 156 + (off % 44) },
+    { emoji: "🌹", key: "rose"    as const, count: 412 + (off % 88) },
+  ];
+  return seed.sort((a, b) => b.count - a.count);
+}
+
 // 派生额外统计 (likes / gifts / rating)
 export function deriveExtraStats(slug: string, popularity?: number): { likes: number; gifts: number; rating: number } {
   const off = hashSlug(slug);

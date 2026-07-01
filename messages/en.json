@@ -620,14 +620,17 @@
       "memberSince": "Member since"
     },
     "sidebar": {
-      "guesses": "Recommended for you",
       "online": "Online Sugargirls",
+      "recentMedia": "Recent Media",
+      "recommended": "Recommended Creators",
+      "topFans": "Top Fans",
+      "giftLeaderboard": "Gift Leaderboard",
+      "followers": "followers",
+      "guesses": "Recommended for you",
       "hot": "Top Creators",
       "recent": "Newly joined",
       "recommendedVideos": "Recommended Videos",
       "recommendedServices": "Recommended Services",
-      "recentMedia": "Recent Media",
-      "followers": "followers",
       "support": "Support this creator",
       "supportDesc": "Send a small tip to let the creator know you enjoy their work."
     },

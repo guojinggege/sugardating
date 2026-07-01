@@ -620,14 +620,17 @@
       "memberSince": "加入时间"
     },
     "sidebar": {
-      "guesses": "猜你喜欢",
       "online": "在线 Sugargirl",
+      "recentMedia": "Recent Media",
+      "recommended": "Recommended Creators",
+      "topFans": "Top Fans",
+      "giftLeaderboard": "Gift Leaderboard",
+      "followers": "粉丝",
+      "guesses": "猜你喜欢",
       "hot": "热门创作者",
       "recent": "最近加入",
       "recommendedVideos": "推荐视频",
       "recommendedServices": "推荐服务",
-      "recentMedia": "Recent Media",
-      "followers": "粉丝",
       "support": "支持 Ta",
       "supportDesc": "用一笔小额打赏告诉创作者:我喜欢你的内容。"
     },

@@ -44,9 +44,9 @@ export default async function CreatorFold({
       {/* Glass Overlay Header — 悬浮 Hero 底部,与正文融合 */}
       <div className="cr-shell cr-fold-header-wrap">
         <div className="cr-fold-glass">
-          {/* Avatar — translate 上移使 50/50 straddle glass 顶边 */}
+          {/* Avatar 140 — translate 上移使 straddle glass 顶边 & 跨 Hero banner 边界 */}
           <div className="cr-fold-avatar">
-            <Img src={avatar} alt={creator.name} sizes="160px" />
+            <Img src={avatar} alt={creator.name} sizes="140px" />
             {online && (
               <span className="cr-fold-avatar-online" aria-label={t("online")} />
             )}

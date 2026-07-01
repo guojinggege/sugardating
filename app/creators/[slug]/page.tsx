@@ -72,6 +72,15 @@ const SLOGANS = [
   "Life is short — dine well.",
 ];
 
+// Hero Cover Motion priority (spec):
+// 1. Creator's own Cover Video (未来自上传时读取 creator.coverVideoSrc)
+// 2. AI Demo Video (当前所有 creator 统一使用)
+// 3. Cover Image (poster,fallback)
+//
+// 运营需上传实际文件到 public/videos/creator-ai-demo.mp4;
+// 未上传时,browser 会仅显示 poster 图片,无 error UI
+const AI_DEMO_VIDEO_SRC = "/videos/creator-ai-demo.mp4";
+
 export default async function Page({ params }: { params: { slug: string } }) {
   const [dbDetail, dbComments, allCreators, t] = await Promise.all([
     getCreatorBySlug(params.slug),
@@ -124,7 +133,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <div className="cr-page">
-      {/* 1) Hero + Profile Header 融合 Fold — Instagram/Twitter/Threads 风格 avatar 跨 banner */}
+      {/* 1) Hero Cover Motion + "Floating Identity Card" — Instagram/Twitter/Threads 风格 avatar 跨 banner
+             Video priority: creator.coverVideoSrc (未来自) → AI_DEMO_VIDEO_SRC (统一) → cover image (poster) */}
       <CreatorFold
         creator={creator}
         cover={cover}
@@ -136,6 +146,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         intro={slogan}
         online={sgSource ? sgSource.online : true}
         vip
+        videoSrc={AI_DEMO_VIDEO_SRC}
       />
 
       <div className="cr-shell cr-body">

@@ -1179,8 +1179,7 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cr-hero{min-height:500px;height:500px;color:#F2F2F4}
 @media(max-width:1024px){.cr-hero{height:400px;min-height:400px}}
 @media(max-width:640px){.cr-hero{height:280px;min-height:280px}}
-.cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.55) blur(4px);transform:scale(1.05)}
-.cr-hero-video-ctl{position:absolute;right:16px;bottom:16px;z-index:3;display:flex;gap:6px;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);padding:6px;border-radius:999px;border:1px solid rgba(255,255,255,.14)}
+.cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cr-hvc-btn{width:32px;height:32px;border:0;background:transparent;color:#fff;cursor:pointer;border-radius:50%;display:grid;place-items:center;transition:background .15s}
 .cr-hvc-btn:hover{background:rgba(255,255,255,.18)}
 .cr-hvc-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -1427,70 +1426,81 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
    零 absolute (仅 hero-video/veil 内部),零 margin/top 负值 (translate 处理),
    零 magic number (变量:--cr-hero-h / --cr-avatar / 都通过语义命名)
    ============================================================ */
+/* Hero Cover Motion — Fold section (video hero + floating identity card) */
 .cr-fold{position:relative;isolation:isolate;background:var(--page);padding-bottom:24px}
 
 /* Hero band — 500h video banner + bottom gradient fade */
-.cr-fold-hero{position:relative;height:500px;overflow:hidden;background:#0a0a0c;isolation:isolate}
-.cr-fold-hero .cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.5) blur(5px);transform:scale(1.05)}
-.cr-fold-hero .cr-hero-video-ctl{position:absolute;bottom:16px;right:16px;z-index:3}
-.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,.25) 50%,rgba(0,0,0,.5) 100%);pointer-events:none}
+.cr-fold-hero{position:relative;height:560px;overflow:hidden;background:#0a0a0c;isolation:isolate}
+/* Hero video/poster — cinematic drift 20s (让 static poster 也有"背景动画"感;视频播放时也带 subtle motion) */
+.cr-fold-hero .cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:cr-hero-drift 24s ease-in-out infinite alternate;will-change:transform}
+@keyframes cr-hero-drift{
+  0%   {transform:scale(1.08) translate3d(0,0,0)}
+  100% {transform:scale(1.16) translate3d(-1.5%,-1.2%,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .cr-fold-hero .cr-hero-video{animation:none;transform:scale(1.05)}
+}
+/* Veil — 轻度暗化 (让 Glass Card 与 avatar 对比清晰,又保留视频/图片可见) */
+.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.55) 100%);pointer-events:none}
 /* 底部 gradient fade — 平滑过渡到 page bg,不再硬切 */
-.cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:120px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.4) 60%,var(--page) 100%);pointer-events:none}
-@media(max-width:1024px){.cr-fold-hero{height:400px}}
-@media(max-width:640px){.cr-fold-hero{height:280px}}
+.cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:140px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.35) 55%,var(--page) 100%);pointer-events:none}
+@media(max-width:1024px){.cr-fold-hero{height:460px}}
+@media(max-width:640px){.cr-fold-hero{height:340px}}
 
-/* Header Wrap — 悬浮 Glass Card 在 Hero 底部,margin-top 负数使 overlap */
-.cr-fold-header-wrap{position:relative;z-index:3;margin-top:-96px}
-@media(max-width:1024px){.cr-fold-header-wrap{margin-top:-80px}}
-@media(max-width:640px){.cr-fold-header-wrap{margin-top:-64px}}
+/* Header Wrap — "Floating Identity Card" bottom-LEFT of Hero (spec: 位置 Hero 左下角)
+   flex + justify-flex-start ensures glass card sits at left within .cr-shell (max 1280) */
+.cr-fold-header-wrap{position:relative;z-index:3;margin-top:-140px;display:flex;justify-content:flex-start}
+@media(max-width:1024px){.cr-fold-header-wrap{margin-top:-110px;justify-content:center}}
+@media(max-width:640px){.cr-fold-header-wrap{margin-top:-80px}}
 
-/* Glass Header — Overlay 融合 Hero 与正文 (spec §七 Glass Overlay) */
+/* Glass "Floating Identity Card" — 680~760px 宽,bottom-left 悬浮 */
 .cr-fold-glass{
+  width:100%;max-width:720px;
   background:rgba(255,255,255,.92);
-  backdrop-filter:blur(18px) saturate(160%);
-  -webkit-backdrop-filter:blur(18px) saturate(160%);
-  border:1px solid rgba(255,255,255,.6);
-  border-radius:24px;
-  padding:24px 32px;
-  box-shadow:0 24px 60px -12px rgba(0,0,0,.2),0 8px 24px -6px rgba(0,0,0,.08);
-  display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:28px;
-  align-items:center;   /* 垂直居中 — spec §三 */
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:22px;
+  padding:20px 26px;
+  box-shadow:0 30px 70px -14px rgba(0,0,0,.28),0 10px 28px -8px rgba(0,0,0,.14);
+  display:grid;grid-template-columns:140px minmax(0,1fr) auto;gap:20px;
+  align-items:center;
 }
 @media(max-width:1024px){
-  .cr-fold-glass{grid-template-columns:1fr;justify-items:start;padding:20px 24px;text-align:left}
+  .cr-fold-glass{grid-template-columns:1fr;justify-items:start;padding:20px 22px;text-align:left;max-width:640px}
   .cr-fold-actions{width:100%}
 }
 @media(max-width:640px){
-  .cr-fold-glass{justify-items:center;text-align:center;padding:16px 20px;border-radius:20px}
-  .cr-fold-actions{justify-content:center;display:flex}
+  .cr-fold-glass{justify-items:center;text-align:center;padding:16px 18px;border-radius:20px;max-width:100%}
+  .cr-fold-actions{justify-content:center;display:flex;flex-wrap:wrap}
 }
 
-/* Avatar — 直接在 glass grid 内,translate 上移使 50/50 straddle 玻璃卡顶边 */
-.cr-fold-avatar{position:relative;width:160px;height:160px;border-radius:50%;overflow:hidden;border:6px solid #fff;background:#e6e6ea;box-shadow:0 26px 60px -12px rgba(0,0,0,.45),0 10px 24px -6px rgba(0,0,0,.25);transform:translate3d(0,-40%,0);flex-shrink:0}
+/* Avatar — 140px straddle glass 顶边 (spec: 头像 140,居中/左侧,跨 Banner 边界) */
+.cr-fold-avatar{position:relative;width:140px;height:140px;border-radius:50%;overflow:hidden;border:5px solid #fff;background:#e6e6ea;box-shadow:0 26px 60px -12px rgba(0,0,0,.45),0 10px 24px -6px rgba(0,0,0,.25);transform:translate3d(0,-38%,0);flex-shrink:0}
 .cr-fold-avatar img{object-fit:cover;width:100%;height:100%}
-.cr-fold-avatar-online{position:absolute;right:6px;bottom:6px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid #fff}
+.cr-fold-avatar-online{position:absolute;right:5px;bottom:5px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:3px solid #fff}
 @media(max-width:1024px){
-  .cr-fold-avatar{width:130px;height:130px;transform:translate3d(0,-35%,0);border-width:5px}
+  .cr-fold-avatar{width:120px;height:120px;transform:translate3d(0,-34%,0);border-width:4px}
 }
 @media(max-width:640px){
-  .cr-fold-avatar{width:110px;height:110px;transform:translate3d(0,-35%,0);border-width:4px}
+  .cr-fold-avatar{width:100px;height:100px;transform:translate3d(0,-32%,0);border-width:4px}
 }
 
 /* Info column */
 .cr-fold-info{min-width:0}
-.cr-fold-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cr-fold-name{font-size:26px;font-weight:800;letter-spacing:-.022em;color:var(--ink);line-height:1.1;margin:0}
-@media(min-width:1024px){.cr-fold-name{font-size:30px}}
+.cr-fold-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cr-fold-name{font-size:22px;font-weight:800;letter-spacing:-.022em;color:var(--ink);line-height:1.1;margin:0}
+@media(min-width:1024px){.cr-fold-name{font-size:24px}}
 .cr-fold-vf{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:700;line-height:1;background:rgba(56,189,248,.15);color:#0284c7;border:1px solid rgba(56,189,248,.3);letter-spacing:.02em}
 .cr-fold-vf svg{width:10px;height:10px}
 .cr-fold-vip{font-size:10px;font-weight:800;line-height:1;padding:3px 9px;border-radius:999px;color:#1a1409;letter-spacing:.06em;background:linear-gradient(135deg,#d4bf95,#b8a789);box-shadow:0 3px 8px -2px rgba(184,167,137,.4)}
 .cr-fold-on-badge{font-size:10.5px;font-weight:700;line-height:1;padding:3px 9px;border-radius:999px;background:rgba(34,197,94,.15);color:#16a34a;border:1px solid rgba(34,197,94,.35);display:inline-flex;align-items:center;gap:5px}
 .cr-fold-on-badge i{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;display:inline-block}
-.cr-fold-handle{font-size:14px;color:var(--muted);margin-top:6px;font-weight:500}
-.cr-fold-slogan{font-size:14.5px;color:var(--ink);font-weight:500;line-height:1.5;margin:10px 0 0;max-width:560px}
-.cr-fold-meta{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;padding:0;margin:12px 0 0;font-size:13px;color:var(--ink2)}
-.cr-fold-meta li{display:inline-flex;align-items:center;gap:6px;line-height:1.4}
-.cr-fold-meta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.65;flex:0 0 14px}
+.cr-fold-handle{font-size:13px;color:var(--muted);margin-top:4px;font-weight:500}
+.cr-fold-slogan{font-size:13.5px;color:var(--ink);font-weight:500;line-height:1.45;margin:8px 0 0;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cr-fold-meta{display:flex;flex-wrap:wrap;gap:5px 12px;list-style:none;padding:0;margin:10px 0 0;font-size:12px;color:var(--ink2)}
+.cr-fold-meta li{display:inline-flex;align-items:center;gap:5px;line-height:1.35}
+.cr-fold-meta svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.65;flex:0 0 13px}
 @media(max-width:640px){
   .cr-fold-meta{justify-content:center}
 }

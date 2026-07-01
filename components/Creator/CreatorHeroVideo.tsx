@@ -1,70 +1,29 @@
-"use client";
-// Hero Video 背景 — <video> element (poster-only 现在,src 后续接入真视频)
-// 右下角 mute/play/fullscreen 控制条,视觉 affordance 已到位
-import { useRef, useState } from "react";
-
+// Hero Cover Motion — 无 controls,cinematic 静态背景
+// 3-tier priority (handled 由 caller / page.tsx):
+//   1. Creator's own Cover Video (未来自上传)
+//   2. AI Demo Video (当前统一使用)
+//   3. Cover Image (fallback,通过 poster 属性)
+// 8s+ loop,muted,autoplay,playsInline,object-cover
+// 不出现:播放按钮 / 控制栏 / 时间轴 / 字幕 / Logo / 水印
 interface Props {
   poster: string;
-  videoSrc?: string;   // 后续接入
+  videoSrc?: string;   // Creator's own OR AI demo (统一 mp4 URL)
 }
 
 export default function CreatorHeroVideo({ poster, videoSrc }: Props) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [playing, setPlaying] = useState(true);
-
-  const toggleMute = () => {
-    const v = ref.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
-  };
-  const togglePlay = () => {
-    const v = ref.current;
-    if (!v) return;
-    if (v.paused) { v.play().catch(() => {}); setPlaying(true); }
-    else { v.pause(); setPlaying(false); }
-  };
-  const enterFs = () => {
-    const v = ref.current;
-    if (!v) return;
-    if (v.requestFullscreen) v.requestFullscreen().catch(() => {});
-  };
-
   return (
-    <>
-      <video
-        ref={ref}
-        className="cr-hero-video"
-        poster={poster}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-hidden
-      >
-        {videoSrc && <source src={videoSrc} type="video/mp4" />}
-      </video>
-      <div className="cr-hero-video-ctl" aria-label="Video controls">
-        <button type="button" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="cr-hvc-btn">
-          {playing ? (
-            <svg viewBox="0 0 24 24" aria-hidden><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" aria-hidden><path d="M8 5v14l11-7z" /></svg>
-          )}
-        </button>
-        <button type="button" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"} className="cr-hvc-btn">
-          {muted ? (
-            <svg viewBox="0 0 24 24" aria-hidden><path d="M4 9v6h4l5 5V4L8 9zm11 3l4-4M19 12l-4-4M15 12l4 4M19 12l-4 4" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" aria-hidden><path d="M4 9v6h4l5 5V4L8 9zm11-1a5 5 0 0 1 0 8m0-12a9 9 0 0 1 0 16" /></svg>
-          )}
-        </button>
-        <button type="button" onClick={enterFs} aria-label="Fullscreen" className="cr-hvc-btn">
-          <svg viewBox="0 0 24 24" aria-hidden><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
-        </button>
-      </div>
-    </>
+    <video
+      className="cr-hero-video"
+      poster={poster}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      aria-hidden
+      /* 视频加载失败:仅显示 poster (browser 默认行为,不 error UI) */
+    >
+      {videoSrc && <source src={videoSrc} type="video/mp4" />}
+    </video>
   );
 }

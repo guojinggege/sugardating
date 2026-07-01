@@ -1427,44 +1427,57 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
    零 absolute (仅 hero-video/veil 内部),零 margin/top 负值 (translate 处理),
    零 magic number (变量:--cr-hero-h / --cr-avatar / 都通过语义命名)
    ============================================================ */
-.cr-fold{display:flex;flex-direction:column;isolation:isolate;background:var(--page)}
+.cr-fold{position:relative;isolation:isolate;background:var(--page);padding-bottom:24px}
 
-/* Hero band — 460 视频 banner,normal flow,不 sticky/不 fixed */
-.cr-fold-hero{position:relative;height:460px;overflow:hidden;background:#0a0a0c;isolation:isolate}
+/* Hero band — 500h video banner + bottom gradient fade */
+.cr-fold-hero{position:relative;height:500px;overflow:hidden;background:#0a0a0c;isolation:isolate}
 .cr-fold-hero .cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.5) blur(5px);transform:scale(1.05)}
 .cr-fold-hero .cr-hero-video-ctl{position:absolute;bottom:16px;right:16px;z-index:3}
-.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,.2) 45%,rgba(0,0,0,.55) 100%);pointer-events:none}
-@media(max-width:1024px){.cr-fold-hero{height:340px}}
-@media(max-width:640px){.cr-fold-hero{height:240px}}
+.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,.25) 50%,rgba(0,0,0,.5) 100%);pointer-events:none}
+/* 底部 gradient fade — 平滑过渡到 page bg,不再硬切 */
+.cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:120px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.4) 60%,var(--page) 100%);pointer-events:none}
+@media(max-width:1024px){.cr-fold-hero{height:400px}}
+@media(max-width:640px){.cr-fold-hero{height:280px}}
 
-/* Profile shell V2 Final — 3-col grid: [160 avatar] [1fr info] [auto actions] */
-.cr-fold-profile{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:28px;align-items:flex-end;padding-top:24px;padding-bottom:24px;position:relative;z-index:2}
-@media(max-width:1280px){
-  .cr-fold-profile{grid-template-columns:160px minmax(0,1fr);gap:24px}
-  .cr-fold-actions{grid-column:1/-1;width:100%;padding-top:8px;border-top:1px solid var(--line)}
+/* Header Wrap — 悬浮 Glass Card 在 Hero 底部,margin-top 负数使 overlap */
+.cr-fold-header-wrap{position:relative;z-index:3;margin-top:-96px}
+@media(max-width:1024px){.cr-fold-header-wrap{margin-top:-80px}}
+@media(max-width:640px){.cr-fold-header-wrap{margin-top:-64px}}
+
+/* Glass Header — Overlay 融合 Hero 与正文 (spec §七 Glass Overlay) */
+.cr-fold-glass{
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:24px;
+  padding:24px 32px;
+  box-shadow:0 24px 60px -12px rgba(0,0,0,.2),0 8px 24px -6px rgba(0,0,0,.08);
+  display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:28px;
+  align-items:center;   /* 垂直居中 — spec §三 */
 }
 @media(max-width:1024px){
-  .cr-fold-profile{grid-template-columns:1fr;justify-items:start;gap:20px;padding-top:16px}
+  .cr-fold-glass{grid-template-columns:1fr;justify-items:start;padding:20px 24px;text-align:left}
+  .cr-fold-actions{width:100%}
 }
 @media(max-width:640px){
-  .cr-fold-profile{justify-items:center;text-align:center}
-  .cr-fold-actions{display:none}   /* Mobile 用 MobileCTABar */
+  .cr-fold-glass{justify-items:center;text-align:center;padding:16px 20px;border-radius:20px}
+  .cr-fold-actions{justify-content:center;display:flex}
 }
-.cr-fold-actions{padding-bottom:4px}
 
-/* Avatar column — translate(0,-50%) 使其一半在 hero,一半在 profile
-   同 Instagram/Twitter/Threads 头像模式,无负 margin/absolute */
-.cr-fold-avatar-col{align-self:end;line-height:0}
-.cr-fold-avatar{position:relative;width:160px;height:160px;border-radius:50%;overflow:hidden;border:6px solid #fff;background:#e6e6ea;box-shadow:0 26px 60px -12px rgba(0,0,0,.4),0 10px 24px -6px rgba(0,0,0,.2);transform:translate3d(0,-50%,0)}
+/* Avatar — 直接在 glass grid 内,translate 上移使 50/50 straddle 玻璃卡顶边 */
+.cr-fold-avatar{position:relative;width:160px;height:160px;border-radius:50%;overflow:hidden;border:6px solid #fff;background:#e6e6ea;box-shadow:0 26px 60px -12px rgba(0,0,0,.45),0 10px 24px -6px rgba(0,0,0,.25);transform:translate3d(0,-40%,0);flex-shrink:0}
 .cr-fold-avatar img{object-fit:cover;width:100%;height:100%}
 .cr-fold-avatar-online{position:absolute;right:6px;bottom:6px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid #fff}
+@media(max-width:1024px){
+  .cr-fold-avatar{width:130px;height:130px;transform:translate3d(0,-35%,0);border-width:5px}
+}
 @media(max-width:640px){
-  /* Mobile avatar 100% overlap 更少 → 45% 拉近视觉平衡 */
-  .cr-fold-avatar{width:120px;height:120px;transform:translate3d(0,-45%,0);border-width:5px}
+  .cr-fold-avatar{width:110px;height:110px;transform:translate3d(0,-35%,0);border-width:4px}
 }
 
 /* Info column */
-.cr-fold-info{min-width:0;padding-bottom:4px}
+.cr-fold-info{min-width:0}
 .cr-fold-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cr-fold-name{font-size:26px;font-weight:800;letter-spacing:-.022em;color:var(--ink);line-height:1.1;margin:0}
 @media(min-width:1024px){.cr-fold-name{font-size:30px}}
@@ -1482,8 +1495,8 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
   .cr-fold-meta{justify-content:center}
 }
 
-/* Actions column — 单行 flex button group */
-.cr-fold-actions{padding-bottom:4px}
+/* Actions column — Glass Header 内水平 (Follow/Gift/Share 3 button) */
+.cr-fold-actions{display:flex;align-items:center}
 
 /* CreatorFold 用后:.cr-hero legacy 类不再渲染,页面从 CreatorFold 顶开始
    下面 .cr-body 直接接 CreatorFold 底 (normal flow),自然过渡 */

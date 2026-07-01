@@ -1,7 +1,6 @@
 "use client";
-// Fold Header 右侧 7 CTA (spec V2 Final §Creator Header)
-// 聊天 · 视频 · 预约伴游 · 打赏 · 关注 · 收藏 · 分享
-// hierarchy: Primary (聊天) / Secondary (视频 预约) / Gradient (打赏) / Ghost (关注) / Icon (收藏 分享)
+// Hero Header 只保留 3 按钮 (spec Final):❤️ Follow · 🎁 Gift · 🔗 Share
+// 聊天/视频/私拍/预约伴游 已移到 Sidebar Service Actions widget
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
@@ -10,7 +9,6 @@ export default function CreatorFoldActions({ creatorName }: { creatorName: strin
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
   const [following, setFollowing] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
@@ -24,75 +22,53 @@ export default function CreatorFoldActions({ creatorName }: { creatorName: strin
     }
   };
 
-  const cta = "inline-flex items-center justify-center gap-1.5 font-semibold font-ui cursor-pointer transition-all whitespace-nowrap leading-none";
-  const iconOnly = "grid place-items-center w-10 h-10 rounded-[12px] cursor-pointer transition-all border";
+  const pill = "inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-full font-semibold text-[13px] leading-none font-ui cursor-pointer transition-all whitespace-nowrap";
 
   return (
-    <div className="flex flex-wrap items-center gap-2 relative">
-      {/* Primary — 聊天 */}
-      <button type="button" onClick={guard(() => {})} className={cta + " h-11 px-5 rounded-[12px] bg-[var(--ink)] text-white border border-[var(--ink)] text-[14px] hover:bg-black hover:-translate-y-px shadow-[0_4px_14px_-6px_rgba(0,0,0,0.35)]"}>
-        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-[1.9]"><path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        {t("chatShort")}
+    <div className="flex items-center gap-2 relative">
+      {/* Follow */}
+      <button
+        type="button"
+        onClick={guard(() => setFollowing((v) => !v))}
+        className={pill + " " + (following
+          ? "bg-[#e11d48] text-white border border-[#e11d48] hover:bg-[#be123c]"
+          : "bg-white text-[var(--ink)] border border-[var(--line2)] hover:border-[var(--ink)] hover:-translate-y-px")}
+      >
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill={following ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.9}>
+          <path d="M12 21s-7-5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 16 12 21 12 21z" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {following ? t("following") : t("follow")}
       </button>
-      {/* Secondary — 视频 */}
-      <button type="button" onClick={guard(() => {})} className={cta + " h-10 px-4 rounded-[12px] bg-white text-[var(--ink)] border border-[var(--line2)] text-[13.5px] hover:border-[var(--ink)] hover:-translate-y-px"}>
-        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-[1.9]"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M16 10l5-3v10l-5-3z" /></svg>
-        {t("videoShort")}
-      </button>
-      {/* Secondary — 预约伴游 */}
-      <button type="button" onClick={guard(() => {})} className={cta + " h-10 px-4 rounded-[12px] bg-white text-[var(--ink)] border border-[var(--line2)] text-[13.5px] hover:border-[var(--ink)] hover:-translate-y-px"}>
-        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-[1.9]" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12l8-3 4 4 6-7 2 2-7 9-4-4z" /></svg>
-        {t("bookTravel")}
-      </button>
-      {/* Gradient — 打赏 */}
+
+      {/* Gift (gradient primary) */}
       <button
         type="button"
         onClick={guard(() => {})}
-        className={cta + " h-10 px-4 rounded-[12px] text-[#1a1409] border-0 text-[13.5px] font-bold hover:-translate-y-px shadow-[0_4px_12px_-3px_rgba(184,167,137,0.5)]"}
+        className={pill + " text-[#1a1409] border-0 hover:-translate-y-px font-bold shadow-[0_4px_14px_-4px_rgba(184,167,137,0.55)]"}
         style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
       >
         <span className="text-[14px]" aria-hidden>🎁</span>
         {t("tipShort")}
       </button>
-      {/* Ghost — 关注 */}
-      <button
-        type="button"
-        onClick={guard(() => setFollowing((v) => !v))}
-        className={cta + " h-10 px-3.5 rounded-[12px] text-[13.5px] border " + (following ? "bg-[var(--ink)] text-white border-[var(--ink)]" : "bg-transparent text-[var(--ink2)] border-transparent hover:bg-white hover:border-[var(--line)] hover:text-[var(--ink)]")}
-      >
-        {following ? (
-          <><svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-none stroke-current stroke-[1.9]"><path d="M5 12l4 4 10-10" strokeLinecap="round" strokeLinejoin="round" /></svg>{t("following")}</>
-        ) : (
-          <><svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-none stroke-current stroke-[1.9]"><path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" /></svg>{t("follow")}</>
-        )}
-      </button>
-      {/* Icon — 收藏 */}
-      <button
-        type="button"
-        onClick={guard(() => setSaved((v) => !v))}
-        aria-label={t("save")}
-        className={iconOnly + " " + (saved ? "text-[#e11d48] border-[#e11d48] bg-[rgba(225,29,72,0.08)]" : "bg-white text-[var(--ink2)] border-[var(--line2)] hover:border-[var(--ink)] hover:text-[var(--ink)]")}
-      >
-        <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.9}>
-          <path d="M12 21s-7-5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 16 12 21 12 21z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {/* Icon — 分享 */}
+
+      {/* Share (icon only) */}
       <button
         type="button"
         onClick={onShare}
         aria-label={t("share")}
-        className={iconOnly + " bg-white text-[var(--ink2)] border-[var(--line2)] hover:border-[var(--ink)] hover:text-[var(--ink)]"}
+        title={t("share")}
+        className="grid place-items-center w-10 h-10 rounded-full bg-white border border-[var(--line2)] text-[var(--ink2)] hover:text-[var(--ink)] hover:border-[var(--ink)] transition-all cursor-pointer"
       >
-        <svg viewBox="0 0 24 24" className="w-[16px] h-[16px] fill-none stroke-current stroke-[1.9]">
+        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-[1.9]">
           <circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" />
           <path d="M8.2 13.3l7.6 4.4M15.8 6.3l-7.6 4.4" />
         </svg>
       </button>
+
       {copied && (
-        <div className="absolute -top-9 right-0 bg-[var(--ink)] text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg z-10">
+        <span className="absolute -top-9 right-0 bg-[var(--ink)] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold shadow-lg whitespace-nowrap">
           {t("linkCopied")}
-        </div>
+        </span>
       )}
     </div>
   );

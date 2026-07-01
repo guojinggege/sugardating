@@ -1,50 +1,173 @@
-// About Card — 2-col label/value grid,顶部右侧内嵌 Verification chip 行
-// spec:Verification 不再独占一块,合并到 About Header 右侧
+// About Creator Card — Sugargirl V2 完整资料
+// Header: 关于 Ta 标题 + Verification chips 内嵌右
+// Body:
+//   ① About Me (bio,支持展开)
+//   ② Availability (4 行:Online/回复/预约/时区)
+//   ③ Basic Information (2-col Grid,13 项资料)
+//   ④ Interests (chip cloud)
+//   ⑤ Travel Plan (下一站列表)
 import { getTranslations } from "next-intl/server";
-import type { CreatorAbout as CreatorAboutData, TrustFlags } from "@/lib/creatorProfileMock";
+import type { CreatorAbout as CreatorAboutData, TrustFlags, AvailabilityData } from "@/lib/creatorProfileMock";
 import CreatorVerification from "./CreatorVerification";
 
 interface Props {
   about: CreatorAboutData;
+  availability: AvailabilityData;
+  age: number;
+  height: number;
   profession?: string;
   slogan?: string;
   trust: TrustFlags;
+  timezone?: string;
+  nextAvailable?: string;
 }
 
-export default async function CreatorAbout({ about, profession, slogan, trust }: Props) {
+export default async function CreatorAbout({
+  about, availability, age, height, profession, slogan, trust,
+  timezone = "GMT+8", nextAvailable = "今天",
+}: Props) {
   const t = await getTranslations("creatorProfile.about");
+  const tB = await getTranslations("creatorProfile.basicInfo");
+  const tS = await getTranslations("creatorProfile.status");
 
-  const rows: { label: string; value: React.ReactNode }[] = [];
-  rows.push({ label: t("interests"), value: <div className="flex flex-wrap gap-1.5">{about.interests.map((i) => <span key={i} className="text-[12px] font-semibold text-[var(--ink)] bg-[var(--page)] border border-[var(--line)] px-2.5 py-1 rounded-full">{i}</span>)}</div> });
-  rows.push({ label: t("languages"), value: about.languages.join(" / ") });
-  rows.push({ label: t("city"), value: about.city });
-  if (profession) rows.push({ label: t("profession"), value: profession });
-  rows.push({ label: t("frequent"), value: <div className="flex flex-wrap gap-1.5">{about.frequentCountries.map((c) => <span key={c} className="text-[12px] font-semibold text-[var(--ink)] bg-[var(--page)] border border-[var(--line)] px-2.5 py-1 rounded-full">{c}</span>)}</div> });
-  rows.push({ label: t("travelPlans"), value: <ul className="m-0 p-0 list-none flex flex-col gap-1">{about.travelPlans.map((p) => <li key={p} className="text-[13.5px] text-[var(--ink)] pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1 before:h-1 before:rounded-full before:bg-[var(--accent)]">{p}</li>)}</ul> });
-  rows.push({ label: t("joinedAt"), value: about.joinedAt });
+  // Basic Information rows (13 fields per spec V2)
+  const basicRows: { label: string; value: React.ReactNode }[] = [
+    { label: tB("age"),          value: `${age} 岁` },
+    { label: tB("height"),       value: `${height} cm` },
+    { label: tB("weight"),       value: `${about.weight} kg` },
+    { label: tB("bodyType"),     value: about.bodyType },
+    { label: tB("skinTone"),     value: about.skinTone },
+    { label: tB("hairColor"),    value: about.hairColor },
+    { label: tB("eyeColor"),     value: about.eyeColor },
+    { label: tB("profession"),   value: profession || "—" },
+    { label: tB("city"),         value: about.city },
+    { label: tB("birthCountry"), value: about.birthCountry },
+    { label: tB("languages"),    value: about.languages.join(" / ") },
+    { label: tB("education"),    value: about.education },
+    { label: tB("zodiac"),       value: about.zodiac },
+    { label: tB("bloodType"),    value: `${about.bloodType} 型` },
+    { label: tB("joinedAt"),     value: about.joinedAt },
+  ];
 
   return (
-    <section className="bg-white border border-[var(--line)] rounded-[20px] p-6 md:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-      {/* Header row: title (left) + verification chips (right) — spec:合并 */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <h3 className="text-[20px] font-extrabold tracking-tight text-[var(--ink)] m-0">
+    <section className="bg-white border border-[var(--line)] rounded-[20px] p-6 md:p-8 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      {/* Header: title (left) + verification chips (right) */}
+      <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h3 className="text-[22px] font-extrabold tracking-tight text-[var(--ink)] m-0">
           {t("aboutCreator")}
         </h3>
         <CreatorVerification flags={trust} />
+      </header>
+
+      {/* 2-col main grid: left About Me, right Availability */}
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8 mb-8 pb-8 border-b border-[var(--line)]">
+        {/* Left: About Me */}
+        <div>
+          <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-3">
+            {t("aboutMe")}
+          </h4>
+          {slogan && (
+            <p className="text-[15px] font-medium italic text-[var(--ink)] m-0 mb-3 pl-3 border-l-2 border-[var(--accent)]">
+              "{slogan}"
+            </p>
+          )}
+          <p className="text-[15px] leading-[1.7] text-[var(--ink2)] m-0">{about.bio}</p>
+        </div>
+
+        {/* Right: Availability */}
+        <aside className="bg-[var(--page)] rounded-2xl p-5 self-start">
+          <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-3">
+            {t("availability")}
+          </h4>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[12.5px] text-[var(--muted)]">{tS("onlineNow")}</span>
+              {availability.isOnline ? (
+                <span className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-[#16a34a]">
+                  <span className="w-2 h-2 rounded-full bg-[#22c55e]" style={{ boxShadow: "0 0 6px #22c55e" }} />
+                  {tS("onlineNow")}
+                </span>
+              ) : (
+                <span className="text-[12.5px] font-semibold text-[var(--ink)]">{availability.lastActiveText}</span>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[12.5px] text-[var(--muted)]">{tS("avgReply")}</span>
+              <b className="text-[13px] font-bold text-[var(--ink)] tabular-nums">
+                {availability.replyMinutes < 60 ? `${availability.replyMinutes} 分钟` : `< ${Math.round(availability.replyMinutes / 60)} 小时`}
+              </b>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[12.5px] text-[var(--muted)]">{tS("nextAvailable")}</span>
+              <b className="text-[13px] font-bold text-[var(--ink)]">{nextAvailable}</b>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[12.5px] text-[var(--muted)]">{tS("timezone")}</span>
+              <b className="text-[13px] font-bold text-[var(--ink)]">{timezone}</b>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <p className="text-[15px] leading-relaxed text-[var(--ink2)] m-0 pb-5 mb-5 border-b border-[var(--line)]">
-        {about.bio}
-      </p>
+      {/* Basic Information — 2 col grid,10+ fields */}
+      <div className="mb-8 pb-8 border-b border-[var(--line)]">
+        <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-4">
+          {t("basicInformation")}
+        </h4>
+        <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 m-0">
+          {basicRows.map((r) => (
+            <div key={r.label} className="flex flex-col gap-0.5">
+              <dt className="text-[11px] text-[var(--muted)] font-medium">{r.label}</dt>
+              <dd className="text-[14px] text-[var(--ink)] font-semibold m-0">{r.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
-      <dl className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-x-6 gap-y-4 m-0">
-        {rows.map((r, i) => (
-          <div key={i} className="contents">
-            <dt className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] pt-1">{r.label}</dt>
-            <dd className="m-0 text-[14px] text-[var(--ink)] leading-relaxed">{r.value}</dd>
-          </div>
-        ))}
-      </dl>
+      {/* Interests */}
+      <div className="mb-8 pb-8 border-b border-[var(--line)]">
+        <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-3">
+          {t("interests")}
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {about.interests.map((i) => (
+            <span key={i} className="text-[13px] font-semibold text-[var(--ink)] bg-[var(--page)] border border-[var(--line)] px-3 py-1.5 rounded-full">
+              {i}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Travel Plan */}
+      <div>
+        <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-3">
+          {t("travelPlans")}
+        </h4>
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 m-0 p-0 list-none">
+          {about.travelPlans.map((p) => {
+            const parts = p.split("·");
+            const city = parts[0]?.trim() ?? p;
+            const date = parts[1]?.trim();
+            return (
+              <li key={p} className="flex items-center gap-3 bg-[var(--page)] rounded-xl p-3 border border-[var(--line)]">
+                <span className="text-lg leading-none" aria-hidden>📍</span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <b className="text-[14px] font-bold text-[var(--ink)] truncate">{city}</b>
+                  {date && <span className="text-[11.5px] text-[var(--muted)]">{date}</span>}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Frequent countries (备注小行,不占大面积) */}
+      {about.frequentCountries.length > 0 && (
+        <div className="mt-4 flex items-center gap-2 text-[12.5px] text-[var(--muted)]">
+          <span className="font-semibold uppercase tracking-[.12em] text-[11px]">{t("frequent")}:</span>
+          <span>{about.frequentCountries.join(" · ")}</span>
+        </div>
+      )}
     </section>
   );
 }

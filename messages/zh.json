@@ -567,11 +567,34 @@
       "writeNew": "写一条评价"
     },
     "about": {
+      "aboutCreator": "关于 Ta",
+      "aboutMe": "个人介绍",
+      "availability": "在线状态",
+      "basicInformation": "基础资料",
       "interests": "兴趣爱好",
       "languages": "会说语言",
       "city": "所在城市",
+      "profession": "职业",
+      "slogan": "个性签名",
       "frequent": "常去国家",
       "travelPlans": "旅行计划",
+      "joinedAt": "加入时间"
+    },
+    "basicInfo": {
+      "age": "年龄",
+      "height": "身高",
+      "weight": "体重",
+      "bodyType": "体型",
+      "skinTone": "肤色",
+      "hairColor": "发色",
+      "eyeColor": "眼睛",
+      "profession": "职业",
+      "city": "所在城市",
+      "birthCountry": "出生国家",
+      "languages": "语言",
+      "education": "学历",
+      "zodiac": "星座",
+      "bloodType": "血型",
       "joinedAt": "加入时间"
     },
     "availability": {

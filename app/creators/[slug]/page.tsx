@@ -112,6 +112,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const extra        = deriveExtraStats(creator.slug, sgSource?.popularity);
 
   const age         = sgSource?.age ?? 24 + (off % 6);
+  const heightCm    = sgSource?.height ?? 165 + (off % 12);
   const languages   = sgSource?.languages ?? about.languages;
   const profession  = PROFESSIONS[off % PROFESSIONS.length];
   const slogan      = SLOGANS[off % SLOGANS.length];
@@ -152,9 +153,19 @@ export default async function Page({ params }: { params: { slug: string } }) {
           gifts={extra.gifts}
         />
 
-        {/* 4) About Card — 2-col label/value + 顶部右侧内嵌 Verification chips */}
+        {/* 4) About Card — Sugargirl V2:About Me + Availability + Basic Info + Interests + Travel + Verification 内嵌 */}
         <section className="mt-6 md:mt-8">
-          <CreatorAbout about={about} profession={profession} slogan={slogan} trust={trust} />
+          <CreatorAbout
+            about={about}
+            availability={availability}
+            age={age}
+            height={heightCm}
+            profession={profession}
+            slogan={slogan}
+            trust={trust}
+            timezone="GMT+8"
+            nextAvailable={availability.isOnline ? "Now" : "Tonight"}
+          />
         </section>
 
         {/* 5) Sticky Tabs */}

@@ -567,11 +567,34 @@
       "writeNew": "Write a review"
     },
     "about": {
+      "aboutCreator": "About Creator",
+      "aboutMe": "About Me",
+      "availability": "Availability",
+      "basicInformation": "Basic Information",
       "interests": "Interests",
       "languages": "Languages",
       "city": "City",
+      "profession": "Profession",
+      "slogan": "Slogan",
       "frequent": "Frequent destinations",
-      "travelPlans": "Travel plans",
+      "travelPlans": "Travel Plans",
+      "joinedAt": "Joined"
+    },
+    "basicInfo": {
+      "age": "Age",
+      "height": "Height",
+      "weight": "Weight",
+      "bodyType": "Body Type",
+      "skinTone": "Skin Tone",
+      "hairColor": "Hair",
+      "eyeColor": "Eyes",
+      "profession": "Profession",
+      "city": "City",
+      "birthCountry": "Birth Country",
+      "languages": "Languages",
+      "education": "Education",
+      "zodiac": "Zodiac",
+      "bloodType": "Blood Type",
       "joinedAt": "Joined"
     },
     "availability": {

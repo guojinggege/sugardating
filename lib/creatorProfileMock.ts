@@ -279,7 +279,7 @@ export function deriveExtraStats(slug: string, popularity?: number): { likes: nu
   };
 }
 
-// 关于 Ta 区块
+// 关于 Ta 区块 — 完整 Basic Info + Interests + Travel + Availability
 export interface CreatorAbout {
   bio: string;
   interests: string[];
@@ -288,11 +288,30 @@ export interface CreatorAbout {
   frequentCountries: string[];
   travelPlans: string[];
   joinedAt: string;
+  // 扩展 Basic Info (per spec V2)
+  weight: number;             // kg
+  hairColor: string;
+  eyeColor: string;
+  bodyType: string;
+  skinTone: string;
+  birthCountry: string;
+  zodiac: string;
+  bloodType: string;
+  education: string;
 }
+
+const HAIR_COLORS   = ["黑色", "棕色", "深棕", "栗色", "亚麻色", "金色"];
+const EYE_COLORS    = ["黑色", "深棕色", "棕色", "琥珀色", "灰色"];
+const BODY_TYPES    = ["纤细", "标准", "运动型", "曲线"];
+const SKIN_TONES    = ["白皙", "自然", "小麦色", "浅古铜"];
+const BIRTH_COUNTRIES = ["中国", "日本", "韩国", "新加坡", "马来西亚", "泰国", "越南", "菲律宾", "俄罗斯", "乌克兰", "波兰"];
+const ZODIACS       = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+const BLOOD_TYPES   = ["A", "B", "AB", "O"];
+const EDUCATIONS    = ["Bachelor", "Master", "PhD", "College"];
 
 export function deriveAbout(slug: string, baseBio: string, region: string, joinedAt: string): CreatorAbout {
   const off = hashSlug(slug);
-  const interestsPool = ["约会", "旅行", "拍摄", "视频聊天", "时尚", "美食", "瑜伽", "音乐", "电影", "阅读", "红酒"];
+  const interestsPool = ["旅行", "摄影", "阅读", "电影", "咖啡", "美食", "音乐", "健身", "时尚", "Luxury"];
   const langPool = ["中文", "English", "日本語", "한국어", "ภาษาไทย"];
   const countryPool = ["日本", "韩国", "泰国", "新加坡", "马来西亚", "意大利", "法国", "英国", "美国"];
   const planPool = ["东京 · 2026 春", "巴厘岛 · 旅拍 5 天", "首尔 · 摄影周", "巴黎 · 冬季", "新加坡 · 长居"];
@@ -303,11 +322,20 @@ export function deriveAbout(slug: string, baseBio: string, region: string, joine
   };
   return {
     bio: baseBio || "热爱生活与摄影 · 长期分享旅行 vlog 与日常 · 慢节奏",
-    interests: pickN(interestsPool, 5, 0),
+    interests: pickN(interestsPool, 8, 0),
     languages: pickN(langPool, 2, 11),
     city: region,
     frequentCountries: pickN(countryPool, 3, 23),
-    travelPlans: pickN(planPool, 2, 31),
+    travelPlans: pickN(planPool, 3, 31),
     joinedAt,
+    weight:       45 + (off % 15),                          // 45-59 kg
+    hairColor:    HAIR_COLORS[off % HAIR_COLORS.length],
+    eyeColor:     EYE_COLORS[(off * 3) % EYE_COLORS.length],
+    bodyType:     BODY_TYPES[(off * 5) % BODY_TYPES.length],
+    skinTone:     SKIN_TONES[(off * 7) % SKIN_TONES.length],
+    birthCountry: BIRTH_COUNTRIES[off % BIRTH_COUNTRIES.length],
+    zodiac:       ZODIACS[(off * 11) % ZODIACS.length],
+    bloodType:    BLOOD_TYPES[(off * 13) % BLOOD_TYPES.length],
+    education:    EDUCATIONS[(off * 17) % EDUCATIONS.length],
   };
 }

@@ -199,7 +199,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
             guesses={pickCreators(4, 0)}
             online={pickCreators(4, 4)}
             hot={pickCreators(4, 2)}
-            recent={pickCreators(4, 6)}
+            videos={videos}
+            recentMedia={gallery.slice(0, 4)}
           />
         </div>
 

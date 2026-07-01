@@ -1427,13 +1427,13 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
    零 absolute (仅 hero-video/veil 内部),零 margin/top 负值 (translate 处理),
    零 magic number (变量:--cr-hero-h / --cr-avatar / 都通过语义命名)
    ============================================================ */
-/* Hero Cover Motion — Fold section
-   Bar 现在 normal flow 在 Hero 下,bg 透明与 page 自然融入 → 无需 padding-bottom */
-.cr-fold{position:relative;isolation:isolate;background:var(--page)}
+/* Hero Cover Motion — Fold section 撑满首屏 (100svh)
+   Flex 布局:Hero flex-grow 撑余下空间,Bar 自然落在首屏底部 */
+.cr-fold{position:relative;isolation:isolate;background:var(--page);min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
 
 /* Hero band — 500h video banner + bottom gradient fade */
-/* Hero — 640 (spec 620-680) · Apple TV 动态封面感 */
-.cr-fold-hero{position:relative;height:640px;overflow:hidden;background:#0a0a0c;isolation:isolate}
+/* Hero — flex-grow 撑首屏 (Bar 自动落底);min-height 保证短视口有像样高度 */
+.cr-fold-hero{position:relative;flex:1;min-height:480px;overflow:hidden;background:#0a0a0c;isolation:isolate}
 /* Hero video/poster — cinematic drift 24s (let static poster also feel like "background motion") */
 .cr-fold-hero .cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:cr-hero-drift 24s ease-in-out infinite alternate;will-change:transform}
 @keyframes cr-hero-drift{
@@ -1448,8 +1448,8 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 /* 底部 gradient fade — 平滑过渡到 page bg,不再硬切 */
 /* Hero 底部渐变 — 加深加高,让 Bar 座落在 soft-fade 上,与正文自然融合 */
 .cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:240px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.12) 35%,rgba(244,244,245,.45) 70%,var(--page) 100%);pointer-events:none}
-@media(max-width:1024px){.cr-fold-hero{height:540px}}
-@media(max-width:640px){.cr-fold-hero{height:440px}}
+@media(max-width:1024px){.cr-fold-hero{min-height:420px}}
+@media(max-width:640px){.cr-fold-hero{min-height:360px}}
 
 /* Identity Bar — Hero 下方,首屏底部;bg 透明与 page 自然融入,无隔离感
    Avatar 大幅上探 (50%) 跨 Hero 底边,形成 Instagram/Twitter straddle 效果 */

@@ -12,7 +12,6 @@ import {
 } from "@/lib/creatorProfileMock";
 
 import CreatorHero from "@/components/Creator/CreatorHero";
-import CreatorStats from "@/components/Creator/CreatorStats";
 import CreatorTabs from "@/components/Creator/CreatorTabs";
 import FeedList from "@/components/Creator/FeedList";
 import VideoGrid from "@/components/Creator/VideoGrid";
@@ -143,6 +142,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <div className="cr-page">
+      {/* 1) Hero — 全宽 dark banner,内容居中 shell 1280,含 4 stats ribbon */}
       <CreatorHero
         creator={creator}
         bio={about.bio}
@@ -152,17 +152,20 @@ export default async function Page({ params }: { params: { slug: string } }) {
         languages={languages}
         tags={tags}
         online={sgSource ? sgSource.online : true}
+        stats={stats}
       />
 
-      <div className="container cr-container">
-        <CreatorStats data={stats} />
-
-        <div className="cr-tabs-wrap">
+      {/* 2) Tabs — sticky white bar,紧贴 Hero 底 */}
+      <div className="cr-tabs-wrap">
+        <div className="cr-shell">
           <CreatorTabs />
         </div>
+      </div>
 
-        <div className="cr-body">
-          <div className="cr-main">
+      {/* 3) Body — Feed + Sidebar (2fr : 360),统一 shell */}
+      <div className="cr-shell cr-body">
+        <div className="cr-grid">
+          <main className="cr-main">
             <section id="feed" className="cr-section">
               <h3 className="cr-section-h">{t("sections.feed")}</h3>
               <FeedList authorName={creator.name} authorAvatar={avatar} posts={feed} />
@@ -196,7 +199,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               <h3 className="cr-section-h">{t("sections.about")}</h3>
               <AboutBlock about={about} />
             </section>
-          </div>
+          </main>
 
           <RightSidebar
             creatorSlug={creator.slug}
@@ -209,6 +212,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           />
         </div>
 
+        {/* 4) More Creators — 底部 carousel */}
         <RelatedCreators
           sets={[
             { key: "guess",   items: pickCreators(10, 0) },
@@ -217,11 +221,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
             { key: "hot",     items: pickCreators(10, 1) },
           ]}
         />
-
-        <div style={{ height: 60 }} />
       </div>
 
-      {/* 移动端固定底部 CTA bar (仅 <640 显示) */}
+      {/* 5) Mobile-only fixed bottom CTA bar */}
       <MobileCTABar />
     </div>
   );

@@ -788,108 +788,116 @@ body.home-immersive main{padding-top:0}
    Creator Profile (/creators/[slug]) — 重构后的 .cr-* 命名空间
    light 主题,黑金轻奢
    ============================================================ */
+/* ============================================================
+   LAYOUT SYSTEM (统一)
+   - .cr-shell   全站 1280 max-width 容器,响应式 padding
+   - .cr-hero    全宽暗色 hero,内嵌 .cr-shell
+   - .cr-tabs-wrap  白色 sticky bar,内嵌 .cr-shell
+   - .cr-body    Feed + Sidebar 2fr:360px grid,内嵌 .cr-shell
+   - 无 absolute (仅 hero-bg/veil / online-dot / verified-badge)
+   - 无负 margin / 无 magic number / 无每组件独立 max-width
+   ============================================================ */
 .cr-page{background:var(--page);min-height:100vh}
-/* Container 1200 (spec):Airbnb/Patreon 常用宽度,信息更聚焦不发散 */
-.cr-container{max-width:1200px;padding-top:0}
-@media(min-width:1024px){.cr-container{padding-left:32px;padding-right:32px}}
-@media(max-width:640px){.cr-container{padding-left:16px;padding-right:16px;padding-bottom:96px}}
+@media(max-width:640px){.cr-page{padding-bottom:96px}}   /* mobile: 留空间给底部 CTA bar */
 
-/* Hero — 更强 dark overlay 让文字对比度足够 */
-.cr-hero{position:relative}
-.cr-cover{position:relative;height:240px;overflow:hidden;background:#0a0a0c}
-.cr-cover img{object-fit:cover;width:100%;height:100%;opacity:.92}
-.cr-cover-veil{
-  position:absolute;inset:0;
-  background:linear-gradient(180deg,
-    rgba(0,0,0,.42) 0%,
-    rgba(0,0,0,.22) 40%,
-    rgba(0,0,0,.08) 75%,
-    rgba(244,244,245,.7) 100%);
-}
-@media(min-width:1024px){.cr-cover{height:300px}}
+/* 统一 shell — 全站 Hero/Tabs/Body/Related 共用 */
+.cr-shell{max-width:1280px;margin:0 auto;padding-left:24px;padding-right:24px;width:100%}
+@media(min-width:1024px){.cr-shell{padding-left:32px;padding-right:32px}}
+@media(max-width:640px){.cr-shell{padding-left:16px;padding-right:16px}}
 
-/* Head:1200 内 3-col,avatar 单独 overlap;name/actions 从顶对齐 */
-.cr-head{
-  max-width:1200px;margin:0 auto;
-  padding:24px;
-  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;
-  align-items:flex-start;
-  position:relative;z-index:2;
-}
-@media(min-width:1024px){.cr-head{padding-left:32px;padding-right:32px;gap:40px}}
-@media(max-width:1024px){
-  .cr-head{grid-template-columns:auto 1fr;row-gap:24px;gap:24px}
-  .cr-acts{grid-column:1/-1;justify-content:flex-start}
-}
-@media(max-width:640px){
-  .cr-head{grid-template-columns:1fr;justify-items:center;text-align:center;padding:16px}
-  .cr-acts{display:none}   /* mobile 走底部固定 CTA bar */
-}
+/* ============================================================
+   HERO — 全宽暗色 banner,内容居中在 .cr-shell,
+   left (avatar + info) / right (button group),normal flow
+   ============================================================ */
+.cr-hero{position:relative;overflow:hidden;background:#0a0a0c;color:#F2F2F4;isolation:isolate}
+.cr-hero-bg{position:absolute;inset:0;z-index:0}
+.cr-hero-bg img{object-fit:cover;width:100%;height:100%;filter:brightness(.55) blur(6px);transform:scale(1.05)}
+.cr-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 45%,rgba(0,0,0,.55) 100%)}
 
-.cr-ava-wrap{position:relative;flex:0 0 auto;margin-top:-80px}
-@media(max-width:640px){.cr-ava-wrap{margin-top:-64px}}
-/* Avatar 更强 shadow 提升视觉中心 (光晕感) */
-.cr-ava{width:128px;height:128px;border-radius:50%;overflow:hidden;border:4px solid var(--page);background:#e6e6ea;box-shadow:0 24px 60px -20px rgba(0,0,0,.5),0 8px 24px -8px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.04)}
-.cr-ava img{object-fit:cover;width:100%;height:100%}
-@media(min-width:1024px){.cr-ava{width:144px;height:144px;border-width:5px}}
-.cr-online-dot{position:absolute;right:8px;bottom:8px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid var(--page);display:inline-flex;align-items:center;justify-content:center}
-.cr-online-dot-ping{position:absolute;inset:-2px;border-radius:50%;background:#22c55e;opacity:.5;animation:cr-ping 1.6s ease-out infinite}
-@keyframes cr-ping{0%{transform:scale(.9);opacity:.55}80%,100%{transform:scale(1.7);opacity:0}}
+.cr-hero-inner{position:relative;z-index:2;padding-top:48px;padding-bottom:32px;display:flex;flex-direction:column;gap:32px}
+@media(max-width:640px){.cr-hero-inner{padding-top:36px;padding-bottom:24px;gap:24px}}
 
-/* Info 三段视觉组 (name+badges / meta stack / bio+tags),字号层级 32/16/14/13 */
-.cr-id{padding-top:8px;min-width:0}
-.cr-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cr-name{font-size:26px;font-weight:800;letter-spacing:-.022em;margin:0;color:var(--ink);line-height:1.05}
-@media(min-width:1024px){.cr-name{font-size:32px}}
+/* Main row: left info group + right button group */
+.cr-hero-main{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
+@media(max-width:1024px){.cr-hero-main{gap:24px}}
+@media(max-width:640px){.cr-hero-main{flex-direction:column;align-items:center;text-align:center}}
+
+/* Left: avatar + info flex row (Information Group) */
+.cr-hero-left{display:flex;align-items:center;gap:24px;flex:1 1 auto;min-width:0;max-width:640px}
+@media(max-width:640px){.cr-hero-left{flex-direction:column;align-items:center;gap:16px;max-width:100%;width:100%}}
+
+.cr-hero-avatar{position:relative;width:112px;height:112px;border-radius:50%;overflow:hidden;border:4px solid rgba(255,255,255,.92);background:#222;box-shadow:0 20px 50px -12px rgba(0,0,0,.6),0 8px 24px -6px rgba(0,0,0,.4);flex:0 0 112px}
+.cr-hero-avatar img{object-fit:cover;width:100%;height:100%}
+@media(min-width:1024px){.cr-hero-avatar{width:120px;height:120px;flex:0 0 120px}}
+.cr-hero-online{position:absolute;right:6px;bottom:6px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:3px solid rgba(255,255,255,.95)}
+
+.cr-hero-info{min-width:0;flex:1}
+.cr-hero-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cr-hero-name{font-size:28px;font-weight:800;letter-spacing:-.022em;margin:0;color:#fff;line-height:1.1}
+@media(min-width:1024px){.cr-hero-name{font-size:32px}}
+.cr-hero-handle{font-size:14px;color:rgba(255,255,255,.6);margin-top:6px;font-weight:500}
+.cr-hero-meta{display:flex;flex-direction:column;gap:8px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:rgba(255,255,255,.9);font-weight:500}
+.cr-hero-meta li{display:inline-flex;align-items:center;gap:9px;line-height:1.4}
+.cr-hero-meta svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.75;flex:0 0 15px}
+@media(max-width:640px){.cr-hero-meta{align-items:center}}
+.cr-hero-bio{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.78);margin:16px 0 0;max-width:520px;font-weight:400}
+.cr-hero-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+@media(max-width:640px){.cr-hero-tags{justify-content:center}}
+.cr-hero-tag{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);padding:5px 12px;border-radius:999px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:background .15s,border-color .15s}
+.cr-hero-tag:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3)}
+
+/* Right: button group,单行 gap 10 */
+.cr-hero-right{display:flex;align-items:center;gap:10px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:1024px){.cr-hero-right{width:100%;justify-content:flex-start}}
+@media(max-width:640px){.cr-hero-right{display:none}}   /* mobile → MobileCTABar */
+
+/* Badge 深色主题变体 (Hero 内) */
 .cr-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1}
 .cr-badge svg{width:11px;height:11px;fill:currentColor;stroke:currentColor;stroke-width:0}
-.cr-badge-verified{background:rgba(56,189,248,.15);color:#0284c7;border:1px solid rgba(56,189,248,.3)}
-.cr-badge-verified svg path:last-child{stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.cr-badge-sg{background:var(--ink);color:#fff;padding:4px 10px;font-style:italic;font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-size:12px}
-.cr-handle{font-size:14px;color:var(--muted);margin-top:6px;font-weight:500}
+.cr-badge-verified{background:rgba(56,189,248,.2);color:#7dd3fc;border:1px solid rgba(56,189,248,.35)}
+.cr-badge-verified svg path:last-child{stroke:#0a0a0c;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cr-badge-sg{background:#fff;color:#0a0a0c;padding:4px 10px;font-style:italic;font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-size:12px}
 
-/* Meta 竖直堆叠,每行一个 icon,提升扫描效率 */
-.cr-meta{display:flex;flex-direction:column;gap:8px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink2);font-weight:500}
-.cr-meta li{display:inline-flex;align-items:center;gap:10px;line-height:1.4}
-.cr-meta svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.65;flex:0 0 16px}
+/* Bottom stats ribbon — 4 key metrics 内嵌 hero (取代原 .cr-stats 独立段) */
+.cr-hero-stats{display:flex;align-items:center;gap:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);flex-wrap:wrap}
+@media(max-width:640px){.cr-hero-stats{gap:20px;justify-content:center}}
+.cr-hero-stat{display:flex;flex-direction:column;gap:2px}
+.cr-hero-stat b{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.cr-hero-stat span{font-size:11.5px;color:rgba(255,255,255,.62);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
 
-.cr-bio{font-size:15px;line-height:1.65;color:var(--ink2);margin:16px 0 0;max-width:560px;font-weight:400}
-.cr-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
-.cr-tag{font-size:12px;font-weight:600;color:var(--ink);background:var(--page);border:1px solid var(--line);padding:5px 12px;border-radius:999px;transition:border-color .15s,background .15s}
-.cr-tag:hover{border-color:var(--ink2);background:var(--card)}
-@media(max-width:640px){.cr-meta{align-items:center}.cr-tags{justify-content:center}}
-
-/* Hero actions — 3 层按钮 hierarchy:Primary > Secondary > Ghost / Icon
-   Primary (立即聊天) 更大更黑 → 用户第一步注意力
-   Secondary (预约/视频) 中等 outlined
-   Ghost (关注 text) + Icon (收藏/分享 40x40) 轻量 */
-.cr-acts{display:flex;flex-wrap:wrap;gap:8px;padding-top:8px;position:relative;align-items:center;max-width:340px}
-@media(min-width:1024px){.cr-acts{padding-top:16px}}
-
+/* CTA hierarchy — 单行 flex,Primary > Secondary > Ghost > Icon
+   Hero 内是 dark theme (白字 on 暗底),普通场景是 light theme */
+.cr-acts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative}
 .cr-act{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .15s,box-shadow .2s;letter-spacing:-.005em;line-height:1;white-space:nowrap}
 .cr-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-/* Primary — 立即聊天 (视觉焦点) */
-.cr-act-primary{height:44px;padding:0 22px;border-radius:12px;font-weight:700;font-size:14.5px;background:var(--ink);color:#fff;border:1px solid var(--ink);box-shadow:0 4px 14px -6px rgba(0,0,0,.35);flex:1 1 auto;min-width:140px}
+/* --- Light 场景 (fallback,MobileCTABar 未用 hero 暗底) --- */
+.cr-act-primary{height:44px;padding:0 22px;border-radius:12px;font-weight:700;font-size:14.5px;background:var(--ink);color:#fff;border:1px solid var(--ink);box-shadow:0 4px 14px -6px rgba(0,0,0,.35)}
 .cr-act-primary:hover{background:#000;border-color:#000;transform:translateY(-1px);box-shadow:0 10px 28px -8px rgba(0,0,0,.4)}
 .cr-act-primary svg{width:15px;height:15px}
-
-/* Secondary — 预约/视频 (outlined,标准高度) */
 .cr-act-secondary{height:40px;padding:0 16px;border-radius:12px;font-weight:600;font-size:13.5px;background:var(--card);border:1px solid var(--line2);color:var(--ink)}
 .cr-act-secondary:hover{border-color:var(--ink);transform:translateY(-1px)}
-
-/* Ghost — 关注 (最轻,文字风) */
 .cr-act-ghost{height:40px;padding:0 14px;border-radius:12px;font-weight:600;font-size:13.5px;background:transparent;border:1px solid transparent;color:var(--ink2)}
 .cr-act-ghost:hover{background:var(--card);border-color:var(--line);color:var(--ink)}
 .cr-act-ghost.on{background:var(--ink);color:#fff}
-
-/* Icon-only — 收藏/分享 */
 .cr-act-ic{width:40px;height:40px;padding:0;flex:0 0 40px;border-radius:12px;background:var(--card);border:1px solid var(--line2);color:var(--ink2)}
 .cr-act-ic:hover{border-color:var(--ink);color:var(--ink)}
 .cr-act-ic svg{width:17px;height:17px}
 .cr-act-ic.on{color:#e11d48;border-color:#e11d48;background:rgba(225,29,72,.08)}
 
-.cr-act-toast{position:absolute;top:-32px;right:0;font-size:12px;font-weight:600;color:#fff;background:var(--ink);padding:6px 12px;border-radius:8px;animation:cr-fade .2s ease-out}
+/* --- Hero 深色主题 (白字反色) --- */
+.cr-hero .cr-act-primary{background:#fff;color:#0a0a0c;border-color:#fff;box-shadow:0 10px 30px -8px rgba(0,0,0,.5)}
+.cr-hero .cr-act-primary:hover{background:#e5e7eb;border-color:#e5e7eb;box-shadow:0 16px 40px -10px rgba(0,0,0,.55)}
+.cr-hero .cr-act-secondary{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.24);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.cr-hero .cr-act-secondary:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.42)}
+.cr-hero .cr-act-ghost{color:rgba(255,255,255,.85);border-color:transparent}
+.cr-hero .cr-act-ghost:hover{background:rgba(255,255,255,.1);color:#fff;border-color:transparent}
+.cr-hero .cr-act-ghost.on{background:#fff;color:#0a0a0c}
+.cr-hero .cr-act-ic{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.24);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.cr-hero .cr-act-ic:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.42);color:#fff}
+.cr-hero .cr-act-ic.on{color:#fecdd3;background:rgba(225,29,72,.28);border-color:rgba(225,29,72,.5)}
+
+.cr-act-toast{position:absolute;top:-36px;right:0;font-size:12px;font-weight:600;color:#0a0a0c;background:#fff;padding:6px 12px;border-radius:8px;animation:cr-fade .2s ease-out;box-shadow:0 6px 18px -6px rgba(0,0,0,.35)}
 @keyframes cr-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
 
 /* 移动固定底部 CTA bar — 仅 <640 显示,fixed bottom */
@@ -904,37 +912,27 @@ body.home-immersive main{padding-top:0}
 .cr-mcta-secondary{flex:1;height:44px;border-radius:12px;background:var(--card);border:1px solid var(--line2);color:var(--ink);font-weight:600;font-size:14px;font-family:inherit;cursor:pointer}
 .cr-mcta-primary{flex:1.5;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-weight:700;font-size:14.5px;border:0;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px -6px rgba(0,0,0,.35)}
 
-/* Stats strip — radius 16 统一 */
-.cr-stats{margin-top:24px;display:grid;grid-template-columns:repeat(8,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 0;overflow:hidden}
-.cr-stat{padding:4px 18px;border-right:1px solid var(--line);text-align:center}
-.cr-stat:last-child{border-right:none}
-.cr-stat-v{display:block;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.1}
-.cr-stat-l{display:block;font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.06em;text-transform:uppercase}
-@media(max-width:1024px){.cr-stats{grid-template-columns:repeat(4,1fr)}.cr-stat{padding:8px 12px;border-right:1px solid var(--line)}.cr-stat:nth-child(4n){border-right:none}.cr-stat:nth-child(-n+4){border-bottom:1px solid var(--line);padding-bottom:18px}.cr-stat:nth-child(n+5){padding-top:18px}}
-@media(max-width:640px){.cr-stats{grid-template-columns:repeat(2,1fr);padding:18px 0}.cr-stat:nth-child(2n){border-right:none!important}.cr-stat:nth-child(odd){border-right:1px solid var(--line)}.cr-stat:nth-last-child(-n+2){border-bottom:none!important}}
-
-/* Sticky Tabs */
-/* Sticky Tabs — 顶到 Nav (84) 底,毛玻璃背景,extend 到内 padding 边 */
-.cr-tabs-wrap{position:sticky;top:84px;z-index:20;background:rgba(244,244,245,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin:24px -24px 0;padding:0 24px;border-bottom:1px solid var(--line)}
-@media(min-width:1024px){.cr-tabs-wrap{margin-left:-32px;margin-right:-32px;padding-left:32px;padding-right:32px}}
-@media(max-width:640px){.cr-tabs-wrap{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}}
-.cr-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+/* ============================================================
+   TABS — 紧贴 Hero 底部,sticky white bar
+   ============================================================ */
+.cr-tabs-wrap{position:sticky;top:84px;z-index:20;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.cr-tabs-wrap .cr-shell{padding-top:0;padding-bottom:0}
+.cr-tabs{display:flex;height:60px;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none}
 .cr-tabs::-webkit-scrollbar{display:none}
-.cr-tab{position:relative;padding:14px 16px;font-size:14.5px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .15s}
-.cr-tab:hover{color:var(--ink)}
+.cr-tab{position:relative;padding:0 18px;height:60px;display:flex;align-items:center;font-size:14.5px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .18s,background .18s}
+.cr-tab:hover{color:var(--ink);background:rgba(0,0,0,.03)}
 .cr-tab.on{color:var(--ink)}
-.cr-tab.on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2.5px;background:var(--accent);border-radius:2px}
-.cr-tab:hover{background:rgba(0,0,0,.03);border-radius:8px 8px 0 0}
-.cr-tab.on{color:var(--accent)}
+.cr-tab.on::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:2.5px;background:var(--ink);border-radius:2px}
 
-/* 2-col body */
-/* 2-col body 8:4 (spec):Desktop 主区 66% + sidebar 33% */
-.cr-body{display:grid;grid-template-columns:1fr;gap:32px;padding-top:32px}
-@media(min-width:1024px){.cr-body{grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:40px}}
-.cr-main{min-width:0;display:flex;flex-direction:column;gap:32px}   /* Section 32 spacing */
-.cr-section{scroll-margin-top:160px}   /* 让 tab 点击滚到位不被 sticky 挡 */
-.cr-section-h{font-size:20px;font-weight:800;letter-spacing:-.015em;margin:0 0 16px;color:var(--ink)}
-.cr-section-h{font-size:20px;font-weight:800;letter-spacing:-.015em;margin:0 0 16px;color:var(--ink)}
+/* ============================================================
+   BODY GRID — Feed (2fr) + Sidebar (360)
+   ============================================================ */
+.cr-body{padding-top:32px;padding-bottom:48px}
+.cr-grid{display:grid;grid-template-columns:1fr;gap:24px}
+@media(min-width:1024px){.cr-grid{grid-template-columns:minmax(0,1fr) 360px;gap:32px}}
+.cr-main{min-width:0;display:flex;flex-direction:column;gap:32px}
+.cr-section{scroll-margin-top:156px}
+.cr-section-h{font-size:22px;font-weight:800;letter-spacing:-.015em;margin:0 0 16px;color:var(--ink);line-height:1.2}
 
 /* Feed */
 .cr-feed{display:flex;flex-direction:column;gap:18px}
@@ -1061,11 +1059,10 @@ body.home-immersive main{padding-top:0}
 .cr-list li{position:relative;padding-left:14px;font-size:14px;color:var(--ink)}
 .cr-list li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
 
-/* Right sidebar */
-/* 右侧 sidebar — 固定 320,sticky 到 tabs 下方 (top:156);widget 间距 20 一致 */
+/* Right sidebar — 固定 360,sticky 到 tabs 底 (top:84+60=144,加 12 → 156) */
 .cr-sidebar{display:flex;flex-direction:column;gap:20px}
 @media(min-width:1024px){.cr-sidebar{position:sticky;top:156px;align-self:start;max-height:calc(100vh - 176px);overflow-y:auto;padding-right:4px;scrollbar-width:thin}}
-.cr-sb-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.cr-sb-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
 .cr-sb-h{font-size:13px;font-weight:700;letter-spacing:-.005em;color:var(--ink);margin:0 0 12px}
 .cr-sb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
 .cr-sb-row{display:flex;align-items:center;gap:10px;padding:6px;border-radius:10px;transition:background .15s}
@@ -1081,7 +1078,7 @@ body.home-immersive main{padding-top:0}
 .cr-sb-tip-act .btn{width:100%;justify-content:center}
 
 /* Related (bottom carousel) */
-.cr-related{margin-top:42px;padding-top:32px;border-top:1px solid var(--line)}
+.cr-related{margin-top:48px;padding-top:32px;border-top:1px solid var(--line)}
 .cr-related-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .cr-related-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 .cr-related-tabs::-webkit-scrollbar{display:none}

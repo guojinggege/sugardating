@@ -13,16 +13,17 @@ import {
 } from "@/lib/creatorProfileMock";
 
 import CreatorHero from "@/components/Creator/CreatorHero";
-import CreatorTabs from "@/components/Creator/CreatorTabs";
+import CreatorProfileHeader from "@/components/Creator/CreatorProfileHeader";
 import QuickStats from "@/components/Creator/QuickStats";
-import CreatorTrust from "@/components/Creator/CreatorTrust";
+import CreatorAbout from "@/components/Creator/CreatorAbout";
+import CreatorVerification from "@/components/Creator/CreatorVerification";
+import CreatorTabs from "@/components/Creator/CreatorTabs";
 import CreatorGiftPanel from "@/components/Creator/CreatorGiftPanel";
 import FeedList from "@/components/Creator/FeedList";
 import VideoGrid from "@/components/Creator/VideoGrid";
 import GalleryGrid from "@/components/Creator/GalleryGrid";
 import ServiceCards from "@/components/Creator/ServiceCards";
 import ReviewList from "@/components/Creator/ReviewList";
-import AboutBlock from "@/components/Creator/AboutBlock";
 import TravelPlan from "@/components/Creator/TravelPlan";
 import CreatorTimeline from "@/components/Creator/CreatorTimeline";
 import DatingPreference from "@/components/Creator/DatingPreference";
@@ -44,7 +45,6 @@ function fmtNum(n: number): string {
   return n.toLocaleString("en-US");
 }
 
-// SugarGirl fallback
 function loadFromSugarGirls(slug: string): { creator: Creator; bio: string; sg: SugarGirlEntry } | null {
   const sg = sugarGirls.find((x) => x.id === slug);
   if (!sg) return null;
@@ -69,9 +69,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 const PROFESSIONS = ["Travel Creator", "Fashion Blogger", "Fitness Coach", "Foodie", "Photographer", "Model"];
-const ZODIACS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
 const SLOGANS = [
-  "Let's explore the world together.",
+  "Let's make every moment unforgettable.",
   "Slow living, deep conversation.",
   "Wander, wonder, remember.",
   "Elegance is an attitude.",
@@ -114,13 +113,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const timeline     = deriveTimeline(creator.slug, creator.region);
   const extra        = deriveExtraStats(creator.slug, sgSource?.popularity);
 
-  const age       = sgSource?.age       ?? 24 + (off % 6);
-  const heightCm  = sgSource?.height    ?? 165 + (off % 12);
-  const languages = sgSource?.languages ?? about.languages;
-  const tags      = sgSource ? sgSource.categories.slice(0, 6) : about.interests.slice(0, 8);
-  const profession = PROFESSIONS[off % PROFESSIONS.length];
-  const zodiac     = ZODIACS[off % ZODIACS.length];
-  const slogan     = SLOGANS[off % SLOGANS.length];
+  const age         = sgSource?.age ?? 24 + (off % 6);
+  const languages   = sgSource?.languages ?? about.languages;
+  const profession  = PROFESSIONS[off % PROFESSIONS.length];
+  const slogan      = SLOGANS[off % SLOGANS.length];
 
   const others = allCreators.filter((x) => x.slug !== creator.slug);
   const photoFor = (slug: string, off2: number) => {
@@ -133,28 +129,24 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <div className="cr-page">
-      {/* 1) HERO — 560px, dark video bg, 12-col grid (7 info + 5 glass action panel) */}
-      <CreatorHero
+      {/* 1) Hero Cover — 视觉纯 banner,video/image + dark overlay + video controls */}
+      <CreatorHero cover={cover} />
+
+      {/* 2) Profile Header — Avatar overlap + Info + Quick Actions (Instagram/Twitter 风格) */}
+      <CreatorProfileHeader
         creator={creator}
-        bio={about.bio}
-        slogan={slogan}
-        cover={cover}
         avatar={avatar}
         age={age}
-        height={heightCm}
         languages={languages}
         profession={profession}
-        zodiac={zodiac}
-        tags={tags}
+        joinedAt={stats.joinedAt}
+        intro={slogan}
         online={sgSource ? sgSource.online : true}
         vip
-        availability={availability}
-        timezone="GMT+8"
-        nextAvailableText={availability.isOnline ? "Now" : "Tonight"}
       />
 
       <div className="cr-shell cr-body">
-        {/* 2) QUICK STATS — 8 horizontal metric card */}
+        {/* 3) Quick Stats — Instagram-style horizontal 8 metric */}
         <QuickStats
           stats={stats}
           availability={availability}
@@ -164,19 +156,24 @@ export default async function Page({ params }: { params: { slug: string } }) {
           gifts={extra.gifts}
         />
 
-        {/* 3) ACTION BAR — Trust + mini Gift row */}
-        <div className="cr-actionbar">
-          <CreatorTrust flags={trust} />
-        </div>
+        {/* 4) About Card — expanded 2-col label/value (position above tabs) */}
+        <section className="mt-6 md:mt-8">
+          <CreatorAbout about={about} profession={profession} slogan={slogan} />
+        </section>
 
-        {/* 4) TABS — sticky, 7 items */}
-        <div className="cr-tabs-wrap">
+        {/* 5) Verification — small inline row of ✔ (取代大 Card) */}
+        <section className="mt-4 md:mt-5">
+          <CreatorVerification flags={trust} />
+        </section>
+
+        {/* 6) Sticky Tabs */}
+        <div className="cr-tabs-wrap mt-6 md:mt-8">
           <div className="cr-shell">
             <CreatorTabs />
           </div>
         </div>
 
-        {/* 5) BODY GRID — 主内容 (2fr) + Sidebar (360) */}
+        {/* 7) Body Grid — Feed 主 + Sidebar 右 */}
         <div className="cr-grid">
           <main className="cr-main">
             <section id="feed" className="cr-section">
@@ -213,13 +210,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </div>
             </section>
 
+            {/* 关于 Ta tab 深层内容 — Dating Pref / Travel / Timeline */}
             <section id="about" className="cr-section">
-              <h3 className="cr-section-h">{t("sections.about")}</h3>
-              <AboutBlock about={about} />
-
-              <div className="cr-sub-h">
-                <h4>{t("sections.datingPref")}</h4>
-              </div>
+              <h3 className="cr-section-h">{t("sections.datingPref")}</h3>
               <DatingPreference />
 
               <div className="cr-sub-h">
@@ -245,7 +238,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           />
         </div>
 
-        {/* 6) RECOMMENDATIONS — 底部 carousel */}
+        {/* 8) Recommendations — 底部 carousel */}
         <RelatedCreators
           sets={[
             { key: "guess",   items: pickCreators(10, 0) },
@@ -256,9 +249,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
         />
       </div>
 
-      {/* 7) Floating CTA — 右下,滚动 > 600 出现 */}
+      {/* 9) Floating CTA + Mobile CTA Bar */}
       <FloatingCTA />
-      {/* 8) Mobile固定底部 CTA bar — 仅 <640 */}
       <MobileCTABar />
     </div>
   );

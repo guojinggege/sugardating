@@ -1,9 +1,9 @@
-// About Card V2 Final — 简化版
-// spec:动态标题 + 内容 (bio + basic info + interests + 4 service actions)
-// Verification 移到 Sidebar (在线状态下面)
-// Availability 移到 Sidebar (Online Status widget)
-// Actions 主 CTA 移到 Fold Header
-// About Card 只保留 Creator 简介本体,单列 flow
+// V3 — About Card
+// spec §Creator Introduction:
+//   - 标题: {CreatorName} 简介 (动态)
+//   - 内容: About Me + Basic Information + Interests + Languages/Height/Weight/etc
+//   - 采用: 左右 Grid (left About Me + Interests / right Basic Info)
+//   - Services 全宽底部
 import Img from "@/components/Img";
 import { getTranslations } from "next-intl/server";
 import type { CreatorAbout as CreatorAboutData } from "@/lib/creatorProfileMock";
@@ -50,7 +50,7 @@ export default async function CreatorAbout({
 
   return (
     <section className="bg-white border border-[var(--line)] rounded-[20px] p-6 md:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-      {/* Header — Avatar + Dynamic Title (no actions,no verification) */}
+      {/* Header — Avatar + Dynamic Title "{Name} 简介" */}
       <header className="flex items-center gap-3 mb-6 pb-5 border-b border-[var(--line)]">
         <div className="relative w-[64px] h-[64px] rounded-full overflow-hidden border-[3px] border-white bg-[var(--page)] shadow-[0_6px_20px_-8px_rgba(0,0,0,0.2)] flex-shrink-0">
           <Img src={avatar} alt={creator.name} sizes="64px" />
@@ -69,49 +69,50 @@ export default async function CreatorAbout({
         </div>
       </header>
 
-      {/* Body — Single column,更干净 */}
-      <div className="flex flex-col gap-7">
-        {/* 个人简介 */}
-        <div>
-          <h4 className={sectionH}>{t("aboutMe")}</h4>
-          {slogan && (
-            <p className="text-[15px] font-medium italic text-[var(--ink)] m-0 mb-3 pl-3 border-l-2 border-[var(--accent)]">
-              "{slogan}"
-            </p>
-          )}
-          <p className="text-[15px] leading-[1.7] text-[var(--ink2)] m-0">{about.bio}</p>
+      {/* Body — 左右 Grid (spec) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8 lg:gap-10">
+        {/* Left — About Me + Interests */}
+        <div className="flex flex-col gap-7">
+          <div>
+            <h4 className={sectionH}>{t("aboutMe")}</h4>
+            {slogan && (
+              <p className="text-[15px] font-medium italic text-[var(--ink)] m-0 mb-3 pl-3 border-l-2 border-[var(--accent)]">
+                &quot;{slogan}&quot;
+              </p>
+            )}
+            <p className="text-[15px] leading-[1.75] text-[var(--ink2)] m-0">{about.bio}</p>
+          </div>
+
+          <div>
+            <h4 className={sectionH}>{t("interests")}</h4>
+            <div className="flex flex-wrap gap-2">
+              {about.interests.map((i) => (
+                <span key={i} className="text-[13px] font-semibold text-[var(--ink)] bg-[var(--page)] border border-[var(--line)] px-3 py-1.5 rounded-full">
+                  {i}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* 基础资料 — 3 col wider (single column layout means more horizontal room) */}
+        {/* Right — Basic Information (compact 2-col dl) */}
         <div>
           <h4 className={sectionH}>{t("basicInformation")}</h4>
-          <dl className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3 m-0">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 m-0">
             {basicRows.map((r) => (
-              <div key={r.label} className="flex flex-col gap-0.5">
+              <div key={r.label} className="flex flex-col gap-0.5 min-w-0">
                 <dt className="text-[11px] text-[var(--muted)] font-medium">{r.label}</dt>
-                <dd className="text-[14px] text-[var(--ink)] font-semibold m-0">{r.value}</dd>
+                <dd className="text-[13.5px] text-[var(--ink)] font-semibold m-0 truncate">{r.value}</dd>
               </div>
             ))}
           </dl>
         </div>
+      </div>
 
-        {/* 兴趣标签 */}
-        <div>
-          <h4 className={sectionH}>{t("interests")}</h4>
-          <div className="flex flex-wrap gap-2">
-            {about.interests.map((i) => (
-              <span key={i} className="text-[13px] font-semibold text-[var(--ink)] bg-[var(--page)] border border-[var(--line)] px-3 py-1.5 rounded-full">
-                {i}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* 服务入口 (4 Action Cards) */}
-        <div>
-          <h4 className={sectionH}>{t("serviceEntries")}</h4>
-          <CreatorServiceActions />
-        </div>
+      {/* Services 全宽 (spec: 底部 4 service card) */}
+      <div className="mt-8 pt-7 border-t border-[var(--line)]">
+        <h4 className={sectionH}>{t("serviceEntries")}</h4>
+        <CreatorServiceActions />
       </div>
     </section>
   );

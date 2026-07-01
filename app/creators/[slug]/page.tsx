@@ -9,8 +9,7 @@ import type { Creator, Tier } from "@/lib/types";
 import {
   makeFeed, makeVideos, makeGallery, makeServices,
   deriveStats, deriveAbout, deriveAvailability,
-  deriveTrust, deriveExtraStats,
-  deriveGiftLeaderboard,
+  deriveExtraStats, deriveGiftLeaderboard,
 } from "@/lib/creatorProfileMock";
 
 import CreatorFold from "@/components/Creator/CreatorFold";
@@ -112,7 +111,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const services     = makeServices();
   const about        = deriveAbout(creator.slug, baseBio, creator.region, stats.joinedAt);
   const availability = deriveAvailability(creator.slug, stats.joinedAt, { online: sgSource ? sgSource.online : true });
-  const trust        = deriveTrust(creator.slug);
   const extra        = deriveExtraStats(creator.slug, sgSource?.popularity);
   const giftBoard    = deriveGiftLeaderboard(creator.slug);
 
@@ -160,8 +158,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
           gifts={extra.gifts}
         />
 
-        {/* 4) About Card V2 Final — 简化:动态标题 + bio + basic + interests + service actions */}
-        <section className="mt-6 md:mt-8">
+        {/* 4) Creator Introduction — 2-col Grid (spec §Creator Introduction) */}
+        <section className="mt-8 md:mt-10">
           <CreatorAbout
             creator={creator}
             avatar={avatar}
@@ -218,9 +216,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
           <RightSidebar
             availability={availability}
-            trust={trust}
             recentVisitors={pickCreators(4, 0)}
-            popular={pickCreators(4, 2)}
+            trending={pickCreators(4, 2)}
             similar={pickCreators(4, 4)}
             giftBoard={giftBoard}
             timezone="GMT+8"

@@ -1,41 +1,39 @@
 "use client";
-// Right Sidebar V2 Final — 7 widget (per spec)
-//   ① 在线状态 (Online Status)     — creator 自己的 online/reply/next avail/timezone
-//   ② 认证 (Verification)          — 6 verify chips
-//   ③ 快速联系 (Quick Contact)     — 5 stacked CTA (聊天/视频/私拍/伴游/打赏)
-//   ④ 最近浏览 (Recent Visitors)   — creator list
-//   ⑤ 热门推荐 (Popular)           — creator list
-//   ⑥ 相似 Sugargirl (Similar)     — creator list
-//   ⑦ Gift Statistics             — 4 gift rank + total + top gift
+// V3 — Right Sidebar (6 widgets, per spec §Sidebar)
+//   ① Online Status
+//   ② Quick Contact (2×2 grid: 聊天 / 视频聊天 / 私拍 / 预约伴游)
+//   ③ Recent Visitors    — Creator List
+//   ④ Trending Creator   — Creator List
+//   ⑤ Similar Sugargirl  — Creator List
+//   ⑥ Gift Statistics    — Rose/Coffee/Dinner/Diamond + 累计 + Top Gift
+// 删除 (spec §删除旧模块):
+//   - Verification widget (Hero Header 已有 Verified badge,重复展示)
+//   - Tip 独立按钮 (Gift 已在 Hero Actions)
 import Link from "next/link";
 import Img from "@/components/Img";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { Creator } from "@/lib/types";
-import type { AvailabilityData, TrustFlags, GiftRank } from "@/lib/creatorProfileMock";
+import type { AvailabilityData, GiftRank } from "@/lib/creatorProfileMock";
 
 interface CreatorRef { creator: Creator; photo: string }
 
 interface Props {
   availability: AvailabilityData;
-  trust: TrustFlags;
   recentVisitors: CreatorRef[];
-  popular: CreatorRef[];
+  trending: CreatorRef[];
   similar: CreatorRef[];
   giftBoard: GiftRank[];
   timezone?: string;
   nextAvailable?: string;
 }
 
-const TRUST_ORDER: (keyof TrustFlags)[] = ["identity", "phone", "email", "video", "face", "safeMeet"];
-
 export default function RightSidebar({
-  availability, trust, recentVisitors, popular, similar, giftBoard,
+  availability, recentVisitors, trending, similar, giftBoard,
   timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
   const t   = useTranslations("creatorProfile.sidebar");
   const tS  = useTranslations("creatorProfile.status");
-  const tT  = useTranslations("creatorProfile.trust");
   const tG  = useTranslations("creatorProfile.gifts.items");
   const tA  = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
@@ -63,7 +61,6 @@ export default function RightSidebar({
     </div>
   );
 
-  // Gift Statistics: 只显示 Rose/Coffee/Dinner/Diamond (spec 列出的 4 项)
   const giftsOfInterest = ["rose", "coffee", "dinner", "diamond"];
   const giftStats = giftBoard.filter((g) => giftsOfInterest.includes(g.key));
   const totalGifts = giftBoard.reduce((s, g) => s + g.count, 0);
@@ -71,7 +68,7 @@ export default function RightSidebar({
 
   return (
     <aside className="cr-sidebar">
-      {/* ① 在线状态 */}
+      {/* ① Online Status */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{tS("onlineNow")}</h5>
         <div className="flex flex-col gap-2.5">
@@ -88,51 +85,33 @@ export default function RightSidebar({
           </div>
           <SbRow label={tS("replyRate")} value={`${availability.responseRate}%`} />
           <SbRow label={tS("avgReply")} value={availability.replyMinutes < 60 ? `${availability.replyMinutes} 分钟` : `< ${Math.round(availability.replyMinutes / 60)} 小时`} />
+          <SbRow label={tS("lastActive")} value={availability.lastActiveText} />
           <SbRow label={tS("nextAvailable")} value={nextAvailable} />
           <SbRow label={tS("timezone")} value={timezone} />
         </div>
       </div>
 
-      {/* ② 认证 — 在 Online Status 下面 (spec §认证) */}
-      <div className="cr-sb-card">
-        <h5 className="cr-sb-h">{tT("title")}</h5>
-        <div className="flex flex-wrap gap-1.5">
-          {TRUST_ORDER.filter((k) => trust[k]).map((k) => (
-            <span
-              key={k}
-              className="inline-flex items-center gap-1 h-8 px-2.5 rounded-full bg-[rgba(34,197,94,0.08)] border border-[rgba(34,197,94,0.25)] text-[#16a34a] font-semibold text-[11.5px] whitespace-nowrap"
-            >
-              <svg viewBox="0 0 24 24" className="w-3 h-3 fill-none stroke-current stroke-[2.4]" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12l4 4 10-10" />
-              </svg>
-              {tT(`items.${k}`)}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ③ 快速联系 (Quick Contact) — 5 vertical CTA buttons */}
+      {/* ② Quick Contact — 2×2 grid (spec: 聊天/视频聊天/私拍/预约伴游) */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{t("quickContact")}</h5>
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <QcBtn onClick={guard(() => {})} emoji="💬" label={tA("chat")} primary />
           <QcBtn onClick={guard(() => {})} emoji="📹" label={tA("videoCall")} />
           <QcBtn onClick={guard(() => {})} emoji="📷" label={tA("privateShoot")} />
           <QcBtn onClick={guard(() => {})} emoji="✈️" label={tA("bookTravel")} />
-          <QcBtn onClick={guard(() => {})} emoji="🎁" label={tA("tip")} gradient />
         </div>
       </div>
 
-      {/* ④ 最近浏览 */}
+      {/* ③ Recent Visitors */}
       {creatorList(t("recentVisitors"), recentVisitors)}
 
-      {/* ⑤ 热门推荐 */}
-      {creatorList(t("popular"), popular)}
+      {/* ④ Trending Creator */}
+      {creatorList(t("trending"), trending)}
 
-      {/* ⑥ 相似 Sugargirl */}
+      {/* ⑤ Similar Sugargirl */}
       {creatorList(t("similar"), similar)}
 
-      {/* ⑦ Gift Statistics */}
+      {/* ⑥ Gift Statistics */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{t("giftStats")}</h5>
         <ul className="cr-sb-list mb-3">
@@ -179,28 +158,21 @@ function SbRow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function QcBtn({
-  onClick, emoji, label, primary, gradient,
+  onClick, emoji, label, primary,
 }: {
   onClick: () => void;
   emoji: string;
   label: string;
   primary?: boolean;
-  gradient?: boolean;
 }) {
-  let cls = "flex items-center gap-2.5 w-full h-10 px-3.5 rounded-[12px] font-semibold text-[13px] font-ui cursor-pointer transition-all whitespace-nowrap ";
-  const style: React.CSSProperties = {};
-  if (primary) {
-    cls += "bg-[var(--ink)] text-white border border-[var(--ink)] hover:bg-black";
-  } else if (gradient) {
-    cls += "text-[#1a1409] border-0 font-bold hover:opacity-95";
-    style.background = "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)";
-  } else {
-    cls += "bg-white text-[var(--ink)] border border-[var(--line2)] hover:border-[var(--ink)]";
-  }
+  const base = "flex flex-col items-center justify-center gap-1 h-[68px] rounded-[14px] font-semibold text-[12.5px] font-ui cursor-pointer transition-all";
+  const cls = primary
+    ? `${base} bg-[var(--ink)] text-white border border-[var(--ink)] hover:bg-black`
+    : `${base} bg-white text-[var(--ink)] border border-[var(--line2)] hover:border-[var(--ink)] hover:bg-[var(--page)]`;
   return (
-    <button type="button" onClick={onClick} className={cls} style={style}>
-      <span className="text-[15px] leading-none" aria-hidden>{emoji}</span>
-      {label}
+    <button type="button" onClick={onClick} className={cls}>
+      <span className="text-[20px] leading-none" aria-hidden>{emoji}</span>
+      <span>{label}</span>
     </button>
   );
 }

@@ -1175,8 +1175,8 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
           CreatorTrust / GiftPanel / TravelPlan / Timeline / FloatingCTA
    ============================================================ */
 
-/* Hero 高度 520 — 视觉纯 banner (Instagram/Twitter 风格,只含 video+veil+controls) */
-.cr-hero{min-height:520px;height:520px;color:#F2F2F4}
+/* Hero 高度 500 (spec V2 Final:480-520 范围) */
+.cr-hero{min-height:500px;height:500px;color:#F2F2F4}
 @media(max-width:1024px){.cr-hero{height:400px;min-height:400px}}
 @media(max-width:640px){.cr-hero{height:280px;min-height:280px}}
 .cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.55) blur(4px);transform:scale(1.05)}
@@ -1437,14 +1437,20 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 @media(max-width:1024px){.cr-fold-hero{height:340px}}
 @media(max-width:640px){.cr-fold-hero{height:240px}}
 
-/* Profile shell V3 — 2-col grid: [160px avatar] [1fr info] (Actions 移到 About Card) */
-.cr-fold-profile{display:grid;grid-template-columns:160px minmax(0,1fr);gap:28px;align-items:flex-end;padding-top:24px;padding-bottom:24px;position:relative;z-index:2}
+/* Profile shell V2 Final — 3-col grid: [160 avatar] [1fr info] [auto actions] */
+.cr-fold-profile{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:28px;align-items:flex-end;padding-top:24px;padding-bottom:24px;position:relative;z-index:2}
+@media(max-width:1280px){
+  .cr-fold-profile{grid-template-columns:160px minmax(0,1fr);gap:24px}
+  .cr-fold-actions{grid-column:1/-1;width:100%;padding-top:8px;border-top:1px solid var(--line)}
+}
 @media(max-width:1024px){
   .cr-fold-profile{grid-template-columns:1fr;justify-items:start;gap:20px;padding-top:16px}
 }
 @media(max-width:640px){
   .cr-fold-profile{justify-items:center;text-align:center}
+  .cr-fold-actions{display:none}   /* Mobile 用 MobileCTABar */
 }
+.cr-fold-actions{padding-bottom:4px}
 
 /* Avatar column — translate(0,-50%) 使其一半在 hero,一半在 profile
    同 Instagram/Twitter/Threads 头像模式,无负 margin/absolute */

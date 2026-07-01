@@ -10,7 +10,7 @@ import {
   makeFeed, makeVideos, makeGallery, makeServices,
   deriveStats, deriveAbout, deriveAvailability,
   deriveTrust, deriveExtraStats,
-  deriveTopFans, deriveGiftLeaderboard,
+  deriveGiftLeaderboard,
 } from "@/lib/creatorProfileMock";
 
 import CreatorFold from "@/components/Creator/CreatorFold";
@@ -24,7 +24,6 @@ import GalleryGrid from "@/components/Creator/GalleryGrid";
 import ServiceCards from "@/components/Creator/ServiceCards";
 import ReviewList from "@/components/Creator/ReviewList";
 import RightSidebar from "@/components/Creator/RightSidebar";
-import RelatedCreators from "@/components/Creator/RelatedCreators";
 import MobileCTABar from "@/components/Creator/MobileCTABar";
 import FloatingCTA from "@/components/Creator/FloatingCTA";
 import CommentForm from "./CommentForm";
@@ -106,7 +105,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const availability = deriveAvailability(creator.slug, stats.joinedAt, { online: sgSource ? sgSource.online : true });
   const trust        = deriveTrust(creator.slug);
   const extra        = deriveExtraStats(creator.slug, sgSource?.popularity);
-  const topFans      = deriveTopFans(creator.slug);
   const giftBoard    = deriveGiftLeaderboard(creator.slug);
 
   const age         = sgSource?.age ?? 24 + (off % 6);
@@ -151,20 +149,16 @@ export default async function Page({ params }: { params: { slug: string } }) {
           gifts={extra.gifts}
         />
 
-        {/* 4) About Card — Sugargirl V3:动态标题 + 内嵌 Verification + CTA row */}
+        {/* 4) About Card V2 Final — 简化:动态标题 + bio + basic + interests + service actions */}
         <section className="mt-6 md:mt-8">
           <CreatorAbout
             creator={creator}
             avatar={avatar}
             about={about}
-            availability={availability}
             age={age}
             height={heightCm}
             profession={profession}
             slogan={slogan}
-            trust={trust}
-            timezone="GMT+8"
-            nextAvailable={availability.isOnline ? "Now" : "Tonight"}
             online={sgSource ? sgSource.online : true}
           />
         </section>
@@ -212,22 +206,18 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </main>
 
           <RightSidebar
-            online={pickCreators(4, 4)}
-            recommended={pickCreators(4, 0)}
-            topFans={topFans}
+            availability={availability}
+            trust={trust}
+            recentVisitors={pickCreators(4, 0)}
+            popular={pickCreators(4, 2)}
+            similar={pickCreators(4, 4)}
             giftBoard={giftBoard}
+            timezone="GMT+8"
+            nextAvailable={availability.isOnline ? "Now" : "Tonight"}
           />
         </div>
 
-        {/* 8) Recommendations — 底部 carousel */}
-        <RelatedCreators
-          sets={[
-            { key: "guess",   items: pickCreators(10, 0) },
-            { key: "similar", items: pickCreators(10, 2) },
-            { key: "recent",  items: pickCreators(10, 4) },
-            { key: "hot",     items: pickCreators(10, 1) },
-          ]}
-        />
+        {/* 底部 RelatedCreators carousel 已删除 (spec:全部移到 Sidebar) */}
       </div>
 
       {/* 9) Floating CTA + Mobile CTA Bar */}

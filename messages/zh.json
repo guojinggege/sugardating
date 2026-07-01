@@ -620,6 +620,13 @@
       "memberSince": "加入时间"
     },
     "sidebar": {
+      "quickContact": "快速联系",
+      "recentVisitors": "最近浏览",
+      "popular": "热门推荐",
+      "similar": "相似 Sugargirl",
+      "giftStats": "Gift Statistics",
+      "giftTotal": "累计礼物",
+      "topGift": "Top Gift",
       "online": "在线 Sugargirl",
       "recentMedia": "Recent Media",
       "recommended": "Recommended Creators",

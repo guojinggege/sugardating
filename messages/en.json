@@ -582,6 +582,7 @@
       "city": "City",
       "profession": "Profession",
       "slogan": "Slogan",
+      "serviceEntries": "Book a Service",
       "frequent": "Frequent destinations",
       "travelPlans": "Travel Plans",
       "joinedAt": "Joined"

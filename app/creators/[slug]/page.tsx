@@ -213,7 +213,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
           <RightSidebar
             online={pickCreators(4, 4)}
-            recentMedia={gallery.slice(0, 4)}
             recommended={pickCreators(4, 0)}
             topFans={topFans}
             giftBoard={giftBoard}

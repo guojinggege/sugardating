@@ -12,11 +12,9 @@ import {
   deriveTrust, deriveTravel, deriveTimeline, deriveExtraStats,
 } from "@/lib/creatorProfileMock";
 
-import CreatorHero from "@/components/Creator/CreatorHero";
-import CreatorProfileHeader from "@/components/Creator/CreatorProfileHeader";
+import CreatorFold from "@/components/Creator/CreatorFold";
 import QuickStats from "@/components/Creator/QuickStats";
 import CreatorAbout from "@/components/Creator/CreatorAbout";
-import CreatorVerification from "@/components/Creator/CreatorVerification";
 import CreatorTabs from "@/components/Creator/CreatorTabs";
 import CreatorGiftPanel from "@/components/Creator/CreatorGiftPanel";
 import FeedList from "@/components/Creator/FeedList";
@@ -129,12 +127,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <div className="cr-page">
-      {/* 1) Hero Cover — 视觉纯 banner,video/image + dark overlay + video controls */}
-      <CreatorHero cover={cover} />
-
-      {/* 2) Profile Header — Avatar overlap + Info + Quick Actions (Instagram/Twitter 风格) */}
-      <CreatorProfileHeader
+      {/* 1) Hero + Profile Header 融合 Fold — Instagram/Twitter/Threads 风格 avatar 跨 banner */}
+      <CreatorFold
         creator={creator}
+        cover={cover}
         avatar={avatar}
         age={age}
         languages={languages}
@@ -156,17 +152,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
           gifts={extra.gifts}
         />
 
-        {/* 4) About Card — expanded 2-col label/value (position above tabs) */}
+        {/* 4) About Card — 2-col label/value + 顶部右侧内嵌 Verification chips */}
         <section className="mt-6 md:mt-8">
-          <CreatorAbout about={about} profession={profession} slogan={slogan} />
+          <CreatorAbout about={about} profession={profession} slogan={slogan} trust={trust} />
         </section>
 
-        {/* 5) Verification — small inline row of ✔ (取代大 Card) */}
-        <section className="mt-4 md:mt-5">
-          <CreatorVerification flags={trust} />
-        </section>
-
-        {/* 6) Sticky Tabs */}
+        {/* 5) Sticky Tabs */}
         <div className="cr-tabs-wrap mt-6 md:mt-8">
           <div className="cr-shell">
             <CreatorTabs />

@@ -1459,3 +1459,67 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cr-rh-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .cr-rh-chip em{font-style:normal;opacity:.7;font-weight:500;font-variant-numeric:tabular-nums}
 .cr-rh-chip.on em{opacity:.8}
+
+/* ============================================================
+   Creator Fold — Hero + Profile Header 融合 (Instagram/Twitter/Threads)
+   核心技术:CSS Grid + transform:translate(0,-50%) 使 avatar 跨越 hero-profile 边界
+   零 absolute (仅 hero-video/veil 内部),零 margin/top 负值 (translate 处理),
+   零 magic number (变量:--cr-hero-h / --cr-avatar / 都通过语义命名)
+   ============================================================ */
+.cr-fold{display:flex;flex-direction:column;isolation:isolate;background:var(--page)}
+
+/* Hero band — 460 视频 banner,normal flow,不 sticky/不 fixed */
+.cr-fold-hero{position:relative;height:460px;overflow:hidden;background:#0a0a0c;isolation:isolate}
+.cr-fold-hero .cr-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.5) blur(5px);transform:scale(1.05)}
+.cr-fold-hero .cr-hero-video-ctl{position:absolute;bottom:16px;right:16px;z-index:3}
+.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,.2) 45%,rgba(0,0,0,.55) 100%);pointer-events:none}
+@media(max-width:1024px){.cr-fold-hero{height:340px}}
+@media(max-width:640px){.cr-fold-hero{height:240px}}
+
+/* Profile shell — 3-col grid: [160px avatar] [1fr info] [auto actions]
+   align-items: flex-end 使所有列底对齐 */
+.cr-fold-profile{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:28px;align-items:flex-end;padding-top:24px;padding-bottom:24px;position:relative;z-index:2}
+@media(max-width:1024px){
+  .cr-fold-profile{grid-template-columns:1fr;justify-items:start;gap:20px;padding-top:16px}
+  .cr-fold-actions{width:100%}
+}
+@media(max-width:640px){
+  .cr-fold-profile{justify-items:center;text-align:center}
+  .cr-fold-actions{display:none}   /* Mobile 用 MobileCTABar */
+}
+
+/* Avatar column — translate(0,-50%) 使其一半在 hero,一半在 profile
+   同 Instagram/Twitter/Threads 头像模式,无负 margin/absolute */
+.cr-fold-avatar-col{align-self:end;line-height:0}
+.cr-fold-avatar{position:relative;width:160px;height:160px;border-radius:50%;overflow:hidden;border:6px solid #fff;background:#e6e6ea;box-shadow:0 26px 60px -12px rgba(0,0,0,.4),0 10px 24px -6px rgba(0,0,0,.2);transform:translate3d(0,-50%,0)}
+.cr-fold-avatar img{object-fit:cover;width:100%;height:100%}
+.cr-fold-avatar-online{position:absolute;right:6px;bottom:6px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid #fff}
+@media(max-width:640px){
+  /* Mobile avatar 100% overlap 更少 → 45% 拉近视觉平衡 */
+  .cr-fold-avatar{width:120px;height:120px;transform:translate3d(0,-45%,0);border-width:5px}
+}
+
+/* Info column */
+.cr-fold-info{min-width:0;padding-bottom:4px}
+.cr-fold-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cr-fold-name{font-size:26px;font-weight:800;letter-spacing:-.022em;color:var(--ink);line-height:1.1;margin:0}
+@media(min-width:1024px){.cr-fold-name{font-size:30px}}
+.cr-fold-vf{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:700;line-height:1;background:rgba(56,189,248,.15);color:#0284c7;border:1px solid rgba(56,189,248,.3);letter-spacing:.02em}
+.cr-fold-vf svg{width:10px;height:10px}
+.cr-fold-vip{font-size:10px;font-weight:800;line-height:1;padding:3px 9px;border-radius:999px;color:#1a1409;letter-spacing:.06em;background:linear-gradient(135deg,#d4bf95,#b8a789);box-shadow:0 3px 8px -2px rgba(184,167,137,.4)}
+.cr-fold-on-badge{font-size:10.5px;font-weight:700;line-height:1;padding:3px 9px;border-radius:999px;background:rgba(34,197,94,.15);color:#16a34a;border:1px solid rgba(34,197,94,.35);display:inline-flex;align-items:center;gap:5px}
+.cr-fold-on-badge i{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;display:inline-block}
+.cr-fold-handle{font-size:14px;color:var(--muted);margin-top:6px;font-weight:500}
+.cr-fold-slogan{font-size:14.5px;color:var(--ink);font-weight:500;line-height:1.5;margin:10px 0 0;max-width:560px}
+.cr-fold-meta{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;padding:0;margin:12px 0 0;font-size:13px;color:var(--ink2)}
+.cr-fold-meta li{display:inline-flex;align-items:center;gap:6px;line-height:1.4}
+.cr-fold-meta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.65;flex:0 0 14px}
+@media(max-width:640px){
+  .cr-fold-meta{justify-content:center}
+}
+
+/* Actions column — 单行 flex button group */
+.cr-fold-actions{padding-bottom:4px}
+
+/* CreatorFold 用后:.cr-hero legacy 类不再渲染,页面从 CreatorFold 顶开始
+   下面 .cr-body 直接接 CreatorFold 底 (normal flow),自然过渡 */

@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { pick } from "@/lib/images";
 import { getCreatorBySlug, listCommentsByCreator, listCreators } from "@/lib/queries";
+import { sugarGirls } from "@/lib/sugarGirlMock";
+import type { SugarGirlEntry } from "@/lib/sugarGirlMock";
+import type { Creator, Tier } from "@/lib/types";
 import {
   makeFeed, makeVideos, makeGallery, makeServices,
   deriveStats, deriveAbout,
@@ -23,47 +26,106 @@ import CommentForm from "./CommentForm";
 
 export const dynamic = "force-dynamic";
 
-// 从 slug 派生稳定 offset
 function offsetFromSlug(slug: string): number {
   let h = 0;
   for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const detail = await getCreatorBySlug(params.slug);
-  if (!detail) return { title: "Creator · Sugardating" };
+function fmtNum(n: number): string {
+  if (n >= 10000) return `${(n / 10000).toFixed(1).replace(/\.0$/, "")}万`;
+  return n.toLocaleString("en-US");
+}
+
+// SugarGirl fallback:如果 slug 不在 Creator DB,尝试从 sugarGirls mock 找
+// 返回 shape 兼容 CreatorDetail (仅少了 tiers/works,主页不用)
+function loadFromSugarGirls(slug: string): { creator: Creator; bio: string; sg: SugarGirlEntry } | null {
+  const sg = sugarGirls.find((x) => x.id === slug);
+  if (!sg) return null;
   return {
-    title: `${detail.creator.name} · Sugardating`,
-    description: detail.bio || `${detail.creator.name} on Sugardating`,
+    creator: {
+      slug: sg.id,
+      name: sg.name,
+      category: "SugarGirl",
+      specialty: sg.intro,
+      region: `${sg.country} · ${sg.city}`,
+      price: "—",
+      tier: "elite" as Tier,
+      subs: "—",
+      followers: fmtNum(Math.round(sg.popularity * 3)),
+      works: String(sg.categories.length),
+    },
+    bio: sg.bio,
+    sg,
   };
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const detail = await getCreatorBySlug(params.slug);
+  if (detail) {
+    return {
+      title: `${detail.creator.name} · Sugardating`,
+      description: detail.bio || `${detail.creator.name} on Sugardating`,
+    };
+  }
+  const fromSg = loadFromSugarGirls(params.slug);
+  if (fromSg) {
+    return {
+      title: `${fromSg.creator.name} · Sugardating`,
+      description: fromSg.bio,
+    };
+  }
+  return { title: "Creator · Sugardating" };
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
-  const [detail, comments, allCreators, t] = await Promise.all([
+  const [dbDetail, dbComments, allCreators, t] = await Promise.all([
     getCreatorBySlug(params.slug),
     listCommentsByCreator(params.slug),
     listCreators(),
     getTranslations("creatorProfile"),
   ]);
-  if (!detail) notFound();
-  const { creator: c, bio } = detail;
 
-  const off = offsetFromSlug(c.slug);
+  // 数据源:优先 DB,fallback 到 sugarGirls mock
+  let creator: Creator;
+  let baseBio: string;
+  let comments = dbComments;
+  let sgSource: SugarGirlEntry | null = null;
+
+  if (dbDetail) {
+    creator = dbDetail.creator;
+    baseBio = dbDetail.bio;
+  } else {
+    const fromSg = loadFromSugarGirls(params.slug);
+    if (!fromSg) notFound();
+    creator = fromSg.creator;
+    baseBio = fromSg.bio;
+    sgSource = fromSg.sg;
+    comments = [];   // sugargirls 没有 DB comment
+  }
+
+  const off = offsetFromSlug(creator.slug);
   const cover  = pick(0, off)     ?? "/images/placeholder.png";
-  const avatar = pick(1, off + 1) ?? "/images/placeholder.png";
+  // sugargirl 有真封面就用它当 avatar;否则 pick 一张
+  const avatar = sgSource?.cover ?? (pick(1, off + 1) ?? "/images/placeholder.png");
 
-  // 派生数据 (deterministic)
-  const stats    = deriveStats(c.slug, c.subs, c.followers, c.works);
-  const feed     = makeFeed(c.slug);
-  const videos   = makeVideos(c.slug);
-  const gallery  = makeGallery(c.slug);
+  // 派生数据 (deterministic from slug)
+  const stats    = deriveStats(creator.slug, creator.subs, creator.followers, creator.works);
+  const feed     = makeFeed(creator.slug);
+  const videos   = makeVideos(creator.slug);
+  const gallery  = makeGallery(creator.slug);
   const services = makeServices();
-  const about    = deriveAbout(c.slug, bio, c.region, stats.joinedAt);
-  const tags     = about.interests.slice(0, 6);
+  const about    = deriveAbout(creator.slug, baseBio, creator.region, stats.joinedAt);
 
-  // 右侧 sidebar + 底部 related 用 — 排除当前 creator
-  const others = allCreators.filter((x) => x.slug !== c.slug);
+  // sugargirls fallback:用真实数据覆盖派生的部分
+  const age       = sgSource?.age       ?? 24 + (off % 6);
+  const languages = sgSource?.languages ?? about.languages;
+  const tags      = sgSource
+    ? sgSource.categories.slice(0, 6)
+    : about.interests.slice(0, 6);
+
+  // 排除当前 creator,取其它人
+  const others = allCreators.filter((x) => x.slug !== creator.slug);
   const photoFor = (slug: string, off2: number) => {
     let h = 0;
     for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
@@ -77,33 +139,29 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <div className="cr-page">
-      {/* 1. Hero (cover + avatar + info + 6 actions) */}
       <CreatorHero
-        creator={c}
+        creator={creator}
         bio={about.bio}
         cover={cover}
         avatar={avatar}
-        age={24 + (off % 6)}
-        languages={about.languages}
+        age={age}
+        languages={languages}
         tags={tags}
-        online
+        online={sgSource ? sgSource.online : true}
       />
 
       <div className="container cr-container">
-        {/* 2. Stats strip */}
         <CreatorStats data={stats} />
 
-        {/* 3. Sticky Tabs */}
         <div className="cr-tabs-wrap">
           <CreatorTabs />
         </div>
 
-        {/* 4. 2-col content */}
         <div className="cr-body">
           <div className="cr-main">
             <section id="feed" className="cr-section">
               <h3 className="cr-section-h">{t("sections.feed")}</h3>
-              <FeedList authorName={c.name} authorAvatar={avatar} posts={feed} />
+              <FeedList authorName={creator.name} authorAvatar={avatar} posts={feed} />
             </section>
 
             <section id="videos" className="cr-section">
@@ -126,7 +184,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               <ReviewList reviews={comments} />
               <div className="cr-review-form">
                 <h4 className="cr-form-h">{t("reviews.writeNew")}</h4>
-                <CommentForm slug={c.slug} />
+                <CommentForm slug={creator.slug} />
               </div>
             </section>
 
@@ -136,9 +194,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
             </section>
           </div>
 
-          {/* Right sticky sidebar */}
           <RightSidebar
-            creatorSlug={c.slug}
+            creatorSlug={creator.slug}
             guesses={pickCreators(4, 0)}
             online={pickCreators(4, 4)}
             hot={pickCreators(4, 2)}
@@ -146,7 +203,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
           />
         </div>
 
-        {/* 5. Bottom related carousel */}
         <RelatedCreators
           sets={[
             { key: "guess",   items: pickCreators(10, 0) },

@@ -35,7 +35,7 @@ export default function SugarGirlCard({ entry }: { entry: SugarGirlEntry }) {
       <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-transparent transition group-hover:ring-gold/30" />
 
       {/* 大图 3:4 */}
-      <Link href="/membership" className="relative block overflow-hidden" style={{ aspectRatio: "3/4" }}>
+      <Link href={`/creators/${entry.id}`} className="relative block overflow-hidden" style={{ aspectRatio: "3/4" }}>
         <Image
           src={entry.cover}
           alt={entry.name}
@@ -108,7 +108,7 @@ export default function SugarGirlCard({ entry }: { entry: SugarGirlEntry }) {
             {entry.height} cm · {entry.languages[0]}
           </span>
           <Link
-            href="/membership"
+            href={`/creators/${entry.id}`}
             className="inline-flex items-center gap-1 rounded-pill border border-feed-line2 px-3 py-1.5 text-[12px] font-semibold text-feed-ink transition hover:border-gold hover:text-gold"
           >
             {t("viewProfile")}

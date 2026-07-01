@@ -60,7 +60,7 @@ export default function FeaturedAvatarCarousel({ items }: { items: SugarGirlEntr
 function Avatar({ e }: { e: SugarGirlEntry }) {
   return (
     <Link
-      href="/membership"
+      href={`/creators/${e.id}`}
       className="group flex w-[88px] shrink-0 snap-start flex-col items-center gap-2 md:w-[96px]"
       title={e.name}
     >

@@ -1442,8 +1442,8 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 @media(prefers-reduced-motion:reduce){
   .cr-fold-hero .cr-hero-video{animation:none;transform:scale(1.05)}
 }
-/* Veil — 轻度暗化 + 底部深化 (让 Identity Bar 与 avatar 对比清晰,又保留视频/图片可见) */
-.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.08) 35%,rgba(0,0,0,.55) 100%);pointer-events:none}
+/* Veil — 轻暗化,底部略深 (视频可见,Bar 悬浮效果自然;不做厚重 dark scrim) */
+.cr-fold-hero-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.02) 30%,rgba(0,0,0,.35) 100%);pointer-events:none}
 /* 底部 gradient fade — 平滑过渡到 page bg,不再硬切 */
 .cr-fold-hero-fade{position:absolute;left:0;right:0;bottom:0;height:120px;z-index:2;background:linear-gradient(to bottom,transparent 0%,rgba(244,244,245,.25) 55%,var(--page) 100%);pointer-events:none}
 @media(max-width:1024px){.cr-fold-hero{height:540px}}
@@ -1453,14 +1453,15 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
    spec §Floating Identity Bar: 与正文 Container 一致宽度,高 120-140,glass 90/blur20/radius24 */
 .cr-fold-bar-abs{position:absolute;left:0;right:0;bottom:40px;z-index:3}
 .cr-fold-bar{
-  background:rgba(255,255,255,.9);
-  backdrop-filter:blur(22px) saturate(180%);
-  -webkit-backdrop-filter:blur(22px) saturate(180%);
-  border:1px solid rgba(255,255,255,.6);
+  /* Glass Overlay — 轻量悬浮 (spec §Identity Bar 融合:非白板,像悬浮在视频上方) */
+  background:rgba(255,255,255,.84);
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border:1px solid rgba(255,255,255,.45);
   border-radius:24px;
   padding:22px 32px;
   min-height:130px;
-  box-shadow:0 30px 70px -14px rgba(0,0,0,.35),0 12px 28px -8px rgba(0,0,0,.18);
+  box-shadow:0 20px 50px -18px rgba(0,0,0,.22),0 6px 18px -8px rgba(0,0,0,.08);
   display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:32px;
   align-items:center;
 }

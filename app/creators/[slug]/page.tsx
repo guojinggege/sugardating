@@ -73,12 +73,11 @@ const SLOGANS = [
 
 // Hero Cover Motion priority (spec):
 // 1. Creator's own Cover Video (未来自上传时读取 creator.coverVideoSrc)
-// 2. AI Demo Video (当前所有 creator 统一使用)
-// 3. Cover Image (poster,fallback)
+// 2. Hero Demo Video (当前所有 creator 统一使用 /videos/hero.mp4)
+// 3. Cover Image (poster,fallback — 视频加载失败自动回退)
 //
-// 运营需上传实际文件到 public/videos/creator-ai-demo.mp4;
-// 未上传时,browser 会仅显示 poster 图片,无 error UI
-const AI_DEMO_VIDEO_SRC = "/videos/creator-ai-demo.mp4";
+// 文件位置:public/videos/hero.mp4 (Next.js 从 public/ 服务,URL 即 /videos/hero.mp4)
+const HERO_VIDEO_SRC = "/videos/hero.mp4";
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const [dbDetail, dbComments, allCreators, t] = await Promise.all([
@@ -144,7 +143,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         intro={slogan}
         online={sgSource ? sgSource.online : true}
         vip
-        videoSrc={AI_DEMO_VIDEO_SRC}
+        videoSrc={HERO_VIDEO_SRC}
       />
 
       <div className="cr-shell cr-body">

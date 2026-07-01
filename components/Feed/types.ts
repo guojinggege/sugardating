@@ -7,7 +7,7 @@ export interface FeedMedia {
   ratio?: string; // e.g. "16/9" "1/1"
 }
 
-export type FeedTabKey = "all" | "image" | "video" | "vip" | "hot";
+export type FeedTabKey = "for-you" | "following" | "nearby" | "vip" | "newest";
 
 export interface FeedTabDef {
   key: FeedTabKey;
@@ -24,7 +24,10 @@ export interface FeedAuthor {
 export interface FeedPost {
   id: string;
   author: FeedAuthor;
-  createdAt: string;    // ISO 字符串
+  authorSlug?: string;    // 供 <Link href=/creators/{slug}> 用
+  authorCity?: string;    // Nearby filter + 展示
+  authorOnline?: boolean; // online dot
+  createdAt: string;
   text?: string;
   media: FeedMedia[];
   isVip: boolean;

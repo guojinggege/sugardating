@@ -2,30 +2,32 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Tabs, { DEFAULT_TABS } from "./Tabs";
 import PostCard from "./PostCard";
-import Composer from "./Composer";
 import type { FeedPost, FeedTabKey } from "./types";
 
-// 中间列编排:Composer + Tabs(sticky) + 信息流 + 无限滚动 sentinel
-export default function Feed({
-  posts,
-  composerAvatar,
-  composerName,
-}: {
-  posts: FeedPost[];
-  composerAvatar: string;
-  composerName: string;
-}) {
-  const [active, setActive] = useState<FeedTabKey>("all");
+// V2:平台级 Discover Feed (无 Composer,posts 来自不同 creator)
+// Tabs:For You / Following / Nearby / VIP / Newest
+// (composerAvatar/composerName prop 保留兼容,不再使用)
+const NEARBY_CITIES = new Set(["新加坡", "香港", "台北", "东京", "首尔", "曼谷", "吉隆坡", "上海"]);
+
+export default function Feed({ posts }: { posts: FeedPost[]; composerAvatar?: string; composerName?: string }) {
+  const [active, setActive] = useState<FeedTabKey>("for-you");
   const [visible, setVisible] = useState(5);
 
   const filtered = useMemo(() => {
-    const base =
-      active === "image" ? posts.filter((p) => p.media.some((m) => m.type === "image"))
-      : active === "video" ? posts.filter((p) => p.media.some((m) => m.type === "video"))
-      : active === "vip"   ? posts.filter((p) => p.isVip)
-      : active === "hot"   ? [...posts].sort((a, b) => b.stats.likes - a.stats.likes)
-      : posts;
-    return base;
+    switch (active) {
+      case "following":
+        // Mock:随机取 60% 作为 followed
+        return posts.filter((_, i) => (i * 7 + 3) % 5 < 3);
+      case "nearby":
+        return posts.filter((p) => p.authorCity && NEARBY_CITIES.has(p.authorCity));
+      case "vip":
+        return posts.filter((p) => p.isVip);
+      case "newest":
+        return [...posts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      case "for-you":
+      default:
+        return posts;
+    }
   }, [posts, active]);
 
   // tab 切换时把可见数量重置
@@ -46,10 +48,11 @@ export default function Feed({
   }, [filtered.length]);
 
   const countBy: Partial<Record<FeedTabKey, number>> = useMemo(() => ({
-    all: posts.length,
-    image: posts.filter((p) => p.media.some((m) => m.type === "image")).length,
-    video: posts.filter((p) => p.media.some((m) => m.type === "video")).length,
+    "for-you": posts.length,
+    following: posts.filter((_, i) => (i * 7 + 3) % 5 < 3).length,
+    nearby: posts.filter((p) => p.authorCity && NEARBY_CITIES.has(p.authorCity)).length,
     vip: posts.filter((p) => p.isVip).length,
+    newest: posts.length,
   }), [posts]);
 
   const list = filtered.slice(0, visible);
@@ -57,7 +60,6 @@ export default function Feed({
 
   return (
     <div className="flex flex-col gap-4">
-      <Composer avatar={composerAvatar} name={composerName} />
       <Tabs tabs={DEFAULT_TABS} active={active} onChange={setActive} countBy={countBy} />
 
       {list.length === 0 ? (

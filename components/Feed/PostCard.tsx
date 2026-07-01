@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import MediaGrid from "./MediaGrid";
 import type { FeedPost } from "./types";
 
@@ -19,23 +20,33 @@ function fmtCount(n: number): string {
 
 export default function PostCard({ post }: { post: FeedPost }) {
   const hasMedia = post.media.length > 0;
+  const creatorHref = post.authorSlug ? `/creators/${post.authorSlug}` : "#";
   return (
     <article className="group relative rounded-card border border-feed-line bg-feed-surface p-5 transition duration-300 ease-out hover:bg-feed-elevated hover:border-feed-line2 hover:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]">
-      {/* 头 */}
+      {/* Header (avatar + name + time,均可点跳 creator 主页) */}
       <header className="flex items-start gap-3">
-        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-feed-line">
+        <Link href={creatorHref} className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-feed-line block hover:ring-gold/60 transition">
           <Image src={post.author.avatar} alt={post.author.name} fill sizes="44px" className="object-cover" />
-        </div>
+          {post.authorOnline && (
+            <span className="absolute right-0 bottom-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-feed-surface" />
+          )}
+        </Link>
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="truncate text-[15px] font-semibold text-feed-ink">{post.author.name}</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Link href={creatorHref} className="truncate text-[15px] font-semibold text-feed-ink hover:text-gold transition">{post.author.name}</Link>
               {post.author.verified && (
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0 fill-gold">
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0 fill-gold" aria-label="Verified">
                   <path d="M12 2l2.4 1.8 3-.2 1 2.8 2.6 1.5-.6 3 .6 3-2.6 1.5-1 2.8-3-.2L12 22l-2.4-1.8-3 .2-1-2.8L3 16.3l.6-3L3 10.3l2.6-1.5 1-2.8 3 .2z" />
                 </svg>
               )}
-              <span className="truncate text-[13px] text-feed-dim">{post.author.handle}</span>
+              <Link href={creatorHref} className="truncate text-[13px] text-feed-dim hover:text-feed-ink transition">{post.author.handle}</Link>
+              {post.authorCity && (
+                <span className="text-[11.5px] text-feed-dim inline-flex items-center gap-0.5">
+                  · <svg viewBox="0 0 24 24" className="h-2.5 w-2.5 fill-none stroke-current stroke-[1.8]"><path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>
+                  {post.authorCity}
+                </span>
+              )}
             </div>
             <div className="mt-0.5 text-[12px] text-feed-dim">{timeAgo(post.createdAt)}</div>
           </div>
@@ -80,19 +91,24 @@ export default function PostCard({ post }: { post: FeedPost }) {
         </div>
       )}
 
-      {/* footer */}
-      <footer className="mt-4 flex items-center justify-between border-t border-feed-line pt-3 text-feed-mute">
-        <Action label="赞" count={post.stats.likes} icon={
+      {/* Footer — 6 actions (spec V2:Like/Comment/Gift/Share/Book) */}
+      <footer className="mt-4 flex items-center justify-between border-t border-feed-line pt-3 text-feed-mute overflow-x-auto scrollbar-hide">
+        <Action label="Like" count={post.stats.likes} icon={
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.8]"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21s-7-5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 16 12 21 12 21z"/></svg>
         } hoverColor="hover:text-rose-300" />
-        <Action label="评论" count={post.stats.comments} icon={
+        <Action label="Comment" count={post.stats.comments} icon={
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.8]"><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 12z"/></svg>
         } hoverColor="hover:text-sky-300" />
-        <Action label="分享" count={post.stats.shares} icon={
+        {/* Gift — gradient accent */}
+        <Action label="Gift" count={null} icon={
+          <span className="text-[15px] leading-none" aria-hidden>🎁</span>
+        } hoverColor="hover:text-gold" />
+        <Action label="Share" count={post.stats.shares} icon={
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.8]"><path strokeLinecap="round" strokeLinejoin="round" d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></svg>
         } hoverColor="hover:text-gold" />
-        <Action label="收藏" count={null} icon={
-          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.8]"><path strokeLinecap="round" strokeLinejoin="round" d="M5 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17l-7-4-7 4V4z"/></svg>
+        {/* Book — 预约 */}
+        <Action label="Book" count={null} icon={
+          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.8]"><rect x="3" y="5" width="18" height="16" rx="2" /><path strokeLinecap="round" strokeLinejoin="round" d="M16 3v4M8 3v4M3 11h18" /></svg>
         } hoverColor="hover:text-gold" />
       </footer>
     </article>

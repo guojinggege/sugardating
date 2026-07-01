@@ -1,12 +1,13 @@
 "use client";
 import type { FeedTabKey, FeedTabDef } from "./types";
 
+// V2 tabs (per spec): For You / Following / Nearby / VIP / Newest
 export const DEFAULT_TABS: FeedTabDef[] = [
-  { key: "all",   label: "全部" },
-  { key: "image", label: "图片" },
-  { key: "video", label: "视频" },
-  { key: "vip",   label: "VIP" },
-  { key: "hot",   label: "热门" },
+  { key: "for-you",   label: "For You" },
+  { key: "following", label: "关注" },
+  { key: "nearby",    label: "附近" },
+  { key: "vip",       label: "VIP" },
+  { key: "newest",    label: "最新" },
 ];
 
 interface Props {

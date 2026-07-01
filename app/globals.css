@@ -1476,16 +1476,13 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 @media(max-width:1024px){.cr-fold-hero{height:340px}}
 @media(max-width:640px){.cr-fold-hero{height:240px}}
 
-/* Profile shell — 3-col grid: [160px avatar] [1fr info] [auto actions]
-   align-items: flex-end 使所有列底对齐 */
-.cr-fold-profile{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:28px;align-items:flex-end;padding-top:24px;padding-bottom:24px;position:relative;z-index:2}
+/* Profile shell V3 — 2-col grid: [160px avatar] [1fr info] (Actions 移到 About Card) */
+.cr-fold-profile{display:grid;grid-template-columns:160px minmax(0,1fr);gap:28px;align-items:flex-end;padding-top:24px;padding-bottom:24px;position:relative;z-index:2}
 @media(max-width:1024px){
   .cr-fold-profile{grid-template-columns:1fr;justify-items:start;gap:20px;padding-top:16px}
-  .cr-fold-actions{width:100%}
 }
 @media(max-width:640px){
   .cr-fold-profile{justify-items:center;text-align:center}
-  .cr-fold-actions{display:none}   /* Mobile 用 MobileCTABar */
 }
 
 /* Avatar column — translate(0,-50%) 使其一半在 hero,一半在 profile

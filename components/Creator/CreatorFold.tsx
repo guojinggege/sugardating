@@ -11,7 +11,6 @@ import Img from "@/components/Img";
 import { getTranslations } from "next-intl/server";
 import type { Creator } from "@/lib/types";
 import CreatorHeroVideo from "./CreatorHeroVideo";
-import CreatorQuickActions from "./CreatorQuickActions";
 
 interface Props {
   creator: Creator;
@@ -100,10 +99,7 @@ export default async function CreatorFold({
           </ul>
         </div>
 
-        {/* Actions column — horizontal button row */}
-        <div className="cr-fold-actions">
-          <CreatorQuickActions creatorName={creator.name} />
-        </div>
+        {/* Actions column 已移到 About Card header 右侧 (V3 spec) */}
       </div>
     </div>
   );

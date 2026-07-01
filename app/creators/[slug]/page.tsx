@@ -153,9 +153,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
           gifts={extra.gifts}
         />
 
-        {/* 4) About Card — Sugargirl V2:About Me + Availability + Basic Info + Interests + Travel + Verification 内嵌 */}
+        {/* 4) About Card — Sugargirl V3:动态标题 + 内嵌 Verification + CTA row */}
         <section className="mt-6 md:mt-8">
           <CreatorAbout
+            creatorName={creator.name}
             about={about}
             availability={availability}
             age={age}

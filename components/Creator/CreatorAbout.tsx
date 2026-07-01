@@ -1,16 +1,18 @@
-// About Creator Card — Sugargirl V2 完整资料
-// Header: 关于 Ta 标题 + Verification chips 内嵌右
-// Body:
-//   ① About Me (bio,支持展开)
-//   ② Availability (4 行:Online/回复/预约/时区)
-//   ③ Basic Information (2-col Grid,13 项资料)
-//   ④ Interests (chip cloud)
-//   ⑤ Travel Plan (下一站列表)
+// About Creator Card — Sugargirl V3
+// Header 布局:
+//   ┌─────────────────────────────────────────────────────────────┐
+//   │ {name} 简介                                                   │
+//   ├─────────────────────────────────────────────────────────────┤
+//   │ [Verification 6 chip]  │  [Actions: chat/video/私拍/伴游/tip/...] │
+//   └─────────────────────────────────────────────────────────────┘
+// Actions 从 Hero 右侧移到这里 (V3 spec)
 import { getTranslations } from "next-intl/server";
 import type { CreatorAbout as CreatorAboutData, TrustFlags, AvailabilityData } from "@/lib/creatorProfileMock";
 import CreatorVerification from "./CreatorVerification";
+import CreatorQuickActions from "./CreatorQuickActions";
 
 interface Props {
+  creatorName: string;
   about: CreatorAboutData;
   availability: AvailabilityData;
   age: number;
@@ -23,14 +25,13 @@ interface Props {
 }
 
 export default async function CreatorAbout({
-  about, availability, age, height, profession, slogan, trust,
+  creatorName, about, availability, age, height, profession, slogan, trust,
   timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
   const t = await getTranslations("creatorProfile.about");
   const tB = await getTranslations("creatorProfile.basicInfo");
   const tS = await getTranslations("creatorProfile.status");
 
-  // Basic Information rows (13 fields per spec V2)
   const basicRows: { label: string; value: React.ReactNode }[] = [
     { label: tB("age"),          value: `${age} 岁` },
     { label: tB("height"),       value: `${height} cm` },
@@ -50,18 +51,21 @@ export default async function CreatorAbout({
   ];
 
   return (
-    <section className="bg-white border border-[var(--line)] rounded-[20px] p-6 md:p-8 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-      {/* Header: title (left) + verification chips (right) */}
-      <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h3 className="text-[22px] font-extrabold tracking-tight text-[var(--ink)] m-0">
-          {t("aboutCreator")}
+    <section className="bg-white border border-[var(--line)] rounded-[20px] p-6 md:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      {/* Header — Row 1: 动态标题 "{name} 简介"  |  Row 2: Verification + Actions 同一行 */}
+      <header className="mb-6 md:mb-7 pb-5 md:pb-6 border-b border-[var(--line)]">
+        <h3 className="text-[22px] md:text-[24px] font-extrabold tracking-tight text-[var(--ink)] m-0 mb-4">
+          {t("aboutTitle", { name: creatorName })}
         </h3>
-        <CreatorVerification flags={trust} />
+        <div className="flex flex-wrap items-center gap-3">
+          <CreatorVerification flags={trust} />
+          <div className="w-px h-6 bg-[var(--line)] hidden lg:block" aria-hidden />
+          <CreatorQuickActions creatorName={creatorName} />
+        </div>
       </header>
 
-      {/* 2-col main grid: left About Me, right Availability */}
+      {/* Body — About Me + Availability 2-col */}
       <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8 mb-8 pb-8 border-b border-[var(--line)]">
-        {/* Left: About Me */}
         <div>
           <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-3">
             {t("aboutMe")}
@@ -73,8 +77,6 @@ export default async function CreatorAbout({
           )}
           <p className="text-[15px] leading-[1.7] text-[var(--ink2)] m-0">{about.bio}</p>
         </div>
-
-        {/* Right: Availability */}
         <aside className="bg-[var(--page)] rounded-2xl p-5 self-start">
           <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-3">
             {t("availability")}
@@ -109,7 +111,7 @@ export default async function CreatorAbout({
         </aside>
       </div>
 
-      {/* Basic Information — 2 col grid,10+ fields */}
+      {/* Basic Info 15 fields */}
       <div className="mb-8 pb-8 border-b border-[var(--line)]">
         <h4 className="text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-4">
           {t("basicInformation")}
@@ -161,7 +163,6 @@ export default async function CreatorAbout({
         </ul>
       </div>
 
-      {/* Frequent countries (备注小行,不占大面积) */}
       {about.frequentCountries.length > 0 && (
         <div className="mt-4 flex items-center gap-2 text-[12.5px] text-[var(--muted)]">
           <span className="font-semibold uppercase tracking-[.12em] text-[11px]">{t("frequent")}:</span>

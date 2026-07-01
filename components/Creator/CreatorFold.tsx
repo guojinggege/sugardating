@@ -39,11 +39,12 @@ export default async function CreatorFold({
         <CreatorHeroVideo poster={cover} videoSrc={videoSrc} />
         <div className="cr-fold-hero-veil" aria-hidden />
         <div className="cr-fold-hero-fade" aria-hidden />
+      </div>
 
-        {/* Floating Identity Bar — absolute bottom of Hero,full-shell width */}
-        <div className="cr-fold-bar-abs">
-          <div className="cr-shell">
-            <div className="cr-fold-bar">
+      {/* Identity Bar — sibling of Hero,flex column 布局下自动落在首屏底部 */}
+      <div className="cr-fold-bar-abs">
+        <div className="cr-shell">
+          <div className="cr-fold-bar">
               {/* Avatar 160 — translate 上移 35% straddle Bar 顶边 */}
               <div className="cr-fold-avatar">
                 <Img src={avatar} alt={creator.name} sizes="160px" />
@@ -96,10 +97,9 @@ export default async function CreatorFold({
                 </ul>
               </div>
 
-              {/* Actions — 3 button (Follow / Gift / Share) */}
-              <div className="cr-fold-actions">
-                <CreatorFoldActions creatorName={creator.name} />
-              </div>
+            {/* Actions — 3 button (Follow / Gift / Share) */}
+            <div className="cr-fold-actions">
+              <CreatorFoldActions creatorName={creator.name} />
             </div>
           </div>
         </div>

@@ -195,6 +195,90 @@ export function deriveAvailability(slug: string, memberSince: string, opts?: { o
   };
 }
 
+// Trust flags
+export interface TrustFlags {
+  identity: boolean;
+  phone: boolean;
+  email: boolean;
+  video: boolean;
+  face: boolean;
+  safeMeet: boolean;
+}
+export function deriveTrust(slug: string): TrustFlags {
+  const off = hashSlug(slug);
+  return {
+    identity: true,
+    phone: true,
+    email: true,
+    video: (off % 5) !== 0,
+    face: (off % 4) !== 0,
+    safeMeet: (off % 3) !== 0,
+  };
+}
+
+// Travel Plan
+export interface TravelData {
+  currentCity: string;
+  upcoming: { city: string; date: string }[];
+  wishList: string[];
+  favRestaurants: string[];
+  favHotels: string[];
+  favActivities: string[];
+}
+export function deriveTravel(slug: string, region: string): TravelData {
+  const off = hashSlug(slug);
+  const cityPool = ["东京", "首尔", "巴厘岛", "曼谷", "巴黎", "米兰", "伦敦", "洛杉矶", "迪拜"];
+  const wishPool = ["京都", "圣托里尼", "冰岛", "马尔代夫", "开普敦", "秘鲁"];
+  const restPool = ["Amber (Hong Kong)", "Odette (Singapore)", "Sushi Saito (Tokyo)", "Central (Lima)"];
+  const hotelPool = ["Aman Tokyo", "The Peninsula", "Rosewood", "Six Senses"];
+  const actPool = ["Yoga", "Sailing", "Fine Dining", "Wine Tasting", "Gallery Hop", "Beach Day", "Ski"];
+  const monthOff = ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026"];
+  const pick = <T,>(arr: T[], n: number, salt: number) => {
+    const r: T[] = [];
+    for (let i = 0; i < n; i++) r.push(arr[(off + i * 3 + salt) % arr.length]);
+    return Array.from(new Set(r));
+  };
+  return {
+    currentCity: region,
+    upcoming: [0, 1, 2].map((i) => ({
+      city: cityPool[(off + i * 7) % cityPool.length],
+      date: monthOff[i % monthOff.length],
+    })),
+    wishList: pick(wishPool, 4, 11),
+    favRestaurants: pick(restPool, 3, 5),
+    favHotels: pick(hotelPool, 3, 8),
+    favActivities: pick(actPool, 5, 13),
+  };
+}
+
+// Timeline events
+export interface TimelineEvent {
+  type: "online" | "update" | "travel" | "post";
+  text: string;
+  time: string;
+}
+export function deriveTimeline(slug: string, currentCity: string): TimelineEvent[] {
+  const off = hashSlug(slug);
+  return [
+    { type: "online", text: "刚刚上线,准备好回复消息",             time: "2 分钟前" },
+    { type: "post",   text: "更新了新的动态 · 分享本周旅拍",         time: "3 小时前" },
+    { type: "travel", text: `本周前往 ${["东京","首尔","巴厘岛","曼谷"][off % 4]}`, time: "昨天" },
+    { type: "update", text: `更新了资料 · 新增服务类型`,             time: "2 天前" },
+    { type: "post",   text: `从 ${currentCity} 出发的旅行照`,        time: "5 天前" },
+  ];
+}
+
+// 派生额外统计 (likes / gifts / rating)
+export function deriveExtraStats(slug: string, popularity?: number): { likes: number; gifts: number; rating: number } {
+  const off = hashSlug(slug);
+  const base = popularity ?? 5000;
+  return {
+    likes: Math.round(base * 3 + (off % 5000)),
+    gifts: 800 + (off % 4200),
+    rating: 4.85 + ((off % 15) / 100),   // 4.85 - 4.99
+  };
+}
+
 // 关于 Ta 区块
 export interface CreatorAbout {
   bio: string;

@@ -6,9 +6,10 @@ import { useTranslations } from "next-intl";
 
 const TABS = [
   { id: "feed",     key: "feed" },
+  { id: "gallery",  key: "photos" },
   { id: "videos",   key: "videos" },
-  { id: "gallery",  key: "gallery" },
   { id: "services", key: "services" },
+  { id: "gifts",    key: "gifts" },
   { id: "reviews",  key: "reviews" },
   { id: "about",    key: "about" },
 ] as const;

@@ -396,9 +396,63 @@
       "chat": "立即聊天",
       "bookDate": "预约约会",
       "videoCall": "视频聊天",
+      "tip": "打赏 Ta",
       "save": "收藏",
       "share": "分享",
+      "report": "举报",
       "linkCopied": "已复制链接"
+    },
+    "quickStats": {
+      "ariaLabel": "关键数据",
+      "followers": "粉丝",
+      "likes": "喜欢",
+      "posts": "动态",
+      "rating": "评分",
+      "responseRate": "响应率",
+      "avgReply": "平均回复",
+      "gifts": "收到礼物",
+      "completedDates": "完成约会"
+    },
+    "trust": {
+      "title": "安全认证",
+      "verified": "已验证",
+      "items": {
+        "identity": "身份认证",
+        "phone": "手机认证",
+        "email": "邮箱认证",
+        "video": "视频认证",
+        "face": "人脸识别",
+        "safeMeet": "安全见面认证"
+      }
+    },
+    "gifts": {
+      "title": "送 Ta 一份礼物",
+      "subtitle": "小小心意,让 Ta 知道你在。",
+      "quick": "快速打赏",
+      "items": {
+        "rose": "玫瑰",
+        "coffee": "咖啡",
+        "dinner": "晚餐",
+        "luxury": "轻奢",
+        "diamond": "钻石",
+        "custom": "自定义"
+      }
+    },
+    "travel": {
+      "currentCity": "当前所在",
+      "upcoming": "即将前往",
+      "wishList": "旅行心愿",
+      "restaurants": "喜欢的餐厅",
+      "hotels": "喜欢的酒店",
+      "activities": "喜欢的活动"
+    },
+    "timeline": {
+      "types": {
+        "online": "在线",
+        "update": "资料更新",
+        "travel": "旅行",
+        "post": "动态"
+      }
     },
     "stats": {
       "ariaLabel": "创作者数据",
@@ -414,19 +468,23 @@
     "tabs": {
       "ariaLabel": "内容导航",
       "feed": "动态",
+      "photos": "照片",
       "videos": "视频",
-      "gallery": "相册",
       "services": "服务",
+      "gifts": "礼物",
       "reviews": "评价",
       "about": "关于 Ta"
     },
     "sections": {
       "feed": "动态",
       "videos": "视频",
-      "gallery": "相册",
+      "gallery": "照片",
       "services": "服务",
+      "gifts": "打赏与礼物",
       "reviews": "用户评价",
-      "about": "关于 Ta"
+      "about": "关于 Ta",
+      "travel": "旅行计划",
+      "timeline": "最近动态"
     },
     "feed": {
       "end": "—— 没有更多动态了 ——",

@@ -396,9 +396,63 @@
       "chat": "Chat Now",
       "bookDate": "Book a Date",
       "videoCall": "Video Call",
+      "tip": "Send a Tip",
       "save": "Save",
       "share": "Share",
+      "report": "Report",
       "linkCopied": "Link copied"
+    },
+    "quickStats": {
+      "ariaLabel": "Key metrics",
+      "followers": "Followers",
+      "likes": "Likes",
+      "posts": "Posts",
+      "rating": "Rating",
+      "responseRate": "Response Rate",
+      "avgReply": "Avg Reply",
+      "gifts": "Gifts Received",
+      "completedDates": "Completed Dates"
+    },
+    "trust": {
+      "title": "Verified & Safety",
+      "verified": "verified",
+      "items": {
+        "identity": "Identity Verified",
+        "phone": "Phone Verified",
+        "email": "Email Verified",
+        "video": "Video Verified",
+        "face": "Face Verified",
+        "safeMeet": "Safe Meet Certified"
+      }
+    },
+    "gifts": {
+      "title": "Send a Gift",
+      "subtitle": "A small gesture goes a long way.",
+      "quick": "Quick Tip",
+      "items": {
+        "rose": "Rose",
+        "coffee": "Coffee",
+        "dinner": "Dinner",
+        "luxury": "Luxury",
+        "diamond": "Diamond",
+        "custom": "Custom"
+      }
+    },
+    "travel": {
+      "currentCity": "Current City",
+      "upcoming": "Upcoming Cities",
+      "wishList": "Wish List",
+      "restaurants": "Favorite Restaurants",
+      "hotels": "Favorite Hotels",
+      "activities": "Favorite Activities"
+    },
+    "timeline": {
+      "types": {
+        "online": "Online",
+        "update": "Profile Update",
+        "travel": "Travel",
+        "post": "New Post"
+      }
     },
     "stats": {
       "ariaLabel": "Creator stats",
@@ -414,19 +468,23 @@
     "tabs": {
       "ariaLabel": "Content navigation",
       "feed": "Feed",
+      "photos": "Photos",
       "videos": "Videos",
-      "gallery": "Gallery",
       "services": "Services",
+      "gifts": "Gifts",
       "reviews": "Reviews",
       "about": "About"
     },
     "sections": {
       "feed": "Feed",
       "videos": "Videos",
-      "gallery": "Gallery",
+      "gallery": "Photos",
       "services": "Services",
+      "gifts": "Tips & Gifts",
       "reviews": "Reviews",
-      "about": "About"
+      "about": "About",
+      "travel": "Travel Plan",
+      "timeline": "Recent Activity"
     },
     "feed": {
       "end": "— end of feed —",

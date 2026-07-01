@@ -934,14 +934,16 @@ body.home-immersive main{padding-top:0}
 .cr-section{scroll-margin-top:156px}
 .cr-section-h{font-size:22px;font-weight:800;letter-spacing:-.015em;margin:0 0 16px;color:var(--ink);line-height:1.2}
 
-/* Feed */
-.cr-feed{display:flex;flex-direction:column;gap:18px}
-.cr-post{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;transition:border-color .18s,box-shadow .25s}
-.cr-post:hover{border-color:#d8d8de;box-shadow:0 6px 24px -16px rgba(0,0,0,.12)}
-.cr-post-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.cr-post-ava{width:40px;height:40px;border-radius:50%;overflow:hidden;background:#e6e6ea;flex:0 0 40px}
+/* Feed — spec V2: Card gap 24 / radius 20 / soft shadow / padding 24 / avatar 48 clickable */
+.cr-feed{display:flex;flex-direction:column;gap:24px}
+.cr-post{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 4px 12px -6px rgba(0,0,0,.04);transition:border-color .18s,box-shadow .25s}
+.cr-post:hover{border-color:#d8d8de;box-shadow:0 6px 24px -12px rgba(0,0,0,.12),0 2px 6px -2px rgba(0,0,0,.06)}
+.cr-post-h{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cr-post-ava{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden;background:#e6e6ea;flex:0 0 48px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+.cr-post-ava:hover{transform:scale(1.05);box-shadow:0 4px 12px -3px rgba(0,0,0,.15)}
 .cr-post-ava img{object-fit:cover;width:100%;height:100%}
-.cr-post-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.2}
+.cr-post-name{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.2;text-decoration:none;transition:color .15s;display:inline-block}
+.cr-post-name:hover{color:var(--accent)}
 .cr-post-time{font-size:12px;color:var(--muted);margin-top:1px}
 .cr-post-text{font-size:14.5px;line-height:1.65;color:var(--ink);margin:0 0 12px;white-space:pre-wrap;word-break:break-word}
 .cr-post-grid{display:grid;gap:8px;margin-bottom:12px;border-radius:12px;overflow:hidden}
@@ -1526,3 +1528,9 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cr-sb-fan-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#d4bf95,#b8a789);color:#1a1409;display:grid;place-items:center;font-weight:800;font-size:15px;font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-style:italic;flex:0 0 34px}
 .cr-sb-gift-emoji{font-size:20px;line-height:1;flex:0 0 24px;text-align:center}
 .cr-sb-gift-count{font-size:13px;font-weight:700;color:var(--ink);tabular-nums:tabular-nums;letter-spacing:-.01em}
+
+/* Spec V2 收尾:section-to-section 底 48px 呼吸;sidebar top 与 feed top 严格对齐 */
+.cr-main > .cr-section:last-child{padding-bottom:24px}
+.cr-body{padding-bottom:64px}
+.cr-sidebar{padding-top:0}  /* 与 feed 第一条动态顶对齐,无额外 offset */
+

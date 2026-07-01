@@ -1,5 +1,6 @@
-// 动态 Feed 流 — 帖子卡:时间 / 文字 / 9 宫格图 / 视频 / 点赞 / 收藏 / 分享 / 评论
-// MVP: 服务端渲染 + 客户端交互 widget (FeedActions)
+// 动态 Feed 流 — 帖子卡:头像(48,可点跳 Creator 主页)/name/time/文字/9 宫格/视频/交互按钮
+// 用 creator 真实 avatar (从 page 传下,与 Header 一致)
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import Img from "@/components/Img";
 import FeedActions from "./FeedActions";
@@ -8,21 +9,22 @@ import type { FeedPost } from "@/lib/creatorProfileMock";
 interface Props {
   authorName: string;
   authorAvatar: string;
+  authorSlug: string;   // 供头像/名字点击跳自己主页
   posts: FeedPost[];
 }
 
-export default async function FeedList({ authorName, authorAvatar, posts }: Props) {
+export default async function FeedList({ authorName, authorAvatar, authorSlug, posts }: Props) {
   const t = await getTranslations("creatorProfile.feed");
   return (
     <div className="cr-feed">
       {posts.map((p) => (
         <article key={p.id} className="cr-post">
           <header className="cr-post-h">
-            <div className="cr-post-ava">
-              <Img src={authorAvatar} alt={authorName} sizes="40px" />
-            </div>
+            <Link href={`/creators/${authorSlug}`} className="cr-post-ava" aria-label={authorName}>
+              <Img src={authorAvatar} alt={authorName} sizes="48px" />
+            </Link>
             <div className="cr-post-meta">
-              <div className="cr-post-name">{authorName}</div>
+              <Link href={`/creators/${authorSlug}`} className="cr-post-name">{authorName}</Link>
               <div className="cr-post-time">{p.time}</div>
             </div>
           </header>

@@ -9,7 +9,7 @@ import type { Creator, Tier } from "@/lib/types";
 import {
   makeFeed, makeVideos, makeGallery, makeServices,
   deriveStats, deriveAbout, deriveAvailability,
-  deriveTrust, deriveTravel, deriveTimeline, deriveExtraStats,
+  deriveTrust, deriveExtraStats,
   deriveTopFans, deriveGiftLeaderboard,
 } from "@/lib/creatorProfileMock";
 
@@ -23,9 +23,6 @@ import VideoGrid from "@/components/Creator/VideoGrid";
 import GalleryGrid from "@/components/Creator/GalleryGrid";
 import ServiceCards from "@/components/Creator/ServiceCards";
 import ReviewList from "@/components/Creator/ReviewList";
-import TravelPlan from "@/components/Creator/TravelPlan";
-import CreatorTimeline from "@/components/Creator/CreatorTimeline";
-import DatingPreference from "@/components/Creator/DatingPreference";
 import RightSidebar from "@/components/Creator/RightSidebar";
 import RelatedCreators from "@/components/Creator/RelatedCreators";
 import MobileCTABar from "@/components/Creator/MobileCTABar";
@@ -108,8 +105,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const about        = deriveAbout(creator.slug, baseBio, creator.region, stats.joinedAt);
   const availability = deriveAvailability(creator.slug, stats.joinedAt, { online: sgSource ? sgSource.online : true });
   const trust        = deriveTrust(creator.slug);
-  const travel       = deriveTravel(creator.slug, creator.region);
-  const timeline     = deriveTimeline(creator.slug, creator.region);
   const extra        = deriveExtraStats(creator.slug, sgSource?.popularity);
   const topFans      = deriveTopFans(creator.slug);
   const giftBoard    = deriveGiftLeaderboard(creator.slug);
@@ -186,7 +181,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <div className="cr-grid">
           <main className="cr-main">
             <section id="feed" className="cr-section" aria-label={t("sections.feed")}>
-              <FeedList authorName={creator.name} authorAvatar={avatar} posts={feed} />
+              <FeedList authorName={creator.name} authorAvatar={avatar} authorSlug={creator.slug} posts={feed} />
             </section>
 
             <section id="gallery" className="cr-section" aria-label={t("sections.gallery")}>
@@ -213,22 +208,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </div>
             </section>
 
-            {/* 关于 Ta tab 深层内容 — Dating Pref + Travel + Timeline
-                (About Card 已展示 bio/basic/interests,这里是补充详情) */}
-            <section id="about" className="cr-section" aria-label={t("sections.about")}>
-              <div className="cr-sub-h"><h4>{t("sections.datingPref")}</h4></div>
-              <DatingPreference />
-
-              <div className="cr-sub-h">
-                <h4>{t("sections.travel")}</h4>
-              </div>
-              <TravelPlan data={travel} />
-
-              <div className="cr-sub-h">
-                <h4>{t("sections.timeline")}</h4>
-              </div>
-              <CreatorTimeline events={timeline} />
-            </section>
+            {/* 关于 Ta tab 已删除 (spec §一) — Creator 简介已在 Tabs 上方 About Card 完整展示 */}
           </main>
 
           <RightSidebar

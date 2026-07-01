@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
+// 6 tabs (删除 "关于 Ta" — Creator 简介已在 Tabs 上方 About Card 展示)
 const TABS = [
   { id: "feed",     key: "feed" },
   { id: "gallery",  key: "photos" },
@@ -11,7 +12,6 @@ const TABS = [
   { id: "services", key: "services" },
   { id: "gifts",    key: "gifts" },
   { id: "reviews",  key: "reviews" },
-  { id: "about",    key: "about" },
 ] as const;
 
 export default function CreatorTabs() {

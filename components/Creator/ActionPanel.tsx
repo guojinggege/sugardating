@@ -1,14 +1,28 @@
 "use client";
 // Hero 右侧 5-col Floating Glass Card
-// 7 stacked 按钮 + 内嵌 Gift Panel + Report
-// 所有写操作走 requireLogin gate
+// Status block (Online/Reply/Rate/Next/Timezone) → CTA hierarchy → Gift row → Ghost row
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 
-export default function ActionPanel({ creatorName }: { creatorName: string }) {
+interface StatusData {
+  isOnline: boolean;
+  lastActiveText: string;
+  responseRate: number;
+  replyMinutes: number;
+  nextAvailableText: string;
+  timezone: string;
+}
+
+interface Props {
+  creatorName: string;
+  status?: StatusData;
+}
+
+export default function ActionPanel({ creatorName, status }: Props) {
   const t = useTranslations("creatorProfile.actions");
   const tG = useTranslations("creatorProfile.gifts");
+  const tS = useTranslations("creatorProfile.status");
   const requireLogin = useRequireLogin();
   const [following, setFollowing] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -27,6 +41,31 @@ export default function ActionPanel({ creatorName }: { creatorName: string }) {
 
   return (
     <aside className="cr-ap" aria-label="Actions">
+      {/* Status block — 顶部信任信号 */}
+      {status && (
+        <div className="cr-ap-status">
+          <div className="cr-ap-status-row cr-ap-status-online">
+            {status.isOnline ? (
+              <>
+                <span className="cr-ap-dot cr-ap-dot-on" aria-hidden><span /></span>
+                <b>{tS("onlineNow")}</b>
+              </>
+            ) : (
+              <>
+                <span className="cr-ap-dot" aria-hidden />
+                <b>{tS("lastActive")} {status.lastActiveText}</b>
+              </>
+            )}
+          </div>
+          <div className="cr-ap-status-grid">
+            <div className="cr-ap-status-item"><span>{tS("replyRate")}</span><b>{status.responseRate}%</b></div>
+            <div className="cr-ap-status-item"><span>{tS("avgReply")}</span><b>{status.replyMinutes < 60 ? `${status.replyMinutes}m` : `<${Math.round(status.replyMinutes/60)}h`}</b></div>
+            <div className="cr-ap-status-item"><span>{tS("nextAvailable")}</span><b>{status.nextAvailableText}</b></div>
+            <div className="cr-ap-status-item"><span>{tS("timezone")}</span><b>{status.timezone}</b></div>
+          </div>
+        </div>
+      )}
+
       {/* Primary CTA — 立即聊天 */}
       <button type="button" onClick={guard(() => {})} className="cr-ap-btn cr-ap-primary">
         <svg viewBox="0 0 24 24" aria-hidden><path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" /></svg>

@@ -5,6 +5,7 @@ import CreatorHeroVideo from "./CreatorHeroVideo";
 import CreatorInfo from "./CreatorInfo";
 import ActionPanel from "./ActionPanel";
 import type { Creator } from "@/lib/types";
+import type { AvailabilityData } from "@/lib/creatorProfileMock";
 
 interface Props {
   creator: Creator;
@@ -20,13 +21,27 @@ interface Props {
   tags: string[];
   online?: boolean;
   vip?: boolean;
+  availability?: AvailabilityData;
+  timezone?: string;
+  nextAvailableText?: string;
 }
 
 export default async function CreatorHero({
   creator, bio, slogan, cover, avatar,
   age, height, languages, profession, zodiac,
   tags, online = true, vip = true,
+  availability, timezone = "GMT+8", nextAvailableText = "Tonight",
 }: Props) {
+  const status = availability
+    ? {
+        isOnline: availability.isOnline,
+        lastActiveText: availability.lastActiveText,
+        responseRate: availability.responseRate,
+        replyMinutes: availability.replyMinutes,
+        nextAvailableText,
+        timezone,
+      }
+    : undefined;
   return (
     <section className="cr-hero">
       <div className="cr-hero-bg" aria-hidden>
@@ -41,6 +56,7 @@ export default async function CreatorHero({
             <CreatorInfo
               creator={creator}
               avatar={avatar}
+              cover={cover}
               age={age}
               height={height}
               languages={languages}
@@ -53,9 +69,9 @@ export default async function CreatorHero({
               vip={vip}
             />
           </div>
-          {/* Right 5 col — Glass Action Panel */}
+          {/* Right 5 col — Glass Action Panel (with Status block) */}
           <div className="cr-hero-c-right">
-            <ActionPanel creatorName={creator.name} />
+            <ActionPanel creatorName={creator.name} status={status} />
           </div>
         </div>
       </div>

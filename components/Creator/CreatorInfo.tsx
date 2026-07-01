@@ -9,10 +9,12 @@
 import Img from "@/components/Img";
 import { getTranslations } from "next-intl/server";
 import type { Creator } from "@/lib/types";
+import WatchStoryButton from "./WatchStoryButton";
 
 interface Props {
   creator: Creator;
   avatar: string;
+  cover?: string;   // 供 Watch Story 用做 poster
   age: number;
   height: number;
   languages: string[];
@@ -26,7 +28,7 @@ interface Props {
 }
 
 export default async function CreatorInfo({
-  creator, avatar, age, height, languages,
+  creator, avatar, cover, age, height, languages,
   profession, zodiac, slogan, bio, tags,
   online = true, vip = true,
 }: Props) {
@@ -57,7 +59,12 @@ export default async function CreatorInfo({
         </div>
       </div>
 
-      {slogan && <p className="cr-info-slogan">"{slogan}"</p>}
+      {slogan && (
+        <div className="cr-info-slogan-row">
+          <p className="cr-info-slogan">"{slogan}"</p>
+          {cover && <WatchStoryButton poster={cover} creatorName={creator.name} />}
+        </div>
+      )}
 
       <ul className="cr-info-meta">
         <li><Icon k="pin" /> {creator.region}</li>

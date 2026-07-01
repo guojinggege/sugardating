@@ -1,8 +1,9 @@
 "use client";
 // 评价列表 — 复用 DB Comment 数据,展示为带评分 + 头像首字的评价
-// 客户端分页 (每页 5 条)
+// 客户端分页 (每页 5 条) + 顶部 ReviewsHeader (Overall/Verified/Photo/Latest)
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import ReviewsHeader from "./ReviewsHeader";
 
 export interface ReviewItem {
   id: string;
@@ -14,6 +15,7 @@ export interface ReviewItem {
 interface Props {
   reviews: ReviewItem[];
   pageSize?: number;
+  overallRating?: number;
 }
 
 function timeAgo(d: Date, locale: string): string {
@@ -40,7 +42,7 @@ function deriveRating(name: string): number {
   return 4 + (Math.abs(h) % 2);
 }
 
-export default function ReviewList({ reviews, pageSize = 5 }: Props) {
+export default function ReviewList({ reviews, pageSize = 5, overallRating = 4.98 }: Props) {
   const t = useTranslations("creatorProfile.reviews");
   const [locale] = useState<string>(() =>
     typeof document !== "undefined" && /lang="zh/.test(document.documentElement.outerHTML.slice(0, 200)) ? "zh" : "en"
@@ -54,12 +56,19 @@ export default function ReviewList({ reviews, pageSize = 5 }: Props) {
   );
   const hasMore = page < totalPages;
 
-  if (reviews.length === 0) {
-    return <div className="cr-empty">{t("empty")}</div>;
-  }
+  const totalDisplayed = Math.max(reviews.length, 24);
+  const verified = Math.round(totalDisplayed * 0.85);
+  const withPhoto = Math.round(totalDisplayed * 0.36);
 
   return (
     <div className="cr-reviews">
+      <ReviewsHeader
+        overall={overallRating}
+        total={totalDisplayed}
+        verified={verified}
+        withPhoto={withPhoto}
+      />
+      {reviews.length === 0 && <div className="cr-empty">{t("empty")}</div>}
       {visible.map((r) => {
         const rating = deriveRating(r.authorName);
         return (

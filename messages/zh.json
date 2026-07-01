@@ -454,6 +454,41 @@
         "post": "动态"
       }
     },
+    "status": {
+      "onlineNow": "🟢 在线中",
+      "lastActive": "最近活跃",
+      "replyRate": "响应率",
+      "avgReply": "平均回复",
+      "nextAvailable": "下次可预约",
+      "timezone": "时区"
+    },
+    "watchStory": {
+      "cta": "▶ 看 Ta 的介绍视频",
+      "close": "关闭",
+      "comingSoon": "创作者介绍视频即将上线"
+    },
+    "dating": {
+      "items": {
+        "coffee":    "咖啡约会",
+        "dinner":    "晚餐约会",
+        "travel":    "一起旅行",
+        "photo":     "摄影同行",
+        "shopping":  "购物同行",
+        "weekend":   "周末小旅",
+        "museum":    "博物馆",
+        "concert":   "音乐会",
+        "language":  "语言交换"
+      }
+    },
+    "reviewsHeader": {
+      "reviews": "条评价",
+      "verifiedPct": "已认证",
+      "photoCount": "带照片",
+      "all": "全部",
+      "verified": "已认证",
+      "withPhoto": "带照片",
+      "latest": "最新"
+    },
     "stats": {
       "ariaLabel": "创作者数据",
       "followers": "粉丝",
@@ -483,6 +518,7 @@
       "gifts": "打赏与礼物",
       "reviews": "用户评价",
       "about": "关于 Ta",
+      "datingPref": "约会偏好",
       "travel": "旅行计划",
       "timeline": "最近动态"
     },

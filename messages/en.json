@@ -454,6 +454,41 @@
         "post": "New Post"
       }
     },
+    "status": {
+      "onlineNow": "🟢 Online now",
+      "lastActive": "Last active",
+      "replyRate": "Reply rate",
+      "avgReply": "Avg reply",
+      "nextAvailable": "Next available",
+      "timezone": "Timezone"
+    },
+    "watchStory": {
+      "cta": "▶ Watch My Story",
+      "close": "Close",
+      "comingSoon": "Creator intro video coming soon"
+    },
+    "dating": {
+      "items": {
+        "coffee":    "Coffee Date",
+        "dinner":    "Dinner Date",
+        "travel":    "Travel Together",
+        "photo":     "Photo Walk",
+        "shopping":  "Shopping",
+        "weekend":   "Weekend Trip",
+        "museum":    "Museum",
+        "concert":   "Concert",
+        "language":  "Language Exchange"
+      }
+    },
+    "reviewsHeader": {
+      "reviews": "reviews",
+      "verifiedPct": "verified",
+      "photoCount": "with photos",
+      "all": "All",
+      "verified": "Verified",
+      "withPhoto": "With Photo",
+      "latest": "Latest"
+    },
     "stats": {
       "ariaLabel": "Creator stats",
       "followers": "Followers",
@@ -483,6 +518,7 @@
       "gifts": "Tips & Gifts",
       "reviews": "Reviews",
       "about": "About",
+      "datingPref": "Dating Preferences",
       "travel": "Travel Plan",
       "timeline": "Recent Activity"
     },

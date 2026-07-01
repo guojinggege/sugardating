@@ -25,6 +25,7 @@ import ReviewList from "@/components/Creator/ReviewList";
 import AboutBlock from "@/components/Creator/AboutBlock";
 import TravelPlan from "@/components/Creator/TravelPlan";
 import CreatorTimeline from "@/components/Creator/CreatorTimeline";
+import DatingPreference from "@/components/Creator/DatingPreference";
 import RightSidebar from "@/components/Creator/RightSidebar";
 import RelatedCreators from "@/components/Creator/RelatedCreators";
 import MobileCTABar from "@/components/Creator/MobileCTABar";
@@ -147,6 +148,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
         tags={tags}
         online={sgSource ? sgSource.online : true}
         vip
+        availability={availability}
+        timezone="GMT+8"
+        nextAvailableText={availability.isOnline ? "Now" : "Tonight"}
       />
 
       <div className="cr-shell cr-body">
@@ -202,7 +206,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
             <section id="reviews" className="cr-section">
               <h3 className="cr-section-h">{t("sections.reviews")}</h3>
-              <ReviewList reviews={comments} />
+              <ReviewList reviews={comments} overallRating={extra.rating} />
               <div className="cr-review-form">
                 <h4 className="cr-form-h">{t("reviews.writeNew")}</h4>
                 <CommentForm slug={creator.slug} />
@@ -212,6 +216,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
             <section id="about" className="cr-section">
               <h3 className="cr-section-h">{t("sections.about")}</h3>
               <AboutBlock about={about} />
+
+              <div className="cr-sub-h">
+                <h4>{t("sections.datingPref")}</h4>
+              </div>
+              <DatingPreference />
 
               <div className="cr-sub-h">
                 <h4>{t("sections.travel")}</h4>

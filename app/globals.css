@@ -1402,3 +1402,59 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cr-fab-tip{background:linear-gradient(135deg,#d4bf95,#b8a789);color:#1a1409;border:0}
 .cr-fab-tip:hover{box-shadow:0 16px 40px -8px rgba(184,167,137,.6)}
 
+
+/* ============================================================
+   Creator Profile v3 追加:Status block / Watch Story / Dating Pref / Reviews Header
+   ============================================================ */
+
+/* ActionPanel 顶部 Status block */
+.cr-ap-status{padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:4px}
+.cr-ap-status-online{display:flex;align-items:center;gap:8px;font-size:14px;color:#fff;font-weight:700;margin-bottom:10px}
+.cr-ap-status-online b{font-weight:700}
+.cr-ap-dot{position:relative;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3);flex:0 0 9px}
+.cr-ap-dot-on{background:#22c55e}
+.cr-ap-dot-on span{position:absolute;inset:-3px;border-radius:50%;background:#22c55e;opacity:.5;animation:cr-ping 1.6s ease-out infinite}
+.cr-ap-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.cr-ap-status-item{display:flex;flex-direction:column;gap:2px;font-size:11px;color:rgba(255,255,255,.55);line-height:1.3}
+.cr-ap-status-item b{font-size:13px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.2}
+
+/* Watch My Story button + modal */
+.cr-info-slogan-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cr-info-slogan-row .cr-info-slogan{flex:1;min-width:200px;margin:0}
+.cr-ws-trigger{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;height:38px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:999px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .18s,border-color .18s,transform .15s;white-space:nowrap;flex:0 0 auto}
+.cr-ws-trigger:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.4);transform:translateY(-1px)}
+.cr-ws-trigger svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}
+.cr-ws-modal{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:120;display:grid;place-items:center;animation:cr-fade .22s ease-out;padding:24px}
+.cr-ws-close{position:absolute;top:18px;right:24px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:0;font-size:24px;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(10px);line-height:1;z-index:2}
+.cr-ws-close:hover{background:rgba(255,255,255,.24)}
+.cr-ws-frame{position:relative;width:90vw;max-width:960px;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 30px 80px -12px rgba(0,0,0,.7)}
+.cr-ws-video{width:100%;height:100%;object-fit:cover}
+.cr-ws-placeholder{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff;text-align:center;padding:24px}
+.cr-ws-play-big{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,.14);backdrop-filter:blur(12px);display:grid;place-items:center;margin:0 auto 16px;border:1px solid rgba(255,255,255,.22)}
+.cr-ws-play-big svg{width:34px;height:34px;fill:#fff;stroke:none;margin-left:4px}
+.cr-ws-placeholder p{font-size:14px;color:rgba(255,255,255,.75);margin:0}
+
+/* Dating Preference — 9 chip grid */
+.cr-dp{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.cr-dp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(max-width:640px){.cr-dp-grid{grid-template-columns:repeat(2,1fr)}}
+.cr-dp-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--page);transition:border-color .15s,background .15s}
+.cr-dp-item:hover{border-color:var(--accent);background:#fff}
+.cr-dp-emoji{font-size:22px;line-height:1;flex:0 0 22px}
+.cr-dp-label{font-size:13.5px;font-weight:600;color:var(--ink)}
+
+/* Reviews Header */
+.cr-rh{background:linear-gradient(135deg,var(--card) 0%,var(--page) 100%);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:20px}
+.cr-rh-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.cr-rh-overall{display:flex;align-items:baseline;gap:10px}
+.cr-rh-num{font-size:34px;font-weight:800;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.cr-rh-stars{color:var(--accent);font-size:16px;letter-spacing:2px}
+.cr-rh-total{font-size:13px;color:var(--muted);font-weight:500}
+.cr-rh-summary{font-size:12.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+.cr-rh-summary span+span{color:var(--line)}
+.cr-rh-chips{display:flex;gap:6px;flex-wrap:wrap}
+.cr-rh-chip{padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;background:#fff;border:1px solid var(--line2);color:var(--ink2);cursor:pointer;transition:all .15s}
+.cr-rh-chip:hover{border-color:var(--ink);color:var(--ink)}
+.cr-rh-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cr-rh-chip em{font-style:normal;opacity:.7;font-weight:500;font-variant-numeric:tabular-nums}
+.cr-rh-chip.on em{opacity:.8}

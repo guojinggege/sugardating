@@ -26,20 +26,22 @@ const Ic = {
 
 export default function BottomNav() {
   const pathname = usePathname() || "/";
-  const t = useTranslations("nav");
+  const t = useTranslations("nav.bottom");
   const { user } = useAuth();
   const requireLogin = useRequireLogin();
 
   const items: Item[] = [
     { href: "/",             labelKey: "home",       fallback: "首页",       icon: Ic.home, match: (p) => p === "/" },
-    { href: "/photography",  labelKey: "discover",   fallback: "动态",       icon: Ic.feed, match: (p) => p.startsWith("/photography") },
+    { href: "/photography",  labelKey: "discover",   fallback: "发现",       icon: Ic.feed, match: (p) => p.startsWith("/photography") },
     { href: "/creators",     labelKey: "sugargirl",  fallback: "Sugargirl", icon: Ic.sg,   match: (p) => p.startsWith("/creators") },
     { href: "/community",    labelKey: "community",  fallback: "社区",       icon: Ic.com,  match: (p) => p.startsWith("/community") },
     { href: user ? "/me" : "/login", labelKey: "me", fallback: "我的",       icon: Ic.me,   match: (p) => p === "/me" || p === "/login", requireAuth: !user },
   ];
 
+  // 若 i18n 缺 key,next-intl 返回 "nav.bottom.xxx" 原样;检测后 fallback 到中文默认
   const label = (k: string, fallback: string) => {
-    try { return t(k); } catch { return fallback; }
+    const v = t(k);
+    return v && !v.includes(".") ? v : fallback;
   };
 
   return (

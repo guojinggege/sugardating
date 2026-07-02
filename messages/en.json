@@ -32,6 +32,13 @@
     },
     "mobile": {
       "allOf": "All {label}"
+    },
+    "bottom": {
+      "home": "Home",
+      "discover": "Discover",
+      "sugargirl": "Sugargirl",
+      "community": "Community",
+      "me": "Me"
     }
   },
   "footer": {

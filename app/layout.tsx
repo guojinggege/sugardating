@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -34,6 +35,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // 语言对应的 html lang 值
   const htmlLang = locale === "zh" ? "zh-Hans" : "en";
 
+  // 判断当前是否 /m/* 路径 (middleware 设置 x-pathname header)
+  // 是则跳过 desktop Nav/Footer/BottomNav,/m/layout.tsx 提供自己的移动 shell
+  const pathname = headers().get("x-pathname") || "";
+  const isMobileRoute = pathname === "/m" || pathname.startsWith("/m/");
+
   return (
     <html lang={htmlLang}>
       <head>
@@ -47,11 +53,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <Nav />
+            {!isMobileRoute && <Nav />}
             <main>{children}</main>
-            <Footer />
+            {!isMobileRoute && <Footer />}
             <LoginModal />
-            <BottomNav />
+            {!isMobileRoute && <BottomNav />}
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

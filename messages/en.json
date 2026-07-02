@@ -397,9 +397,13 @@
       "chatShort": "Chat",
       "bookDate": "Book a Date",
       "bookTravel": "Book Travel",
+      "bookTravelSub": "Companion booking",
       "videoCall": "Video Call",
+      "videoCallSub": "Live video chat",
       "videoShort": "Video",
       "privateShoot": "Private Shoot",
+      "privateShootSub": "Custom photo content",
+      "chatSub": "Start a conversation",
       "tip": "Send a Tip",
       "tipShort": "Tip",
       "save": "Save",
@@ -585,7 +589,19 @@
       "serviceEntries": "Book a Service",
       "frequent": "Frequent destinations",
       "travelPlans": "Travel Plans",
-      "joinedAt": "Joined"
+      "joinedAt": "Joined",
+      "readMore": "Read more",
+      "collapse": "Collapse"
+    },
+    "lifestyle": {
+      "title": "Lifestyle",
+      "smoking": "Smoking",
+      "drinking": "Drinking",
+      "diet": "Diet",
+      "schedule": "Schedule",
+      "exercise": "Exercise",
+      "travel": "Travel",
+      "datingPref": "Dating Preference"
     },
     "basicInfo": {
       "age": "Age",

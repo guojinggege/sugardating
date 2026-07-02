@@ -1,42 +1,55 @@
 "use client";
-// About Card 里的 4 功能入口 (取代原 Travel Plan 位置):
-//   💬 聊天  ·  📹 视频聊天  ·  📷 私拍  ·  ✈️ 预约伴游
-// 统一 Card 样式,同高,同 icon 尺寸,hover 抬升
+// Service Cards — Right column of Creator Introduction (2×2 grid always)
+// Spec §三: 立即聊天 / 视频聊天 / 私拍 / 预约伴游,每 card = icon + title + subtitle
+// 视觉:soft pastel bg + white icon puck + 轻边框,统一 radius 18
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 
 type ServiceKey = "chat" | "videoCall" | "privateShoot" | "bookTravel";
 
-const SERVICES: { k: ServiceKey; emoji: string; tint: string }[] = [
-  { k: "chat",          emoji: "💬", tint: "sky" },
-  { k: "videoCall",     emoji: "📹", tint: "violet" },
-  { k: "privateShoot",  emoji: "📷", tint: "amber" },
-  { k: "bookTravel",    emoji: "✈️", tint: "gold" },
+interface Svc {
+  k: ServiceKey;
+  emoji: string;
+  subKey: string;
+  bg: string;
+  border: string;
+  hoverBorder: string;
+}
+
+const SERVICES: Svc[] = [
+  { k: "chat",         emoji: "💬", subKey: "chatSub",         bg: "#F8FAFC", border: "#E6EEF6", hoverBorder: "#B8C9DA" },
+  { k: "videoCall",    emoji: "📹", subKey: "videoCallSub",    bg: "#F7F3EA", border: "#EFE7D4", hoverBorder: "#D4C79E" },
+  { k: "privateShoot", emoji: "📸", subKey: "privateShootSub", bg: "#F3F8F6", border: "#DFEDE5", hoverBorder: "#A8CFBD" },
+  { k: "bookTravel",   emoji: "✈️", subKey: "bookTravelSub",   bg: "#F8F5FF", border: "#EBE3F7", hoverBorder: "#C6B4E4" },
 ];
 
-const TINT_BG: Record<string, string> = {
-  sky:    "bg-sky-50 border-sky-100 hover:border-sky-300",
-  violet: "bg-violet-50 border-violet-100 hover:border-violet-300",
-  amber:  "bg-amber-50 border-amber-100 hover:border-amber-300",
-  gold:   "bg-[rgba(184,167,137,0.08)] border-[rgba(184,167,137,0.2)] hover:border-[var(--accent)]",
-};
-
 export default function CreatorServiceActions() {
-  const t = useTranslations("creatorProfile.actions");
+  const t   = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
-  const onClick = () => { if (!requireLogin()) return; /* TODO 接入 */ };
+  const onClick = () => { if (!requireLogin()) return; /* TODO: route to action */ };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-2 gap-3">
       {SERVICES.map((s) => (
         <button
           key={s.k}
           type="button"
           onClick={onClick}
-          className={`flex flex-col items-center justify-center gap-1.5 p-4 border rounded-2xl transition-all cursor-pointer font-ui hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-12px_rgba(0,0,0,0.15)] ${TINT_BG[s.tint]}`}
+          className="group relative flex flex-col items-start justify-between gap-4 min-h-[120px] p-4 rounded-[18px] border transition-all duration-200 ease-out cursor-pointer font-ui text-left hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-14px_rgba(0,0,0,0.14)]"
+          style={{ background: s.bg, borderColor: s.border }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = s.hoverBorder)}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = s.border)}
         >
-          <span className="text-[26px] leading-none" aria-hidden>{s.emoji}</span>
-          <span className="text-[13px] font-bold text-[var(--ink)] mt-0.5">{t(s.k)}</span>
+          <span
+            className="grid place-items-center w-10 h-10 rounded-[12px] bg-white shadow-[0_2px_6px_-2px_rgba(0,0,0,0.08)] text-[22px] leading-none"
+            aria-hidden
+          >
+            {s.emoji}
+          </span>
+          <div className="min-w-0 w-full">
+            <div className="text-[14px] font-bold text-[var(--ink)] leading-tight">{t(s.k)}</div>
+            <div className="text-[11.5px] text-[var(--muted)] mt-1 leading-snug">{t(s.subKey)}</div>
+          </div>
         </button>
       ))}
     </div>

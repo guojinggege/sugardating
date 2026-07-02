@@ -318,7 +318,16 @@ export function deriveExtraStats(slug: string, popularity?: number): { likes: nu
   };
 }
 
-// 关于 Ta 区块 — 完整 Basic Info + Interests + Travel + Availability
+// 关于 Ta 区块 — Basic Info + Interests + Travel + Availability + Lifestyle
+export interface CreatorLifestyle {
+  smoking: string;
+  drinking: string;
+  diet: string;
+  schedule: string;
+  exercise: string;
+  travel: string;
+  datingPref: string;
+}
 export interface CreatorAbout {
   bio: string;
   interests: string[];
@@ -327,7 +336,7 @@ export interface CreatorAbout {
   frequentCountries: string[];
   travelPlans: string[];
   joinedAt: string;
-  // 扩展 Basic Info (per spec V2)
+  // Basic Info
   weight: number;             // kg
   hairColor: string;
   eyeColor: string;
@@ -337,6 +346,8 @@ export interface CreatorAbout {
   zodiac: string;
   bloodType: string;
   education: string;
+  // Lifestyle (Creator Profile Refactor)
+  lifestyle: CreatorLifestyle;
 }
 
 const HAIR_COLORS   = ["黑色", "棕色", "深棕", "栗色", "亚麻色", "金色"];
@@ -347,6 +358,13 @@ const BIRTH_COUNTRIES = ["中国", "日本", "韩国", "新加坡", "马来西�
 const ZODIACS       = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
 const BLOOD_TYPES   = ["A", "B", "AB", "O"];
 const EDUCATIONS    = ["Bachelor", "Master", "PhD", "College"];
+const SMOKING       = ["不吸烟", "偶尔", "社交场合"];
+const DRINKING      = ["不饮酒", "偶尔", "社交场合", "享受红酒"];
+const DIETS         = ["无禁忌", "弹性素食", "地中海", "低碳饮食", "轻食主义"];
+const SCHEDULES     = ["早起", "规律作息", "夜猫子", "自由"];
+const EXERCISES     = ["每周 2 次", "每周 3-5 次", "每日 30 分钟", "瑜伽 + 力量"];
+const TRAVELS       = ["经常旅行", "偶尔", "每季一次", "长居一地"];
+const DATING_PREFS  = ["咖啡 / 晚餐", "户外 / 展览", "音乐现场", "深度对话", "旅行同行"];
 
 export function deriveAbout(slug: string, baseBio: string, region: string, joinedAt: string): CreatorAbout {
   const off = hashSlug(slug);
@@ -376,5 +394,14 @@ export function deriveAbout(slug: string, baseBio: string, region: string, joine
     zodiac:       ZODIACS[(off * 11) % ZODIACS.length],
     bloodType:    BLOOD_TYPES[(off * 13) % BLOOD_TYPES.length],
     education:    EDUCATIONS[(off * 17) % EDUCATIONS.length],
+    lifestyle: {
+      smoking:    SMOKING[(off * 19) % SMOKING.length],
+      drinking:   DRINKING[(off * 23) % DRINKING.length],
+      diet:       DIETS[(off * 29) % DIETS.length],
+      schedule:   SCHEDULES[(off * 31) % SCHEDULES.length],
+      exercise:   EXERCISES[(off * 37) % EXERCISES.length],
+      travel:     TRAVELS[(off * 41) % TRAVELS.length],
+      datingPref: DATING_PREFS[(off * 43) % DATING_PREFS.length],
+    },
   };
 }

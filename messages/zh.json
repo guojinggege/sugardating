@@ -397,9 +397,13 @@
       "chatShort": "聊天",
       "bookDate": "预约约会",
       "bookTravel": "预约伴游",
+      "bookTravelSub": "线下陪伴预约",
       "videoCall": "视频聊天",
+      "videoCallSub": "实时视频互动",
       "videoShort": "视频",
       "privateShoot": "私拍",
+      "privateShootSub": "定制照片内容",
+      "chatSub": "快速开始对话",
       "tip": "打赏 Ta",
       "tipShort": "打赏",
       "save": "收藏",
@@ -585,7 +589,19 @@
       "serviceEntries": "服务入口",
       "frequent": "常去国家",
       "travelPlans": "旅行计划",
-      "joinedAt": "加入时间"
+      "joinedAt": "加入时间",
+      "readMore": "展开更多",
+      "collapse": "收起"
+    },
+    "lifestyle": {
+      "title": "生活方式",
+      "smoking": "吸烟",
+      "drinking": "饮酒",
+      "diet": "饮食偏好",
+      "schedule": "作息",
+      "exercise": "运动习惯",
+      "travel": "旅行频率",
+      "datingPref": "约会偏好"
     },
     "basicInfo": {
       "age": "年龄",

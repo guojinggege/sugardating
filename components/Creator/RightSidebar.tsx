@@ -32,7 +32,6 @@ export default function RightSidebar({
   timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
   const t   = useTranslations("creatorProfile.sidebar");
-  const tS  = useTranslations("creatorProfile.status");
   const tG  = useTranslations("creatorProfile.gifts.items");
   const requireLogin = useRequireLogin();
 
@@ -41,13 +40,9 @@ export default function RightSidebar({
   const totalGifts = giftBoard.reduce((s, g) => s + g.count, 0);
   const topGift = giftBoard.reduce((max, g) => (g.count > max.count ? g : max), giftBoard[0]);
 
-  const replyValue = availability.replyMinutes < 60
-    ? `${availability.replyMinutes} 分钟`
-    : `< ${Math.round(availability.replyMinutes / 60)} 小时`;
-
   return (
     <aside className="cr-sidebar">
-      {/* ═══ TOP (sticky) — Media Showcase Card ═══ */}
+      {/* ═══ TOP — Media Showcase Card (含 Online Status rows) ═══ */}
       <div className="cr-sidebar-top">
         <CreatorSidebarMediaCard
           creator={creator}
@@ -55,31 +50,43 @@ export default function RightSidebar({
           age={age}
           city={city}
           price={price}
+          availability={availability}
+          timezone={timezone}
+          nextAvailable={nextAvailable}
         />
       </div>
 
-      {/* ═══ BOTTOM (scroll with page) — Status / Gifts / Similar (IG/X) ═══ */}
+      {/* ═══ BOTTOM — 快速互动 / Gifts / Similar (IG/X) ═══ */}
       <div className="cr-sidebar-bottom">
-        {/* Online Status */}
+        {/* 快速互动 — 3 CTA (打赏 / 聊天 / 约她) · 从 Media Card 迁移下来 */}
         <div className="cr-sb-card">
-          <h5 className="cr-sb-h">{tS("onlineNow")}</h5>
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between text-[12.5px]">
-              <span className="text-[var(--muted)]">{tS("onlineNow")}</span>
-              {availability.isOnline ? (
-                <span className="inline-flex items-center gap-1.5 font-bold text-[#16a34a]">
-                  <span className="w-2 h-2 rounded-full bg-[#22c55e]" style={{ boxShadow: "0 0 6px #22c55e" }} />
-                  {tS("onlineNow")}
-                </span>
-              ) : (
-                <span className="font-semibold text-[var(--ink)]">{availability.lastActiveText}</span>
-              )}
-            </div>
-            <SbRow label={tS("replyRate")}     value={`${availability.responseRate}%`} />
-            <SbRow label={tS("avgReply")}      value={replyValue} />
-            <SbRow label={tS("nextAvailable")} value={nextAvailable} />
-            <SbRow label={tS("timezone")}      value={timezone} />
-            <SbRow label={tS("lastActive")}    value={availability.lastActiveText} />
+          <h5 className="cr-sb-h">快速互动</h5>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => requireLogin()}
+              className="h-11 rounded-full text-[#1a1409] text-[13px] font-bold hover:opacity-95 transition inline-flex items-center justify-center gap-1.5"
+              style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
+            >
+              <span aria-hidden>🎁</span>
+              打赏
+            </button>
+            <button
+              type="button"
+              onClick={() => requireLogin()}
+              className="h-11 rounded-full bg-[var(--ink)] text-white text-[13px] font-semibold hover:bg-black transition inline-flex items-center justify-center gap-1.5"
+            >
+              <span aria-hidden>💬</span>
+              聊天
+            </button>
+            <button
+              type="button"
+              onClick={() => requireLogin()}
+              className="h-11 rounded-full bg-white text-[var(--ink)] border border-[var(--line2)] text-[13px] font-semibold hover:border-[var(--ink)] hover:bg-[var(--page)] transition inline-flex items-center justify-center gap-1.5"
+            >
+              <span aria-hidden>📅</span>
+              约她
+            </button>
           </div>
         </div>
 
@@ -156,11 +163,3 @@ export default function RightSidebar({
   );
 }
 
-function SbRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between text-[12.5px]">
-      <span className="text-[var(--muted)]">{label}</span>
-      <b className="text-[13px] font-bold text-[var(--ink)] tabular-nums">{value}</b>
-    </div>
-  );
-}

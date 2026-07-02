@@ -1,12 +1,13 @@
 "use client";
-// Sidebar Media Showcase Card V2:
-//   - 顶部 3 CTA 行:打赏 / 聊天 / 约她 (spec 明确)
-//   - 大图 4:5 · radius 24 · 底部渐变 + 信息 chip
+// Sidebar Media Showcase Card V3:
+//   - 顶部 Online Status rows (在线/回复率/平均回复/下次可预约/时区/最近活跃)
+//   - 大图 4:5 · radius 20 · 底部渐变 + 信息 chip
 //   - 左上 bookmark · 右下 expand
-//   - 无底部 pill Action Bar (已由顶部 CTA 承担转化,不重复)
+//   - 3 CTA (打赏/聊天/约她) 已迁至独立卡片 (RightSidebar)
 import Img from "@/components/Img";
-import { useRequireLogin } from "@/components/Auth/AuthProvider";
+import { useTranslations } from "next-intl";
 import type { Creator } from "@/lib/types";
+import type { AvailabilityData } from "@/lib/creatorProfileMock";
 
 interface Props {
   creator: Creator;
@@ -14,13 +15,16 @@ interface Props {
   age?: number;
   city?: string;
   price?: string;
+  availability: AvailabilityData;
+  timezone?: string;
+  nextAvailable?: string;
 }
 
 export default function CreatorSidebarMediaCard({
   creator, imageSrc, age, city, price,
+  availability, timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
-  const requireLogin = useRequireLogin();
-  const guard = () => { if (!requireLogin()) return; /* TODO route */ };
+  const tS = useTranslations("creatorProfile.status");
 
   const parts: string[] = [creator.name];
   if (age) parts.push(String(age));
@@ -28,64 +32,51 @@ export default function CreatorSidebarMediaCard({
   else if (city) parts.push(city);
   const chipText = parts.join(" · ");
 
+  const replyValue = availability.replyMinutes < 60
+    ? `${availability.replyMinutes} 分钟`
+    : `< ${Math.round(availability.replyMinutes / 60)} 小时`;
+
   return (
     <div className="rounded-[20px] overflow-hidden bg-white border border-[var(--line)] shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
-      {/* 顶部 3 CTA 行 — 打赏 / 聊天 / 约她 · padding 与其它 cr-sb-card 对齐 (20px) */}
-      <div className="grid grid-cols-3 gap-2 p-5 bg-white">
-        <button
-          type="button"
-          onClick={guard}
-          className="h-11 rounded-full text-[#1a1409] text-[13px] font-bold hover:opacity-95 transition inline-flex items-center justify-center gap-1.5"
-          style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
-        >
-          <span aria-hidden>🎁</span>
-          打赏
-        </button>
-        <button
-          type="button"
-          onClick={guard}
-          className="h-11 rounded-full bg-[var(--ink)] text-white text-[13px] font-semibold hover:bg-black transition inline-flex items-center justify-center gap-1.5"
-        >
-          <span aria-hidden>💬</span>
-          聊天
-        </button>
-        <button
-          type="button"
-          onClick={guard}
-          className="h-11 rounded-full bg-white text-[var(--ink)] border border-[var(--line2)] text-[13px] font-semibold hover:border-[var(--ink)] hover:bg-[var(--page)] transition inline-flex items-center justify-center gap-1.5"
-        >
-          <span aria-hidden>📅</span>
-          约她
-        </button>
+      {/* 顶部 Online Status rows */}
+      <div className="p-5">
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between text-[12.5px]">
+            <span className="text-[var(--muted)]">{tS("onlineNow")}</span>
+            {availability.isOnline ? (
+              <span className="inline-flex items-center gap-1.5 font-bold text-[#16a34a]">
+                <span className="w-2 h-2 rounded-full bg-[#22c55e]" style={{ boxShadow: "0 0 6px #22c55e" }} />
+                {tS("onlineNow")}
+              </span>
+            ) : (
+              <span className="font-semibold text-[var(--ink)]">{availability.lastActiveText}</span>
+            )}
+          </div>
+          <StatRow label={tS("replyRate")}     value={`${availability.responseRate}%`} />
+          <StatRow label={tS("avgReply")}      value={replyValue} />
+          <StatRow label={tS("nextAvailable")} value={nextAvailable} />
+          <StatRow label={tS("timezone")}      value={timezone} />
+          <StatRow label={tS("lastActive")}    value={availability.lastActiveText} />
+        </div>
       </div>
 
-      {/* Media Image — 4:5 竖版,radius 只作用于底部 (top 已被 CTA 行占据) */}
-      <div
-        className="relative w-full bg-[#F3F4F6]"
-        style={{ aspectRatio: "4 / 5" }}
-      >
+      {/* Media Image — 4:5 竖版 */}
+      <div className="relative w-full bg-[#F3F4F6]" style={{ aspectRatio: "4 / 5" }}>
         <Img src={imageSrc} alt={creator.name} sizes="(min-width:1024px) 360px, 100vw" />
 
-        {/* 底部 30% 渐变 — 保 chip 可读 */}
+        {/* 底部 30% 渐变 */}
         <div
           className="absolute inset-x-0 bottom-0 h-[30%] pointer-events-none"
-          style={{
-            background: "linear-gradient(to top, rgba(0,0,0,.6) 0%, rgba(0,0,0,.2) 60%, transparent 100%)",
-          }}
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,.6) 0%, rgba(0,0,0,.2) 60%, transparent 100%)" }}
           aria-hidden
         />
 
         {/* 左上 bookmark icon */}
         <button
           type="button"
-          onClick={guard}
           aria-label="Bookmark"
           className="absolute top-[18px] left-[18px] w-9 h-9 grid place-items-center rounded-full text-[#6B7280] hover:text-[#111827] transition"
-          style={{
-            background: "rgba(255,255,255,0.72)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-          }}
+          style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
         >
           <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 3h12v18l-6-4-6 4z" />
@@ -97,11 +88,7 @@ export default function CreatorSidebarMediaCard({
           type="button"
           aria-label="Expand"
           className="absolute bottom-4 right-4 w-[34px] h-[34px] grid place-items-center rounded-full text-white transition hover:bg-black/55"
-          style={{
-            background: "rgba(0,0,0,0.35)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-          }}
+          style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
         >
           <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
@@ -121,6 +108,15 @@ export default function CreatorSidebarMediaCard({
           {chipText}
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between text-[12.5px]">
+      <span className="text-[var(--muted)]">{label}</span>
+      <b className="text-[13px] font-bold text-[var(--ink)] tabular-nums">{value}</b>
     </div>
   );
 }

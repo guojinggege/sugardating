@@ -1527,3 +1527,24 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cr-body{padding-bottom:64px}
 .cr-sidebar{padding-top:0}  /* 与 feed 第一条动态顶对齐,无额外 offset */
 
+/* ============================================================
+   COMMUNITY — 独立暗色主题 (只作用于 /community 页面)
+   全站其它页面不受影响
+   ============================================================ */
+.cm-scope{
+  --cm-bg: #09090B;
+  --cm-surface: #121218;
+  --cm-surface-2: #181820;
+  --cm-border: rgba(255,255,255,0.08);
+  --cm-text: #F5F5F7;
+  --cm-muted: #9CA3AF;
+  --cm-pink: #EC4C86;
+  --cm-purple: #7C5CFF;
+  --cm-gold: #D6B86A;
+  --cm-emerald: #10B981;
+  background: var(--cm-bg);
+  color: var(--cm-text);
+}
+/* 页面级 body bg 覆盖(避免全局 --page #F4F4F5 露出) */
+body:has(.cm-scope){ background: var(--cm-bg); }
+

@@ -934,37 +934,35 @@ body.home-immersive main{padding-top:0}
    ============================================================ */
 .cr-tabs-wrap{
   position:sticky;top:72px;z-index:20;
-  background:transparent;             /* wrap 无 bg,tabs 自己有 card bg */
-  margin-bottom:32px;                 /* Tabs → Feed 32 (spec §十) */
+  background:transparent;
+  margin-bottom:32px;                 /* Tabs → Feed Grid 32 */
 }
 .cr-tabs-wrap .cr-shell{padding-top:0;padding-bottom:0}
 .cr-tabs{
   display:flex;align-items:center;
-  height:64px;padding:0 20px;gap:8px;
+  height:64px;padding:0 24px;gap:32px;
   background:#fff;
   border:1px solid #E5E7EB;
-  border-radius:18px;
-  box-shadow:0 6px 20px rgba(15,23,42,0.04);
+  border-radius:20px;
+  box-shadow:0 8px 24px rgba(15,23,42,0.04);
   overflow-x:auto;scrollbar-width:none;
 }
 .cr-tabs::-webkit-scrollbar{display:none}
-/* Sticky 时 shadow 稍增强,视觉分离 */
-.cr-tabs-wrap:has(.cr-tabs){transition:none}
 .cr-tab{
-  position:relative;padding:0 14px;height:44px;
+  position:relative;padding:0 4px;height:44px;
   display:flex;align-items:center;
   font-size:14px;font-weight:600;color:#9CA3AF;
   background:none;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;
-  border-radius:999px;
-  transition:color .18s,background .18s;
+  transition:color .18s;
 }
-.cr-tab:hover{color:#111827;background:#F8F8F8}
-.cr-tab.on{color:#111827;font-weight:700;background:transparent}
-.cr-tab.on::after{content:"";position:absolute;left:14px;right:14px;bottom:-8px;height:3px;background:#111827;border-radius:999px}
-/* Mobile: tabs 卡片全宽横滚 · 内嵌 shell 内 padding */
+.cr-tab:hover{color:#111827}
+.cr-tab.on{color:#111827;font-weight:700}
+/* Active underline — inside card,底部 4px 内 offset */
+.cr-tab.on::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:3px;background:#111827;border-radius:999px}
+/* Mobile: 收紧,保 gap 让 3-4 tab 可见,横滚 */
 @media(max-width:640px){
-  .cr-tabs{border-radius:14px;padding:0 12px;height:56px}
-  .cr-tab{padding:0 10px;font-size:13px}
+  .cr-tabs{border-radius:16px;padding:0 16px;gap:20px;height:56px}
+  .cr-tab{font-size:13px}
   .cr-tabs-wrap{margin-bottom:24px;top:64px}
 }
 
@@ -973,7 +971,7 @@ body.home-immersive main{padding-top:0}
    ============================================================ */
 /* Spec §模块间距 8pt: Hero↓40 · Header↓32 · Stats↓40 · Introduction↓32 · Tabs↓32 · Feed↓48 */
 .cr-body{padding-top:40px;padding-bottom:64px}
-.cr-grid{display:grid;grid-template-columns:1fr;gap:24px}
+.cr-grid{display:grid;grid-template-columns:1fr;gap:24px;align-items:start}
 @media(min-width:1024px){.cr-grid{grid-template-columns:minmax(0,1fr) 360px;gap:32px}}
 .cr-main{min-width:0;display:flex;flex-direction:column;gap:48px}
 .cr-section{scroll-margin-top:156px}
@@ -1107,8 +1105,8 @@ body.home-immersive main{padding-top:0}
 .cr-list li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
 
 /* Right sidebar — 固定 360,sticky 到 tabs 底 (top:84+60=144,加 12 → 156) */
-.cr-sidebar{display:flex;flex-direction:column;gap:20px}
-@media(min-width:1024px){.cr-sidebar{position:sticky;top:156px;align-self:start;max-height:calc(100vh - 176px);overflow-y:auto;padding-right:4px;scrollbar-width:thin}}
+.cr-sidebar{display:flex;flex-direction:column;gap:24px}
+@media(min-width:1024px){.cr-sidebar{position:sticky;top:168px;align-self:start;max-height:calc(100vh - 188px);overflow-y:auto;padding-right:4px;scrollbar-width:thin}}
 .cr-sb-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
 .cr-sb-h{font-size:13px;font-weight:700;letter-spacing:-.005em;color:var(--ink);margin:0 0 12px}
 .cr-sb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}

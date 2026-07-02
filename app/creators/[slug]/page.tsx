@@ -220,13 +220,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             city={about.city}
             availability={availability}
             giftBoard={giftBoard}
-            similar={pickCreators(4, 4)}
-            recentMedia={[
-              { src: pick(2, off + 3) ?? "/images/placeholder.png", title: "最新写真",  meta: `2 小时前 · ${128 + (off % 200)} 喜欢` },
-              { src: pick(2, off + 5) ?? "/images/placeholder.png", title: "视频花絮",  meta: `昨天 · ${34 + (off % 60)} 评论` },
-              { src: pick(0, off + 7) ?? "/images/placeholder.png", title: "旅行照片",  meta: `3 天前 · ${450 + (off % 250)} 喜欢` },
-              { src: pick(0, off + 9) ?? "/images/placeholder.png", title: "私拍预览",  meta: "本周 · VIP 内容" },
-            ]}
+            similar={pickCreators(5, 4)}
             timezone="GMT+8"
             nextAvailable={availability.isOnline ? "Now" : "Tonight"}
           />

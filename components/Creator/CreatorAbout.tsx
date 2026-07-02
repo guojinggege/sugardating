@@ -52,20 +52,26 @@ const Ic = {
 
 function Svg({ children }: { children: React.ReactNode }) {
   return (
-    <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       {children}
     </svg>
   );
 }
 
+// Profile Attribute Pill — Basic Info + Lifestyle 共用
+// Icon puck (28 grey circle) + Label + Value(右对齐);
+// bg #fff · border #E5E7EB · radius 999 · h 60 · 柔和 shadow + hover gold border + lift
 function InfoPill({ icon, label, value }: Row) {
   return (
-    <div className="flex items-center gap-2.5 h-[54px] px-4 rounded-[16px] bg-white border border-[var(--line)] shadow-[0_1px_2px_rgba(0,0,0,0.02)] min-w-0 hover:border-[var(--line2)] transition-colors">
-      <span className="text-[var(--muted)] flex-shrink-0" aria-hidden>
+    <div className="flex items-center gap-3 h-[60px] px-[18px] rounded-full bg-white border border-[#E5E7EB] min-w-0 cursor-default transition-all duration-200 ease-out shadow-[0_4px_12px_rgba(15,23,42,0.04)] hover:-translate-y-px hover:border-[#D6C29A] hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+      <span
+        className="grid place-items-center w-7 h-7 rounded-full bg-[#F8F8F8] text-[#9CA3AF] flex-shrink-0"
+        aria-hidden
+      >
         <Svg>{icon}</Svg>
       </span>
-      <span className="text-[12px] text-[var(--muted)] whitespace-nowrap flex-shrink-0">{label}</span>
-      <span className="ml-auto text-[13px] text-[var(--ink)] font-semibold truncate">{value}</span>
+      <span className="text-[14px] text-[#6B7280] font-medium whitespace-nowrap flex-shrink-0">{label}</span>
+      <span className="ml-auto text-[14px] text-[#111827] font-semibold truncate whitespace-nowrap">{value}</span>
     </div>
   );
 }

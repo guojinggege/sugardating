@@ -603,6 +603,26 @@
       "travel": "Travel",
       "datingPref": "Dating Preference"
     },
+    "verification": {
+      "title": "Verification",
+      "realPerson": { "title": "ID Verified",    "desc": "Real identity confirmed" },
+      "safety":     { "title": "Safety",         "desc": "Platform-backed safety" },
+      "service":    { "title": "Service Vetted", "desc": "Content reviewed" },
+      "vip":        { "title": "VIP",            "desc": "Top creator status" }
+    },
+    "services": {
+      "chat":         { "desc": "Start a conversation fast" },
+      "videoCall":    { "desc": "Live video — great for long distance" },
+      "privateShoot": { "desc": "Custom photo content" },
+      "bookTravel":   { "desc": "In-person companion booking" },
+      "chatDur":         "Instant",
+      "videoCallDur":    "30 min",
+      "privateShootDur": "3 hours",
+      "bookTravelDur":   "2 hours",
+      "priceFrom":       "from",
+      "ctaStart":        "Start now",
+      "ctaBook":         "Book now"
+    },
     "basicInfo": {
       "age": "Age",
       "height": "Height",

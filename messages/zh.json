@@ -603,6 +603,26 @@
       "travel": "旅行频率",
       "datingPref": "约会偏好"
     },
+    "verification": {
+      "title": "认证保障",
+      "realPerson": { "title": "真人认证", "desc": "真实资料已验证" },
+      "safety":     { "title": "安全认证", "desc": "平台安全保障" },
+      "service":    { "title": "服务认证", "desc": "服务内容已审核" },
+      "vip":        { "title": "VIP 认证", "desc": "优质创作者标识" }
+    },
+    "services": {
+      "chat":         { "desc": "快速开始对话" },
+      "videoCall":    { "desc": "实时视频互动,适合远距离了解" },
+      "privateShoot": { "desc": "定制照片内容" },
+      "bookTravel":   { "desc": "线下陪伴预约" },
+      "chatDur":         "即时",
+      "videoCallDur":    "30 分钟",
+      "privateShootDur": "3 小时",
+      "bookTravelDur":   "2 小时",
+      "priceFrom":       "起",
+      "ctaStart":        "立即开始",
+      "ctaBook":         "立即预约"
+    },
     "basicInfo": {
       "age": "年龄",
       "height": "身高",

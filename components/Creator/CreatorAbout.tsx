@@ -9,6 +9,7 @@ import { getTranslations } from "next-intl/server";
 import type { CreatorAbout as CreatorAboutData } from "@/lib/creatorProfileMock";
 import type { Creator } from "@/lib/types";
 import CreatorServiceActions from "./CreatorServiceActions";
+import CreatorTrustBadges from "./CreatorTrustBadges";
 import CreatorBio from "./CreatorBio";
 
 interface Props {
@@ -116,7 +117,7 @@ export default async function CreatorAbout({
   ].filter((r) => r.value !== dash);
 
   const sectionH = "text-[11.5px] font-bold uppercase tracking-[.14em] text-[var(--muted)] mb-4";
-  const services = <CreatorServiceActions />;
+  const tV = await getTranslations("creatorProfile.verification");
 
   return (
     <section className="bg-white border border-[var(--line)] rounded-[20px] p-6 md:p-8 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
@@ -189,10 +190,16 @@ export default async function CreatorAbout({
           )}
         </div>
 
-        {/* ─── Right — Services (Mobile: order 1 for conversion 优先) ── */}
-        <div className="order-1 lg:order-2 lg:sticky lg:top-[156px] lg:self-start">
-          <h4 className={sectionH}>{t("serviceEntries")}</h4>
-          {services}
+        {/* ─── Right — Verification Badges + Service Cards (Mobile: order 1 转化优先) ── */}
+        <div className="order-1 lg:order-2 lg:sticky lg:top-[156px] lg:self-start flex flex-col gap-8">
+          <div>
+            <h4 className={sectionH}>{tV("title")}</h4>
+            <CreatorTrustBadges />
+          </div>
+          <div>
+            <h4 className={sectionH}>{t("serviceEntries")}</h4>
+            <CreatorServiceActions />
+          </div>
         </div>
       </div>
     </section>

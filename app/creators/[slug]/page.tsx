@@ -214,6 +214,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </main>
 
           <RightSidebar
+            creator={creator}
+            imageSrc={cover}
+            age={age}
+            city={about.city}
             availability={availability}
             giftBoard={giftBoard}
             similar={pickCreators(4, 4)}

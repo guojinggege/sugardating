@@ -1,20 +1,26 @@
 "use client";
-// Right Sidebar — 5 卡结构 (per spec §七, 转化优先):
-//   ① Creator Action Card — 聊天 / 打赏 / 预约 (转化核心)
-//   ② Online Status — 在线/回复率/平均回复/下次可预约/时区/最近活跃
-//   ③ Gift Statistics — Rose/Coffee/Dinner/Diamond + 累计 + Top Gift (无大图 preview)
-//   ④ Similar Sugargirl — Creator List
-//   ⑤ Recent Media (optional) — 2×2 小图 grid
+// Right Sidebar 顺序 (per spec §Media Card §七):
+//   ① Media Showcase Card (大图 + chip + 4-button pill action bar)  ← 新
+//   ② Online Status
+//   ③ Gift Statistics
+//   ④ Similar Sugargirl
+//   ⑤ Recent Media (optional 小图 grid)
+// 删除:Quick Contact / 快速互动 3-CTA (与 Media Card action bar 重复,spec §十二)
 import Link from "next/link";
 import Img from "@/components/Img";
 import { useTranslations } from "next-intl";
-import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { Creator } from "@/lib/types";
 import type { AvailabilityData, GiftRank } from "@/lib/creatorProfileMock";
+import CreatorSidebarMediaCard from "./CreatorSidebarMediaCard";
 
 interface CreatorRef { creator: Creator; photo: string }
 
 interface Props {
+  creator: Creator;
+  imageSrc: string;
+  age?: number;
+  city?: string;
+  price?: string;
   availability: AvailabilityData;
   giftBoard: GiftRank[];
   similar: CreatorRef[];
@@ -24,15 +30,13 @@ interface Props {
 }
 
 export default function RightSidebar({
+  creator, imageSrc, age, city, price,
   availability, giftBoard, similar, recentMedia = [],
   timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
   const t   = useTranslations("creatorProfile.sidebar");
   const tS  = useTranslations("creatorProfile.status");
   const tG  = useTranslations("creatorProfile.gifts.items");
-  const tA  = useTranslations("creatorProfile.actions");
-  const requireLogin = useRequireLogin();
-  const guard = () => { if (!requireLogin()) return; /* TODO: route */ };
 
   const giftsOfInterest = ["rose", "coffee", "dinner", "diamond"];
   const giftStats = giftBoard.filter((g) => giftsOfInterest.includes(g.key));
@@ -45,33 +49,16 @@ export default function RightSidebar({
 
   return (
     <aside className="cr-sidebar">
-      {/* ① Creator Action Card — 转化核心 3 CTA */}
-      <div className="cr-sb-card">
-        <h5 className="cr-sb-h">{t("quickContact")}</h5>
-        <div className="flex flex-col gap-2">
-          <button
-            type="button" onClick={guard}
-            className="h-11 rounded-full bg-[var(--ink)] text-white text-[13.5px] font-semibold hover:bg-black transition inline-flex items-center justify-center gap-2"
-          >
-            💬 {tA("chat")}
-          </button>
-          <button
-            type="button" onClick={guard}
-            className="h-11 rounded-full text-[#1a1409] text-[13.5px] font-bold hover:opacity-95 transition inline-flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
-          >
-            🎁 {tA("tip")}
-          </button>
-          <button
-            type="button" onClick={guard}
-            className="h-11 rounded-full bg-white text-[var(--ink)] border border-[var(--line2)] text-[13.5px] font-semibold hover:border-[var(--ink)] hover:bg-[var(--page)] transition inline-flex items-center justify-center gap-2"
-          >
-            📅 {tA("bookDate")}
-          </button>
-        </div>
-      </div>
+      {/* ① Media Showcase Card — 大图 + 底部 pill Action Bar */}
+      <CreatorSidebarMediaCard
+        creator={creator}
+        imageSrc={imageSrc}
+        age={age}
+        city={city}
+        price={price}
+      />
 
-      {/* ② Online Status Card */}
+      {/* ② Online Status */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{tS("onlineNow")}</h5>
         <div className="flex flex-col gap-2.5">
@@ -94,7 +81,7 @@ export default function RightSidebar({
         </div>
       </div>
 
-      {/* ③ Gift Statistics — 无大图 preview,flat row list */}
+      {/* ③ Gift Statistics */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{t("giftStats")}</h5>
         <ul className="cr-sb-list mb-3">
@@ -130,15 +117,15 @@ export default function RightSidebar({
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{t("similar")}</h5>
         <ul className="cr-sb-list">
-          {similar.map(({ creator, photo }) => (
-            <li key={creator.slug}>
-              <Link href={`/creators/${creator.slug}`} className="cr-sb-row">
+          {similar.map(({ creator: c, photo }) => (
+            <li key={c.slug}>
+              <Link href={`/creators/${c.slug}`} className="cr-sb-row">
                 <div className="cr-sb-ava">
-                  <Img src={photo} alt={creator.name} sizes="44px" />
+                  <Img src={photo} alt={c.name} sizes="44px" />
                 </div>
                 <div className="cr-sb-meta">
-                  <div className="cr-sb-name">{creator.name}</div>
-                  <div className="cr-sb-sub">{creator.region} · {creator.followers} {t("followers")}</div>
+                  <div className="cr-sb-name">{c.name}</div>
+                  <div className="cr-sb-sub">{c.region} · {c.followers} {t("followers")}</div>
                 </div>
               </Link>
             </li>
@@ -146,7 +133,7 @@ export default function RightSidebar({
         </ul>
       </div>
 
-      {/* ⑤ Recent Media (optional) — 2×2 小图,不撑高 sidebar */}
+      {/* ⑤ Recent Media (optional) — 2×2 小图 */}
       {recentMedia.length > 0 && (
         <div className="cr-sb-card">
           <h5 className="cr-sb-h">{t("recentMedia")}</h5>

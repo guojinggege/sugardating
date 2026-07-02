@@ -1573,6 +1573,59 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cr-sidebar{padding-top:0}  /* 与 feed 第一条动态顶对齐,无额外 offset */
 
 /* ============================================================
+   MOBILE ONLY — 全站 mobile polish (< 768px)
+   零 desktop impact · 所有规则 gated by @media(max-width:767px)
+   ============================================================ */
+@media(max-width:767px){
+  /* Global page container 减 padding */
+  .container{padding:0 16px}
+
+  /* Creator Detail — body & main spacing 收紧 */
+  .cr-body{padding-top:24px;padding-bottom:48px}
+  .cr-grid{gap:20px}
+  .cr-main{gap:32px}
+
+  /* Feed post cards — 移动端更紧凑 */
+  .cr-post{padding:16px;border-radius:16px}
+  .cr-post-h{gap:10px;margin-bottom:12px}
+  .cr-post-ava{width:40px;height:40px;flex:0 0 40px}
+  .cr-post-name{font-size:14px}
+  .cr-post-text{font-size:14px;line-height:1.6;margin:0 0 10px}
+  .cr-post-grid{margin-bottom:10px;gap:6px}
+  .cr-post-grid.g-1,
+  .cr-post-grid.g-3,
+  .cr-post-grid.g-9{max-width:100%}
+  .cr-post-acts{gap:4px;font-size:12.5px}
+  .cr-section-h{font-size:18px;margin-bottom:12px}
+
+  /* Sidebar cards — 与 post cards 同 padding */
+  .cr-sb-card{padding:16px;border-radius:16px}
+  .cr-sb-h{font-size:13px;margin-bottom:10px}
+  .cr-sb-ava{width:40px;height:40px;flex:0 0 40px}
+  .cr-sb-name{font-size:13.5px}
+  .cr-sb-sub{font-size:11.5px}
+
+  /* Sidebar 两模块间距减 */
+  .cr-sidebar{gap:16px}
+  .cr-sidebar-top,.cr-sidebar-bottom{gap:16px}
+
+  /* Hero fold — mobile 略降 min-height 保 CTA 可见 */
+  .cr-fold-hero{min-height:400px}
+
+  /* Nav — sticky top height + z 保留 · 但降 padding */
+  .nav-in{padding:0 16px}
+
+}
+
+/* Small mobile <= 375 — 进一步紧凑 */
+@media(max-width:375px){
+  .cr-body{padding-top:20px}
+  .cr-post{padding:14px}
+  .cr-sb-card{padding:14px}
+  .cr-post-text{font-size:13.5px}
+}
+
+/* ============================================================
    COMMUNITY — 独立暗色主题 (只作用于 /community 页面)
    全站其它页面不受影响
    ============================================================ */

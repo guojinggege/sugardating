@@ -15,7 +15,26 @@
   --maxw:1200px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--page);font-family:var(--ui);color:var(--ink);-webkit-font-smoothing:antialiased}
+html,body{
+  margin:0;background:var(--page);font-family:var(--ui);color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  /* Mobile foundations */
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
+  overflow-x:hidden;                          /* 全站禁止横向滚动 */
+  overscroll-behavior-y:none;
+}
+/* iPhone 刘海屏安全区 + BottomNav 遮挡预留 (mobile only) */
+@supports(padding:max(0px)){
+  body{padding-bottom:max(0px,env(safe-area-inset-bottom))}
+}
+@media(max-width:767px){
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}   /* BottomNav 72 + safe-area */
+}
+/* 图片视频防溢出 */
+img,video{max-width:100%;height:auto;display:block}
+video{height:auto}
+/* 触控目标 minimum 44px */
+button,[role="button"],a{touch-action:manipulation}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
@@ -798,7 +817,7 @@ body.home-immersive main{padding-top:0}
    - 无负 margin / 无 magic number / 无每组件独立 max-width
    ============================================================ */
 .cr-page{background:var(--page);min-height:100vh}
-@media(max-width:640px){.cr-page{padding-bottom:96px}}   /* mobile: 留空间给底部 CTA bar */
+@media(max-width:640px){.cr-page{padding-bottom:80px}}   /* mobile: 页面自己空 80,body 全局再 +72 (BottomNav+safe) = MobileCTABar 上方 152 clearance */
 
 /* 统一 shell — 全站 Hero/Tabs/Body/Related 共用 */
 .cr-shell{max-width:1280px;margin:0 auto;padding-left:24px;padding-right:24px;width:100%}
@@ -902,6 +921,8 @@ body.home-immersive main{padding-top:0}
 
 /* 移动固定底部 CTA bar — 仅 <640 显示,fixed bottom */
 .cr-mcta{display:none}
+/* MobileCTABar 与全局 BottomNav (64h) 堆叠:CTA 上移让位 */
+@media(max-width:767px){.cr-mcta{bottom:calc(64px + env(safe-area-inset-bottom, 0px)) !important}}
 @media(max-width:640px){
   .cr-mcta{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.94);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-top:1px solid var(--line);box-shadow:0 -8px 24px -12px rgba(0,0,0,.12)}
 }

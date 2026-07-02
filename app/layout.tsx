@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import BottomNav from "@/components/BottomNav";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { AuthProvider } from "@/components/Auth/AuthProvider";
@@ -14,6 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
   return { title: t("title"), description: t("description") };
 }
+
+// 移动端 viewport — 关键:防 iOS 缩放输入框,支持 safe-area
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#F4F4F5",
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [locale, messages] = await Promise.all([
@@ -41,6 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <main>{children}</main>
             <Footer />
             <LoginModal />
+            <BottomNav />
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

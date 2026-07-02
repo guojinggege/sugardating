@@ -24,7 +24,7 @@ interface Props {
   availability: AvailabilityData;
   giftBoard: GiftRank[];
   similar: CreatorRef[];
-  recentMedia?: string[];
+  recentMedia?: { src: string; title: string; meta: string }[];
   timezone?: string;
   nextAvailable?: string;
 }
@@ -133,21 +133,32 @@ export default function RightSidebar({
         </ul>
       </div>
 
-      {/* ⑤ Recent Media (optional) — 2×2 小图 */}
+      {/* ⑤ Recent Media (optional) — 竖向列表 · 与 Similar Sugargirl 风格统一 */}
       {recentMedia.length > 0 && (
         <div className="cr-sb-card">
           <h5 className="cr-sb-h">{t("recentMedia")}</h5>
-          <div className="grid grid-cols-2 gap-2">
-            {recentMedia.slice(0, 4).map((src, i) => (
-              <div
-                key={i}
-                className="relative rounded-[12px] overflow-hidden bg-[var(--page)]"
-                style={{ aspectRatio: "1 / 1" }}
-              >
-                <Img src={src} alt="" sizes="150px" />
-              </div>
+          <ul className="flex flex-col">
+            {recentMedia.slice(0, 4).map((m, i, arr) => (
+              <li key={i}>
+                <button
+                  type="button"
+                  onClick={() => { /* TODO: lightbox / media detail — placeholder */ }}
+                  className={`w-full flex items-center gap-3 py-2.5 text-left transition-all hover:bg-[#F9FAFB] hover:rounded-[12px] hover:px-2 hover:-mx-2 cursor-pointer ${i < arr.length - 1 ? "border-b border-[#F1F1F1]" : ""}`}
+                >
+                  <div className="relative w-[52px] h-[52px] rounded-[12px] overflow-hidden bg-[#F3F4F6] flex-shrink-0">
+                    <Img src={m.src} alt={m.title} sizes="52px" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[14px] font-semibold text-[#111827] truncate">{m.title}</div>
+                    <div className="text-[12px] text-[#9CA3AF] mt-1 truncate">{m.meta}</div>
+                  </div>
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-[#D1D5DB] flex-shrink-0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
     </aside>

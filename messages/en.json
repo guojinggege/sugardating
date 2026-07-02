@@ -612,6 +612,13 @@
       "vip":        { "title": "VIP",            "desc": "Top creator status" }
     },
     "services": {
+      "book": "Book Now",
+      "items": {
+        "dating":     { "title": "Dating",      "desc": "Premium 1-on-1 dates in your city. 24h advance booking." },
+        "travel":     { "title": "Travel",      "desc": "Short or long-trip companion. Local insider experiences + photo notes." },
+        "shoot":      { "title": "Photo Shoot", "desc": "Fashion / portrait / street. Collaborative work with your photographer." },
+        "video-chat": { "title": "Video Chat",  "desc": "1-on-1 video conversation. Perfect for long-distance connections." }
+      },
       "chat":         { "desc": "Start a conversation fast" },
       "videoCall":    { "desc": "Live video — great for long distance" },
       "privateShoot": { "desc": "Custom photo content" },

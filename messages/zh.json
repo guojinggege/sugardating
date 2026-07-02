@@ -612,6 +612,13 @@
       "vip":        { "title": "VIP 认证", "desc": "优质创作者标识" }
     },
     "services": {
+      "book": "立即预约",
+      "items": {
+        "dating":     { "title": "约会",     "desc": "线下精致约会 · 城市内 1v1 · 提前 24 小时预约" },
+        "travel":     { "title": "旅游",     "desc": "短途 / 长途旅伴 · 本地玩法 + 摄影记录" },
+        "shoot":      { "title": "拍摄",     "desc": "时尚 / 写真 / 街拍 · 摄影师沟通配合" },
+        "video-chat": { "title": "视频聊天", "desc": "1v1 视频沟通 · 适合远距离了解" }
+      },
       "chat":         { "desc": "快速开始对话" },
       "videoCall":    { "desc": "实时视频互动,适合远距离了解" },
       "privateShoot": { "desc": "定制照片内容" },

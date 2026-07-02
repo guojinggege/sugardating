@@ -929,16 +929,44 @@ body.home-immersive main{padding-top:0}
 .cr-mcta-primary{flex:1.5;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-weight:700;font-size:14.5px;border:0;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px -6px rgba(0,0,0,.35)}
 
 /* ============================================================
-   TABS — 紧贴 Hero 底部,sticky white bar
+   TABS — 独立 Section Navigation Card (spec §七)
+   sticky top:72(nav 高度),自带 radius/border/shadow,与上下模块留 24-32 呼吸
    ============================================================ */
-.cr-tabs-wrap{position:sticky;top:84px;z-index:20;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.cr-tabs-wrap{
+  position:sticky;top:72px;z-index:20;
+  background:transparent;             /* wrap 无 bg,tabs 自己有 card bg */
+  margin-bottom:32px;                 /* Tabs → Feed 32 (spec §十) */
+}
 .cr-tabs-wrap .cr-shell{padding-top:0;padding-bottom:0}
-.cr-tabs{display:flex;height:60px;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none}
+.cr-tabs{
+  display:flex;align-items:center;
+  height:64px;padding:0 20px;gap:8px;
+  background:#fff;
+  border:1px solid #E5E7EB;
+  border-radius:18px;
+  box-shadow:0 6px 20px rgba(15,23,42,0.04);
+  overflow-x:auto;scrollbar-width:none;
+}
 .cr-tabs::-webkit-scrollbar{display:none}
-.cr-tab{position:relative;padding:0 18px;height:60px;display:flex;align-items:center;font-size:14.5px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .18s,background .18s}
-.cr-tab:hover{color:var(--ink);background:rgba(0,0,0,.03)}
-.cr-tab.on{color:var(--ink)}
-.cr-tab.on::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:2.5px;background:var(--ink);border-radius:2px}
+/* Sticky 时 shadow 稍增强,视觉分离 */
+.cr-tabs-wrap:has(.cr-tabs){transition:none}
+.cr-tab{
+  position:relative;padding:0 14px;height:44px;
+  display:flex;align-items:center;
+  font-size:14px;font-weight:600;color:#9CA3AF;
+  background:none;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;
+  border-radius:999px;
+  transition:color .18s,background .18s;
+}
+.cr-tab:hover{color:#111827;background:#F8F8F8}
+.cr-tab.on{color:#111827;font-weight:700;background:transparent}
+.cr-tab.on::after{content:"";position:absolute;left:14px;right:14px;bottom:-8px;height:3px;background:#111827;border-radius:999px}
+/* Mobile: tabs 卡片全宽横滚 · 内嵌 shell 内 padding */
+@media(max-width:640px){
+  .cr-tabs{border-radius:14px;padding:0 12px;height:56px}
+  .cr-tab{padding:0 10px;font-size:13px}
+  .cr-tabs-wrap{margin-bottom:24px;top:64px}
+}
 
 /* ============================================================
    BODY GRID — Feed (2fr) + Sidebar (360)

@@ -214,15 +214,16 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </main>
 
           <RightSidebar
-            creator={creator}
-            imageSrc={cover}
-            age={age}
-            city={about.city}
-            availability={availability}
-            recentVisitors={pickCreators(4, 0)}
-            trending={pickCreators(4, 2)}
-            similar={pickCreators(4, 4)}
+            onlineSg={pickCreators(4, 0)}
+            recentMedia={[
+              pick(2, off + 3) ?? "/images/placeholder.png",
+              pick(2, off + 5) ?? "/images/placeholder.png",
+              pick(0, off + 7) ?? "/images/placeholder.png",
+              pick(0, off + 9) ?? "/images/placeholder.png",
+            ]}
             giftBoard={giftBoard}
+            similar={pickCreators(4, 4)}
+            availability={availability}
             timezone="GMT+8"
             nextAvailable={availability.isOnline ? "Now" : "Tonight"}
           />

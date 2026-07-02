@@ -1,42 +1,33 @@
 "use client";
-// Right Sidebar — Sidebar Media Card (image showcase) 顶部,下方为其它模块
-//   ⓪ Sidebar Media Card (image + info chip + pill action bar)
-//   ① Online Status  — text rows
-//   ② Recent Visitors — creator list
-//   ③ Trending Creator — creator list
-//   ④ Similar Sugargirl — creator list
-//   ⑤ Gift Statistics
-// (Quick Contact 已删除 — 3 CTA 已集成到 Media Card 底部,不重复)
+// Right Sidebar — 4 卡结构 (per spec §二):
+//   ① 在线 Sugargirl (Creator List)
+//   ② 最近媒体 (2×2 image grid)
+//   ③ 收到礼物 (Rose/Coffee/Dinner/Diamond + 累计 + Top Gift)
+//   ④ 相似 Sugargirl (Creator List)
+// 删除:MediaCard (错位大图) · 独立 Online Status · Trending · Quick Contact
 import Link from "next/link";
 import Img from "@/components/Img";
 import { useTranslations } from "next-intl";
 import type { Creator } from "@/lib/types";
 import type { AvailabilityData, GiftRank } from "@/lib/creatorProfileMock";
-import CreatorSidebarMediaCard from "./CreatorSidebarMediaCard";
 
 interface CreatorRef { creator: Creator; photo: string }
 
 interface Props {
-  creator: Creator;
-  imageSrc: string;
-  age?: number;
-  city?: string;
-  availability: AvailabilityData;
-  recentVisitors: CreatorRef[];
-  trending: CreatorRef[];
-  similar: CreatorRef[];
-  giftBoard: GiftRank[];
+  onlineSg: CreatorRef[];         // 在线 Sugargirl (Card 1)
+  recentMedia: string[];          // 4 image URLs for 2×2 grid (Card 2)
+  giftBoard: GiftRank[];          // Card 3
+  similar: CreatorRef[];          // Card 4
+  // 保留以兼容 page.tsx 已有调用签名 (未渲染)
+  availability?: AvailabilityData;
   timezone?: string;
   nextAvailable?: string;
 }
 
 export default function RightSidebar({
-  creator, imageSrc, age, city,
-  availability, recentVisitors, trending, similar, giftBoard,
-  timezone = "GMT+8", nextAvailable = "今天",
+  onlineSg, recentMedia, giftBoard, similar,
 }: Props) {
   const t   = useTranslations("creatorProfile.sidebar");
-  const tS  = useTranslations("creatorProfile.status");
   const tG  = useTranslations("creatorProfile.gifts.items");
 
   const creatorList = (title: string, items: CreatorRef[]) => (
@@ -47,7 +38,7 @@ export default function RightSidebar({
           <li key={creator.slug}>
             <Link href={`/creators/${creator.slug}`} className="cr-sb-row">
               <div className="cr-sb-ava">
-                <Img src={photo} alt={creator.name} sizes="40px" />
+                <Img src={photo} alt={creator.name} sizes="44px" />
               </div>
               <div className="cr-sb-meta">
                 <div className="cr-sb-name">{creator.name}</div>
@@ -65,48 +56,30 @@ export default function RightSidebar({
   const totalGifts = giftBoard.reduce((s, g) => s + g.count, 0);
   const topGift = giftBoard.reduce((max, g) => (g.count > max.count ? g : max), giftBoard[0]);
 
-  const replyValue = availability.replyMinutes < 60
-    ? `${availability.replyMinutes} 分钟`
-    : `< ${Math.round(availability.replyMinutes / 60)} 小时`;
-
   return (
     <aside className="cr-sidebar">
-      {/* ⓪ Sidebar Media Card — image showcase + 3 CTA pill bar */}
-      <CreatorSidebarMediaCard creator={creator} imageSrc={imageSrc} age={age} city={city} />
+      {/* ① 在线 Sugargirl */}
+      {creatorList(t("online"), onlineSg)}
 
-      {/* ① Online Status */}
-      <div className="cr-sb-card">
-        <h5 className="cr-sb-h">{tS("onlineNow")}</h5>
-        <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-[12.5px]">
-            <span className="text-[var(--muted)]">{tS("onlineNow")}</span>
-            {availability.isOnline ? (
-              <span className="inline-flex items-center gap-1.5 font-bold text-[#16a34a]">
-                <span className="w-2 h-2 rounded-full bg-[#22c55e]" style={{ boxShadow: "0 0 6px #22c55e" }} />
-                {tS("onlineNow")}
-              </span>
-            ) : (
-              <span className="font-semibold text-[var(--ink)]">{availability.lastActiveText}</span>
-            )}
+      {/* ② 最近媒体 — 2×2 图片 Grid */}
+      {recentMedia.length > 0 && (
+        <div className="cr-sb-card">
+          <h5 className="cr-sb-h">{t("recentMedia")}</h5>
+          <div className="grid grid-cols-2 gap-2">
+            {recentMedia.slice(0, 4).map((src, i) => (
+              <div
+                key={i}
+                className="relative rounded-[12px] overflow-hidden bg-[var(--page)]"
+                style={{ aspectRatio: "1 / 1" }}
+              >
+                <Img src={src} alt="" sizes="150px" />
+              </div>
+            ))}
           </div>
-          <SbRow label={tS("lastActive")}    value={availability.lastActiveText} />
-          <SbRow label={tS("replyRate")}     value={`${availability.responseRate}%`} />
-          <SbRow label={tS("avgReply")}      value={replyValue} />
-          <SbRow label={tS("nextAvailable")} value={nextAvailable} />
-          <SbRow label={tS("timezone")}      value={timezone} />
         </div>
-      </div>
+      )}
 
-      {/* ② Recent Visitors */}
-      {creatorList(t("recentVisitors"), recentVisitors)}
-
-      {/* ③ Trending Creator */}
-      {creatorList(t("trending"), trending)}
-
-      {/* ④ Similar Sugargirl */}
-      {creatorList(t("similar"), similar)}
-
-      {/* ⑤ Gift Statistics */}
+      {/* ③ 收到礼物 */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{t("giftStats")}</h5>
         <ul className="cr-sb-list mb-3">
@@ -139,15 +112,9 @@ export default function RightSidebar({
           </div>
         )}
       </div>
-    </aside>
-  );
-}
 
-function SbRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between text-[12.5px]">
-      <span className="text-[var(--muted)]">{label}</span>
-      <b className="text-[13px] font-bold text-[var(--ink)] tabular-nums">{value}</b>
-    </div>
+      {/* ④ 相似 Sugargirl */}
+      {creatorList(t("similar"), similar)}
+    </aside>
   );
 }

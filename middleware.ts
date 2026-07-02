@@ -14,8 +14,16 @@ export function middleware(request: NextRequest) {
   const isMobileRoute = pathname === "/m" || pathname.startsWith("/m/");
 
   // 只 redirect 有 /m/ 实现的路径 — 其它 mobile UA 上看到 desktop 层 (responsive CSS 已保底)
-  // Phase 1 覆盖: / (home) · /creators · /creators/[slug]
-  const HAS_M = pathname === "/" || pathname === "/creators" || pathname.startsWith("/creators/");
+  // Phase 2 覆盖: / · /creators · /photography · /video · /membership · /login · /live · /me
+  const HAS_M =
+    pathname === "/" ||
+    pathname === "/creators" || pathname.startsWith("/creators/") ||
+    pathname === "/photography" ||
+    pathname === "/video" ||
+    pathname === "/membership" ||
+    pathname === "/login" ||
+    pathname === "/live" ||
+    pathname === "/me";
   if (!isMobileRoute && HAS_M && MOBILE_UA.test(ua)) {
     const url = request.nextUrl.clone();
     url.pathname = `/m${pathname === "/" ? "" : pathname}`;

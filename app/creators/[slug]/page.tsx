@@ -215,7 +215,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
           <RightSidebar
             creator={creator}
-            poster={cover}
+            imageSrc={cover}
+            age={age}
+            city={about.city}
             availability={availability}
             recentVisitors={pickCreators(4, 0)}
             trending={pickCreators(4, 2)}

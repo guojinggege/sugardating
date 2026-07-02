@@ -1,24 +1,27 @@
 "use client";
-// V3 — Right Sidebar (6 widgets, per spec §Sidebar)
+// V3 — Right Sidebar (7 widgets)
+//   ⓪ Sidebar Video Preview Card (spec §Sidebar Video Card)
 //   ① Online Status
 //   ② Quick Contact (2×2 grid: 聊天 / 视频聊天 / 私拍 / 预约伴游)
 //   ③ Recent Visitors    — Creator List
 //   ④ Trending Creator   — Creator List
 //   ⑤ Similar Sugargirl  — Creator List
 //   ⑥ Gift Statistics    — Rose/Coffee/Dinner/Diamond + 累计 + Top Gift
-// 删除 (spec §删除旧模块):
-//   - Verification widget (Hero Header 已有 Verified badge,重复展示)
-//   - Tip 独立按钮 (Gift 已在 Hero Actions)
 import Link from "next/link";
 import Img from "@/components/Img";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { Creator } from "@/lib/types";
 import type { AvailabilityData, GiftRank } from "@/lib/creatorProfileMock";
+import CreatorSidebarVideoCard from "./CreatorSidebarVideoCard";
 
 interface CreatorRef { creator: Creator; photo: string }
 
 interface Props {
+  creator: Creator;
+  age?: number;
+  online?: boolean;
+  poster?: string;
   availability: AvailabilityData;
   recentVisitors: CreatorRef[];
   trending: CreatorRef[];
@@ -29,6 +32,7 @@ interface Props {
 }
 
 export default function RightSidebar({
+  creator, age, online, poster,
   availability, recentVisitors, trending, similar, giftBoard,
   timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
@@ -68,6 +72,9 @@ export default function RightSidebar({
 
   return (
     <aside className="cr-sidebar">
+      {/* ⓪ Sidebar Video Preview Card — Creator video 名片 + 3 CTA */}
+      <CreatorSidebarVideoCard creator={creator} age={age} online={online} poster={poster} />
+
       {/* ① Online Status */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{tS("onlineNow")}</h5>

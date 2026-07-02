@@ -214,6 +214,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </main>
 
           <RightSidebar
+            creator={creator}
+            age={age}
+            online={sgSource ? sgSource.online : true}
+            poster={cover}
             availability={availability}
             recentVisitors={pickCreators(4, 0)}
             trending={pickCreators(4, 2)}

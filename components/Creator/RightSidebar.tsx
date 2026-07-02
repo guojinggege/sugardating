@@ -1,12 +1,11 @@
 "use client";
-// V3 — Right Sidebar (7 widgets)
-//   ⓪ Sidebar Video Preview Card (spec §Sidebar Video Card)
-//   ① Online Status
-//   ② Quick Contact (2×2 grid: 聊天 / 视频聊天 / 私拍 / 预约伴游)
-//   ③ Recent Visitors    — Creator List
-//   ④ Trending Creator   — Creator List
-//   ⑤ Similar Sugargirl  — Creator List
-//   ⑥ Gift Statistics    — Rose/Coffee/Dinner/Diamond + 累计 + Top Gift
+// V3 — Right Sidebar (6 widgets;Video Card 已合并原 Online Status)
+//   ⓪ Sidebar Video Card + 3 CTA + Online Status text 一体化
+//   ① Quick Contact (2×2 grid)
+//   ② Recent Visitors    — Creator List
+//   ③ Trending Creator   — Creator List
+//   ④ Similar Sugargirl  — Creator List
+//   ⑤ Gift Statistics    — Rose/Coffee/Dinner/Diamond + 累计 + Top Gift
 import Link from "next/link";
 import Img from "@/components/Img";
 import { useTranslations } from "next-intl";
@@ -19,8 +18,6 @@ interface CreatorRef { creator: Creator; photo: string }
 
 interface Props {
   creator: Creator;
-  age?: number;
-  online?: boolean;
   poster?: string;
   availability: AvailabilityData;
   recentVisitors: CreatorRef[];
@@ -32,12 +29,11 @@ interface Props {
 }
 
 export default function RightSidebar({
-  creator, age, online, poster,
+  creator, poster,
   availability, recentVisitors, trending, similar, giftBoard,
   timezone = "GMT+8", nextAvailable = "今天",
 }: Props) {
   const t   = useTranslations("creatorProfile.sidebar");
-  const tS  = useTranslations("creatorProfile.status");
   const tG  = useTranslations("creatorProfile.gifts.items");
   const tA  = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
@@ -72,33 +68,16 @@ export default function RightSidebar({
 
   return (
     <aside className="cr-sidebar">
-      {/* ⓪ Sidebar Video Preview Card — Creator video 名片 + 3 CTA */}
-      <CreatorSidebarVideoCard creator={creator} age={age} online={online} poster={poster} />
+      {/* ⓪ Sidebar Video Card + Online Status 一体化 (spec §六 合并) */}
+      <CreatorSidebarVideoCard
+        creator={creator}
+        availability={availability}
+        timezone={timezone}
+        nextAvailable={nextAvailable}
+        poster={poster}
+      />
 
-      {/* ① Online Status */}
-      <div className="cr-sb-card">
-        <h5 className="cr-sb-h">{tS("onlineNow")}</h5>
-        <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-[12.5px]">
-            <span className="text-[var(--muted)]">{tS("onlineNow")}</span>
-            {availability.isOnline ? (
-              <span className="inline-flex items-center gap-1.5 font-bold text-[#16a34a]">
-                <span className="w-2 h-2 rounded-full bg-[#22c55e]" style={{ boxShadow: "0 0 6px #22c55e" }} />
-                {tS("onlineNow")}
-              </span>
-            ) : (
-              <span className="font-semibold text-[var(--ink)]">{availability.lastActiveText}</span>
-            )}
-          </div>
-          <SbRow label={tS("replyRate")} value={`${availability.responseRate}%`} />
-          <SbRow label={tS("avgReply")} value={availability.replyMinutes < 60 ? `${availability.replyMinutes} 分钟` : `< ${Math.round(availability.replyMinutes / 60)} 小时`} />
-          <SbRow label={tS("lastActive")} value={availability.lastActiveText} />
-          <SbRow label={tS("nextAvailable")} value={nextAvailable} />
-          <SbRow label={tS("timezone")} value={timezone} />
-        </div>
-      </div>
-
-      {/* ② Quick Contact — 2×2 grid (spec: 聊天/视频聊天/私拍/预约伴游) */}
+      {/* ① Quick Contact — 2×2 grid (spec: 聊天/视频聊天/私拍/预约伴游) */}
       <div className="cr-sb-card">
         <h5 className="cr-sb-h">{t("quickContact")}</h5>
         <div className="grid grid-cols-2 gap-2">
@@ -152,15 +131,6 @@ export default function RightSidebar({
         )}
       </div>
     </aside>
-  );
-}
-
-function SbRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between text-[12.5px]">
-      <span className="text-[var(--muted)]">{label}</span>
-      <b className="text-[13px] font-bold text-[var(--ink)] tabular-nums">{value}</b>
-    </div>
   );
 }
 

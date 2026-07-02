@@ -1,22 +1,25 @@
 "use client";
-// Sidebar Video Preview Card — Creator video 名片 + 3 CTA (聊天 / 打赏 / 预约)
-// spec §四: 9:16 竖版 · full-width · radius 24 · overflow hidden · autoplay/muted/loop
-// spec §五: 半透明控制按钮 (mute + fullscreen),不做完整播放器
-// spec §六: 底部 gradient overlay + Creator 名/年龄/城市/在线
-// spec §七-八: 3 CTA 复用现有 useRequireLogin guard (chat / gift / book)
+// Sidebar Video Card — 竖版视频 + 视频底部 Floating CTA + 下方 Online Status 信息
+// spec §四: 9:16 · full-width · radius 24 · overflow hidden · autoplay muted loop
+// spec §四(CTA over video): 聊天 / 打赏 / 预约 覆盖在视频底部,glass 半透明
+// spec §六: 视频下方保留 最近活跃 / 下次可预约 / 时区 (合并原 Online Status)
+// spec §七: 复用现有 useRequireLogin handler
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { Creator } from "@/lib/types";
+import type { AvailabilityData } from "@/lib/creatorProfileMock";
 
-// 中文文件名需 encodeURI (Vercel edge / 部分 CDN 对非 ASCII URL 支持不一致)
-const VIDEO_SRC = encodeURI("/videos/侧边demo.mp4");
+// 视频文件名已 rename 到 ASCII (Vercel edge / 部分 CDN 对非 ASCII URL 处理不稳);
+// 原始文件保留于 git 历史(97537a2 → 97537a2 前),运营素材依然是同一段
+const VIDEO_SRC = "/videos/sidebar-demo.mp4";
 
 interface Props {
   creator: Creator;
-  age?: number;
-  online?: boolean;
-  poster?: string;   // fallback 视频加载失败时显示
+  availability: AvailabilityData;
+  timezone?: string;
+  nextAvailable?: string;
+  poster?: string;
 }
 
 function IcMute() {
@@ -41,8 +44,11 @@ function IcFull() {
   );
 }
 
-export default function CreatorSidebarVideoCard({ creator, age, online = true, poster }: Props) {
+export default function CreatorSidebarVideoCard({
+  creator, availability, timezone = "GMT+8", nextAvailable = "今天", poster,
+}: Props) {
   const tA = useTranslations("creatorProfile.actions");
+  const tS = useTranslations("creatorProfile.status");
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   const requireLogin = useRequireLogin();
@@ -69,9 +75,13 @@ export default function CreatorSidebarVideoCard({ creator, age, online = true, p
     v.play?.().catch(() => {});
   };
 
+  const replyValue = availability.replyMinutes < 60
+    ? `${availability.replyMinutes} 分钟`
+    : `< ${Math.round(availability.replyMinutes / 60)} 小时`;
+
   return (
     <div>
-      {/* Video — 9:16 vertical · full-width · radius 24 */}
+      {/* ── Video 区域 (9:16 竖版,radius 24) ── */}
       <div
         className="relative w-full rounded-[24px] overflow-hidden bg-black shadow-[0_18px_44px_-22px_rgba(0,0,0,0.4)]"
         style={{ aspectRatio: "9 / 16" }}
@@ -90,12 +100,12 @@ export default function CreatorSidebarVideoCard({ creator, age, online = true, p
           aria-label={`${creator.name} — video preview`}
         />
 
-        {/* Top-right controls (mute + fullscreen) */}
-        <div className="absolute top-3 right-3 flex gap-2 z-10">
+        {/* 顶右轻量控制:mute + fullscreen (半透明毛玻璃圆按钮) */}
+        <div className="absolute top-3 right-3 flex gap-2 z-20">
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-            className="w-9 h-9 grid place-items-center rounded-full bg-black/35 text-white backdrop-blur-md hover:bg-black/50 transition"
+            className="w-9 h-9 grid place-items-center rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/60 transition"
             aria-label={muted ? "Unmute" : "Mute"}
           >
             {muted ? <IcMute /> : <IcSound />}
@@ -103,62 +113,80 @@ export default function CreatorSidebarVideoCard({ creator, age, online = true, p
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); enterFullscreen(); }}
-            className="w-9 h-9 grid place-items-center rounded-full bg-black/35 text-white backdrop-blur-md hover:bg-black/50 transition"
+            className="w-9 h-9 grid place-items-center rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/60 transition"
             aria-label="Fullscreen"
           >
             <IcFull />
           </button>
         </div>
 
-        {/* Bottom gradient + Creator info */}
-        <div className="absolute inset-x-0 bottom-0 pt-14 pb-4 px-4 pointer-events-none">
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.2) 60%, transparent)" }}
-            aria-hidden
-          />
-          <div className="relative">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-white text-[15px] font-bold leading-tight">{creator.name}</span>
-              {online && (
-                <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-white bg-emerald-500/85 rounded-full px-2 py-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" style={{ boxShadow: "0 0 4px #fff" }} />
-                  Online
-                </span>
-              )}
-            </div>
-            <div className="text-white/85 text-[12px] mt-1 font-medium">
-              {age ? `${age} · ` : ""}{creator.region}
-            </div>
+        {/* 底部渐变遮罩 — 保证 CTA 在视频上可读 */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-40 pointer-events-none z-10"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.28) 55%, transparent)" }}
+          aria-hidden
+        />
+
+        {/* Floating CTA Bar — 覆盖在视频底部 (spec §四) */}
+        <div className="absolute inset-x-0 bottom-0 p-4 z-20">
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); guard(() => {})(); }}
+              className="h-11 rounded-full bg-[var(--ink)] text-white text-[13px] font-semibold hover:bg-black transition shadow-[0_6px_18px_-4px_rgba(0,0,0,0.4)]"
+            >
+              {tA("chatShort")}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); guard(() => {})(); }}
+              className="h-11 rounded-full text-[#1a1409] text-[13px] font-bold hover:opacity-95 transition shadow-[0_6px_18px_-4px_rgba(0,0,0,0.4)]"
+              style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
+            >
+              {tA("tipShort")}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); guard(() => {})(); }}
+              className="h-11 rounded-full text-[#111] text-[13px] font-semibold transition hover:bg-white shadow-[0_6px_18px_-4px_rgba(0,0,0,0.4)]"
+              style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+            >
+              {tA("bookShort")}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* CTA row — 聊天(primary) · 打赏(gold) · 预约(outline) */}
-      <div className="grid grid-cols-3 gap-2 mt-3">
-        <button
-          type="button"
-          onClick={guard(() => {})}
-          className="h-11 rounded-full bg-[var(--ink)] text-white text-[13px] font-semibold hover:bg-black transition"
-        >
-          {tA("chatShort")}
-        </button>
-        <button
-          type="button"
-          onClick={guard(() => {})}
-          className="h-11 rounded-full text-[#1a1409] text-[13px] font-bold hover:opacity-95 transition"
-          style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
-        >
-          {tA("tipShort")}
-        </button>
-        <button
-          type="button"
-          onClick={guard(() => {})}
-          className="h-11 rounded-full bg-white border border-[var(--line2)] text-[var(--ink)] text-[13px] font-semibold hover:border-[var(--ink)] transition"
-        >
-          {tA("bookShort")}
-        </button>
+      {/* ── 信息区域 (合并原 Online Status widget) ── */}
+      <div className="cr-sb-card mt-3">
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between text-[12.5px]">
+            <span className="text-[var(--muted)]">{tS("onlineNow")}</span>
+            {availability.isOnline ? (
+              <span className="inline-flex items-center gap-1.5 font-bold text-[#16a34a]">
+                <span className="w-2 h-2 rounded-full bg-[#22c55e]" style={{ boxShadow: "0 0 6px #22c55e" }} />
+                {tS("onlineNow")}
+              </span>
+            ) : (
+              <span className="font-semibold text-[var(--ink)]">{availability.lastActiveText}</span>
+            )}
+          </div>
+          <Row label={tS("lastActive")}    value={availability.lastActiveText} />
+          <Row label={tS("replyRate")}     value={`${availability.responseRate}%`} />
+          <Row label={tS("avgReply")}      value={replyValue} />
+          <Row label={tS("nextAvailable")} value={nextAvailable} />
+          <Row label={tS("timezone")}      value={timezone} />
+        </div>
       </div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between text-[12.5px]">
+      <span className="text-[var(--muted)]">{label}</span>
+      <b className="text-[13px] font-bold text-[var(--ink)] tabular-nums">{value}</b>
     </div>
   );
 }

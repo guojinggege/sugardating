@@ -1105,15 +1105,12 @@ body.home-immersive main{padding-top:0}
 .cr-list li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
 
 /* Right sidebar — 固定 360,sticky 到 tabs 底 (top:84+60=144,加 12 → 156) */
-/* Sidebar 拆两模块:top (Media Card) sticky · bottom 正常滚动
-   Desktop: sidebar 本身不 sticky · 仅 .cr-sidebar-top 独立 sticky */
+/* Sidebar 拆两模块:两部分都 normal flow · 一起随页面滚动
+   Media Card 不再 sticky (避免 sticky 覆盖下方模块的视觉问题) */
 .cr-sidebar{display:flex;flex-direction:column;gap:24px}
 .cr-sidebar-top{display:flex;flex-direction:column;gap:24px}
 .cr-sidebar-bottom{display:flex;flex-direction:column;gap:24px}
-@media(min-width:1024px){
-  .cr-sidebar-top{position:sticky;top:168px;align-self:start}
-}
-.cr-sb-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.cr-sb-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(15,23,42,.04)}
 .cr-sb-h{font-size:13px;font-weight:700;letter-spacing:-.005em;color:var(--ink);margin:0 0 12px}
 .cr-sb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
 .cr-sb-row{display:flex;align-items:center;gap:10px;padding:6px;border-radius:10px;transition:background .15s}

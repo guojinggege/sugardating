@@ -29,9 +29,9 @@ export default function CreatorSidebarMediaCard({
   const chipText = parts.join(" · ");
 
   return (
-    <div className="rounded-[24px] overflow-hidden bg-white border border-[#E5E7EB] shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
-      {/* 顶部 3 CTA 行 — 打赏 / 聊天 / 约她 */}
-      <div className="grid grid-cols-3 gap-2 p-3.5 bg-white">
+    <div className="rounded-[20px] overflow-hidden bg-white border border-[var(--line)] shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
+      {/* 顶部 3 CTA 行 — 打赏 / 聊天 / 约她 · padding 与其它 cr-sb-card 对齐 (20px) */}
+      <div className="grid grid-cols-3 gap-2 p-5 bg-white">
         <button
           type="button"
           onClick={guard}

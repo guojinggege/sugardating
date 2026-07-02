@@ -1,6 +1,9 @@
-// Reddit-style Post Card — Vote 列 + Content (meta + title + body + poll + actions)
+// Reddit-style Post Card — Vote 列 + Content (passive area 用 Link 包裹进详情页)
+// 点击帖子主体(meta/title/body/tags)跳转 /community/[slug]/post/[postSlug]
+// Vote / Poll / Actions 独立于 Link,click 不导航
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { CommunityPost, CommunityColor, PostBadge } from "@/lib/communityMock";
 import CommunityPollCard from "./CommunityPollCard";
@@ -31,11 +34,13 @@ export default function CommunityPostCard({ post }: { post: CommunityPost }) {
 
   const dot = DOT_COLOR[post.communityColor];
   const displayScore = post.score + vote;
+  const detailHref = `/community/${post.communitySlug}/post/${post.slug}`;
+  const communityHref = `/community/${post.communitySlug}`;
 
   return (
     <article className="rounded-[18px] border border-white/[0.08] bg-white/[0.045] overflow-hidden transition-all duration-200 hover:border-white/[0.14] hover:bg-white/[0.06]">
       <div className="flex">
-        {/* Vote 列 */}
+        {/* Vote 列 — 独立,不导航 */}
         <div className="w-14 flex flex-col items-center gap-1.5 py-4 bg-white/[0.025] flex-shrink-0">
           <button
             type="button"
@@ -62,12 +67,12 @@ export default function CommunityPostCard({ post }: { post: CommunityPost }) {
 
         {/* Content */}
         <div className="flex-1 min-w-0 p-4 md:p-5">
-          {/* Meta */}
+          {/* Meta — community name 单独 Link,防嵌套 Link */}
           <div className="flex items-center gap-2 text-[11.5px] text-[var(--cm-muted)] mb-2.5 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 font-semibold text-white">
+            <Link href={communityHref} className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-[var(--cm-pink)] transition">
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
               {post.communityName}
-            </span>
+            </Link>
             <span>·</span>
             <span>{post.author}</span>
             <span>·</span>
@@ -78,35 +83,33 @@ export default function CommunityPostCard({ post }: { post: CommunityPost }) {
             })}
           </div>
 
-          {/* Title */}
-          <h3 className="text-[17px] md:text-[18px] font-bold text-white leading-snug m-0 mb-2">
-            {post.title}
-          </h3>
+          {/* Passive area (title + body + tags) — 整块跳详情 */}
+          <Link href={detailHref} className="block group">
+            <h3 className="text-[17px] md:text-[18px] font-bold text-white leading-snug m-0 mb-2 group-hover:text-[var(--cm-pink)] transition-colors">
+              {post.title}
+            </h3>
+            {post.body && (
+              <p className="text-[13.5px] text-[var(--cm-text)]/85 leading-[1.7] m-0 mb-3 line-clamp-3">
+                {post.body}
+              </p>
+            )}
+            {post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {post.tags.map((t) => (
+                  <span key={t} className="text-[11px] text-[var(--cm-muted)] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">#{t}</span>
+                ))}
+              </div>
+            )}
+          </Link>
 
-          {/* Body */}
-          {post.body && (
-            <p className="text-[13.5px] text-[var(--cm-text)]/85 leading-[1.7] m-0 mb-3 line-clamp-3">
-              {post.body}
-            </p>
-          )}
-
-          {/* Poll */}
+          {/* Poll — 独立,不导航 */}
           {post.poll && (
             <div className="mb-3">
               <CommunityPollCard options={post.poll.options} totalVotes={post.poll.totalVotes} />
             </div>
           )}
 
-          {/* Tags */}
-          {post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {post.tags.map((t) => (
-                <span key={t} className="text-[11px] text-[var(--cm-muted)] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">#{t}</span>
-              ))}
-            </div>
-          )}
-
-          {/* Actions */}
+          {/* Actions — 独立,不导航 */}
           <div className="flex items-center gap-1 text-[var(--cm-muted)] -ml-2">
             <ActionBtn label={`${fmt(post.commentsCount)} 评论`} onClick={guard(() => {})} icon={<path d="M21 12a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 12z"/>} />
             {post.roomCount !== undefined && post.roomCount > 0 && (

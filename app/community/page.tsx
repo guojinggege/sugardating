@@ -31,9 +31,13 @@ export default function Page() {
           <CommunityHeader onlineTotal={onlineTotal} joinedCount={myCommunities.length} />
           <CommunityComposer />
           <CommunitySortTabs postsCount={posts.length} />
-          {posts.map((p) => (
-            <CommunityPostCard key={p.id} post={p} />
-          ))}
+          {posts
+            .slice()
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 16)
+            .map((p) => (
+              <CommunityPostCard key={p.slug} post={p} />
+            ))}
         </>
       }
     />

@@ -71,7 +71,7 @@ export default function CommunityLeftSidebar({ joined, discover, activeSlug = "h
       <div>
         <h5 className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--cm-muted)] mb-2 px-2.5">我加入的社区</h5>
         <ul className="flex flex-col gap-0.5">
-          {joined.map((c) => <li key={c.id}><CategoryRow c={c} /></li>)}
+          {joined.map((c) => <li key={c.slug}><CategoryRow c={c} active={c.slug === activeSlug} /></li>)}
         </ul>
       </div>
 
@@ -79,7 +79,7 @@ export default function CommunityLeftSidebar({ joined, discover, activeSlug = "h
       <div>
         <h5 className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--cm-muted)] mb-2 px-2.5">发现专区</h5>
         <ul className="flex flex-col gap-0.5">
-          {discover.map((c) => <li key={c.id}><CategoryRow c={c} /></li>)}
+          {discover.map((c) => <li key={c.slug}><CategoryRow c={c} active={c.slug === activeSlug} /></li>)}
         </ul>
       </div>
 

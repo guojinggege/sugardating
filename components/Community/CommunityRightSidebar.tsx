@@ -38,12 +38,14 @@ export default function CommunityRightSidebar({ topics, activeCommunities }: Pro
         </div>
         <ol className="flex flex-col gap-2.5">
           {topics.map((t) => (
-            <li key={t.rank} className="flex items-start gap-2.5 group cursor-pointer">
-              <span className="text-[15px] font-bold text-[var(--cm-muted)] w-5 shrink-0 leading-tight">{t.rank}</span>
-              <div className="flex-1 min-w-0">
-                <div className="text-[13px] font-medium text-white leading-tight group-hover:text-[var(--cm-pink)] transition-colors truncate">{t.title}</div>
-              </div>
-              {t.badge && <TopicBadge label={t.badge} />}
+            <li key={t.rank}>
+              <Link href={`/community/${t.communitySlug}/post/${t.postSlug}`} className="flex items-start gap-2.5 group">
+                <span className="text-[15px] font-bold text-[var(--cm-muted)] w-5 shrink-0 leading-tight">{t.rank}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium text-white leading-tight group-hover:text-[var(--cm-pink)] transition-colors truncate">{t.title}</div>
+                </div>
+                {t.badge && <TopicBadge label={t.badge} />}
+              </Link>
             </li>
           ))}
         </ol>
@@ -54,7 +56,7 @@ export default function CommunityRightSidebar({ topics, activeCommunities }: Pro
         <h5 className="text-[13px] font-bold text-white mb-3">你的社区,活跃中</h5>
         <ul className="flex flex-col gap-2">
           {activeCommunities.map((c) => (
-            <li key={c.id}>
+            <li key={c.slug}>
               <Link href={`/community/${c.slug}`} className="flex items-center gap-2.5 group">
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: DOT_COLOR[c.color] }} />
                 <span className="text-[12.5px] text-white font-medium truncate flex-1 group-hover:text-[var(--cm-pink)] transition-colors">{c.name}</span>

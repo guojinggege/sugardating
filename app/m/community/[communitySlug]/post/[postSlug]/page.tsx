@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import {
   posts, getCommunityBySlug, getPostBySlug,
 } from "@/lib/communityMock";
-import type { CommunityColor, PostBadge } from "@/lib/communityMock";
+import type { PostBadge } from "@/lib/communityMock";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +19,6 @@ export async function generateMetadata({ params }: { params: { communitySlug: st
   return { title: `${p.title} · ${p.communityName}`, description: p.body?.slice(0, 140) || p.title };
 }
 
-const DOT: Record<CommunityColor, string> = {
-  pink: "#EC4C86", purple: "#7C5CFF", gold: "#D6B86A", cyan: "#22D3EE",
-  amber: "#F59E0B", emerald: "#10B981", rose: "#FB7185", indigo: "#818CF8",
-};
 const BADGE: Record<PostBadge, { label: string; cls: string }> = {
   hot:       { label: "热议",   cls: "text-[#EC4C86] bg-[#EC4C86]/10 border-[#EC4C86]/25" },
   adult:     { label: "18+",   cls: "text-[#7C5CFF] bg-[#7C5CFF]/10 border-[#7C5CFF]/25" },
@@ -42,7 +38,6 @@ export default function Page({ params }: { params: { communitySlug: string; post
   const p = getPostBySlug(params.communitySlug, params.postSlug);
   if (!c || !p) notFound();
 
-  const dot = DOT[p.communityColor];
   const comments = p.comments || [];
 
   return (
@@ -59,8 +54,7 @@ export default function Page({ params }: { params: { communitySlug: string; post
       <article className="mx-4 mt-3 rounded-2xl bg-white border border-[var(--line)] p-5">
         {/* Meta */}
         <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)] mb-3 flex-wrap">
-          <Link href={`/m/community/${c.slug}`} className="inline-flex items-center gap-1 font-bold text-[var(--ink)]">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
+          <Link href={`/m/community/${c.slug}`} className="font-bold text-[var(--ink)]">
             {p.communityName}
           </Link>
           <span>·</span>

@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import {
   communities, getCommunityBySlug, getPostsByCommunity,
 } from "@/lib/communityMock";
-import type { CommunityColor } from "@/lib/communityMock";
 import MobileCommunityPostCard from "@/components/Mobile/MobileCommunityPostCard";
 
 export const dynamic = "force-dynamic";
@@ -20,10 +19,6 @@ export async function generateMetadata({ params }: { params: { communitySlug: st
   return { title: `${c.name} · 互动社区 · Sugardating`, description: c.description };
 }
 
-const DOT: Record<CommunityColor, string> = {
-  pink: "#EC4C86", purple: "#7C5CFF", gold: "#D6B86A", cyan: "#22D3EE",
-  amber: "#F59E0B", emerald: "#10B981", rose: "#FB7185", indigo: "#818CF8",
-};
 const SORT_TABS = ["热门", "最新", "24h"];
 
 export default function Page({ params }: { params: { communitySlug: string } }) {
@@ -41,19 +36,10 @@ export default function Page({ params }: { params: { communitySlug: string } }) 
         </Link>
       </div>
 
-      {/* Community header */}
+      {/* Community header — 简洁,无 color dot */}
       <section className="mx-5 mt-3 rounded-2xl bg-white border border-[var(--line)] p-5">
-        <div className="flex items-start gap-3">
-          <span
-            className="w-11 h-11 rounded-full flex-shrink-0"
-            style={{ background: DOT[c.color], boxShadow: `0 0 12px ${DOT[c.color]}55` }}
-            aria-hidden
-          />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-[18px] font-extrabold text-[var(--ink)] tracking-tight m-0 leading-tight">{c.name}</h1>
-            <p className="text-[12.5px] text-[var(--muted)] mt-1 leading-[1.5] m-0">{c.description}</p>
-          </div>
-        </div>
+        <h1 className="text-[20px] font-extrabold text-[var(--ink)] tracking-tight m-0 leading-tight">{c.name}</h1>
+        <p className="text-[13px] text-[var(--muted)] mt-1.5 leading-[1.5] m-0">{c.description}</p>
         <div className="flex items-center gap-4 mt-3 text-[11.5px] text-[var(--muted)]">
           {c.onlineCount !== undefined && (
             <span><b className="text-[var(--ink)] tabular-nums">{c.onlineCount.toLocaleString("en-US")}</b> 在线</span>

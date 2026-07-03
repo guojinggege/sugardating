@@ -55,7 +55,7 @@ export default function MobileBottomNav() {
               <span className={`text-[10.5px] leading-none ${active ? "font-bold" : "font-medium"}`}>
                 {label(it.labelKey, it.fallback)}
               </span>
-              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-[var(--ink)]" />}
+              {/* Active 状态用 bold + ink 色区分,无 indicator bar (spec: 简洁高级) */}
             </span>
           );
           return (

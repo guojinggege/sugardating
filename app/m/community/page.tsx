@@ -1,15 +1,9 @@
 // Mobile Community — 全站混合帖子 feed
 import Link from "next/link";
 import { communities, posts, trendingTopics } from "@/lib/communityMock";
-import type { CommunityColor } from "@/lib/communityMock";
 import MobileCommunityPostCard from "@/components/Mobile/MobileCommunityPostCard";
 
 export const dynamic = "force-dynamic";
-
-const DOT: Record<CommunityColor, string> = {
-  pink: "#EC4C86", purple: "#7C5CFF", gold: "#D6B86A", cyan: "#22D3EE",
-  amber: "#F59E0B", emerald: "#10B981", rose: "#FB7185", indigo: "#818CF8",
-};
 
 const SORT_TABS = ["热门", "最新", "24h", "关注", "精华"];
 
@@ -33,9 +27,8 @@ export default function Page() {
           <Link
             key={c.slug}
             href={`/m/community/${c.slug}`}
-            className="flex-shrink-0 h-9 inline-flex items-center gap-1.5 px-3 rounded-full bg-white border border-[var(--line)] text-[13px] font-semibold text-[var(--ink)] whitespace-nowrap"
+            className="flex-shrink-0 h-9 inline-flex items-center gap-1.5 px-4 rounded-full bg-white border border-[var(--line)] text-[13px] font-semibold text-[var(--ink)] whitespace-nowrap hover:border-[var(--ink)] transition"
           >
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: DOT[c.color] }} />
             {c.name}
             {c.isHot && <span className="text-[9px] font-bold text-[#EC4C86]">HOT</span>}
           </Link>

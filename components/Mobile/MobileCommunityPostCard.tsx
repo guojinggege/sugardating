@@ -6,10 +6,6 @@ import { useState } from "react";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import type { CommunityPost, CommunityColor, PostBadge } from "@/lib/communityMock";
 
-const DOT: Record<CommunityColor, string> = {
-  pink: "#EC4C86", purple: "#7C5CFF", gold: "#D6B86A", cyan: "#22D3EE",
-  amber: "#F59E0B", emerald: "#10B981", rose: "#FB7185", indigo: "#818CF8",
-};
 const BADGE: Record<PostBadge, { label: string; cls: string }> = {
   hot:       { label: "热议",   cls: "text-[#EC4C86] bg-[#EC4C86]/10 border-[#EC4C86]/25" },
   adult:     { label: "18+",   cls: "text-[#7C5CFF] bg-[#7C5CFF]/10 border-[#7C5CFF]/25" },
@@ -32,7 +28,6 @@ export default function MobileCommunityPostCard({ post }: { post: CommunityPost 
     e?.stopPropagation();
     if (requireLogin()) fn();
   };
-  const dot = DOT[post.communityColor];
   const detailHref = `/m/community/${post.communitySlug}/post/${post.slug}`;
   const communityHref = `/m/community/${post.communitySlug}`;
 
@@ -40,8 +35,7 @@ export default function MobileCommunityPostCard({ post }: { post: CommunityPost 
     <article className="bg-white border border-[var(--line)] rounded-2xl p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
       {/* Meta row */}
       <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)] mb-2.5 flex-wrap">
-        <Link href={communityHref} className="inline-flex items-center gap-1 font-bold text-[var(--ink)] hover:opacity-80">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
+        <Link href={communityHref} className="font-bold text-[var(--ink)] hover:opacity-80">
           {post.communityName}
         </Link>
         <span>·</span>

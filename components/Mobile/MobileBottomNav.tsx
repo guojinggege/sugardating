@@ -45,7 +45,7 @@ export default function MobileBottomNav() {
       }}
       aria-label="Bottom Navigation"
     >
-      <ul className="flex items-stretch justify-around h-16">
+      <ul className="list-none m-0 p-0 flex items-stretch justify-around h-16">
         {items.map((it) => {
           const active = it.match(pathname);
           const inner = (

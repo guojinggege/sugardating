@@ -11,7 +11,7 @@ export default function Page() {
   const sortedPosts = posts.slice().sort((a, b) => b.score - a.score).slice(0, 16);
 
   return (
-    <div>
+    <div className="cmm-scope">
       {/* Header */}
       <div className="px-5 pt-4 pb-3">
         <h1 className="text-[22px] font-extrabold text-[var(--ink)] tracking-tight m-0">互动社区</h1>

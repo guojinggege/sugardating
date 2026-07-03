@@ -27,7 +27,7 @@ export default function Page({ params }: { params: { communitySlug: string } }) 
   const posts = getPostsByCommunity(c.slug);
 
   return (
-    <div>
+    <div className="cmm-scope">
       {/* Back */}
       <div className="px-5 pt-3">
         <Link href="/m/community" className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] transition">

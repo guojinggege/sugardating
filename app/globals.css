@@ -1617,6 +1617,16 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 
 }
 
+/* ============================================================
+   List bullet reset — 修复 preflight 关闭 + 未加 list-none 的 <ul>/<ol>
+   只作用于 mobile route (/m/*) + Bottom Nav · 不影响其它页面
+   ============================================================ */
+[aria-label="Bottom Navigation"] ul,
+[aria-label="Bottom Navigation"] li{list-style:none;margin:0;padding-left:0}
+.cmm-scope ul,
+.cmm-scope ol,
+.cmm-scope li{list-style:none;padding-left:0}
+
 /* Small mobile <= 375 — 进一步紧凑 */
 @media(max-width:375px){
   .cr-body{padding-top:20px}

@@ -41,7 +41,7 @@ export default function Page({ params }: { params: { communitySlug: string; post
   const comments = p.comments || [];
 
   return (
-    <div className="pb-6">
+    <div className="cmm-scope pb-6">
       {/* Back */}
       <div className="px-5 pt-3">
         <Link href={`/m/community/${c.slug}`} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] transition">

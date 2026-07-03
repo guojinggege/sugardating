@@ -18,6 +18,7 @@ export function middleware(request: NextRequest) {
   const HAS_M =
     pathname === "/" ||
     pathname === "/creators" || pathname.startsWith("/creators/") ||
+    pathname === "/community" || pathname.startsWith("/community/") ||
     pathname === "/photography" ||
     pathname === "/video" ||
     pathname === "/membership" ||

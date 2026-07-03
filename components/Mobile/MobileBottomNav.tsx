@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth, useRequireLogin } from "@/components/Auth/AuthProvider";
 
+// sg / me 用 fill silhouette 避免 outline head 圈在小尺寸下呈"漂浮黑点"
 const Ic = {
   home: <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2z" />,
   feed: <><rect x="3" y="4" width="18" height="4" rx="1" /><rect x="3" y="10" width="18" height="4" rx="1" /><rect x="3" y="16" width="18" height="4" rx="1" /></>,
-  sg:   <><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" /></>,
+  sg:   <path fill="currentColor" stroke="none" d="M12 3a4 4 0 1 1-4 4 4 4 0 0 1 4-4zm0 10c4.4 0 8 2.3 8 5v3H4v-3c0-2.7 3.6-5 8-5z" />,
   com:  <path d="M21 12a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 12z" />,
-  me:   <><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" /></>,
+  me:   <path fill="currentColor" stroke="none" d="M12 3a4 4 0 1 1-4 4 4 4 0 0 1 4-4zm0 10c4.4 0 8 2.3 8 5v3H4v-3c0-2.7 3.6-5 8-5z" />,
 };
 
 export default function MobileBottomNav() {

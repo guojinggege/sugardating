@@ -20,13 +20,17 @@ export default function MobileHeader() {
           borderColor: "var(--line)",
         }}
       >
-        {/* Logo */}
-        <Link href="/m" className="flex items-center gap-2 font-bold text-[16px] text-[var(--ink)]" style={{ letterSpacing: "-0.02em" }}>
+        {/* Logo — 与 desktop 一致的 Spark SVG (Cormorant Garamond italic) */}
+        <Link href="/m" className="flex items-center gap-2 font-bold text-[16px] text-[var(--ink)] leading-none" style={{ letterSpacing: "-0.02em" }}>
           <span
-            className="grid place-items-center w-7 h-7 rounded-md text-white text-[13px] font-black"
+            className="grid place-items-center w-8 h-8 rounded-lg flex-shrink-0"
             style={{ background: "var(--ink)" }}
           >
-            S
+            <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
+              <text x="12" y="18.2" textAnchor="middle" fill="#fff"
+                fontFamily='"Cormorant Garamond","Playfair Display",Didot,Georgia,serif'
+                fontSize="20" fontWeight="500" fontStyle="italic">S</text>
+            </svg>
           </span>
           Sugardating
         </Link>

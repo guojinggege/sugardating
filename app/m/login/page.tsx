@@ -22,13 +22,17 @@ export default function Page() {
   return (
     <div className="min-h-[calc(100vh-140px)] flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-[360px]">
-        {/* Logo */}
+        {/* Logo — Spark SVG (Cormorant Garamond italic) */}
         <div className="text-center mb-8">
           <div
-            className="mx-auto w-14 h-14 rounded-2xl grid place-items-center text-white text-[24px] font-black"
+            className="mx-auto w-14 h-14 rounded-2xl grid place-items-center"
             style={{ background: "var(--ink)" }}
           >
-            S
+            <svg viewBox="0 0 24 24" className="w-9 h-9" aria-hidden>
+              <text x="12" y="18.2" textAnchor="middle" fill="#fff"
+                fontFamily='"Cormorant Garamond","Playfair Display",Didot,Georgia,serif'
+                fontSize="20" fontWeight="500" fontStyle="italic">S</text>
+            </svg>
           </div>
           <h1 className="text-[24px] font-extrabold text-[var(--ink)] mt-4 tracking-tight m-0">欢迎回来</h1>
           <p className="text-[13px] text-[var(--muted)] mt-1.5">登录以继续</p>

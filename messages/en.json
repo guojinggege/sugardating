@@ -269,6 +269,48 @@
       "primary": "Join Free",
       "secondary": "Explore Sugargirls",
       "imageAlt": "Sugardating community"
+    },
+    "filterBar": {
+      "region": "Region",     "regionPh": "Select region",
+      "city": "City",         "cityPh": "Select city",
+      "online": "Online",     "onlinePh": "Availability",
+      "verified": "Verified", "verifiedPh": "Verification",
+      "cta": "Search Sugargirls"
+    },
+    "featuredGrid": {
+      "title": "Popular Sugargirls",
+      "subtitle": "Browse recently active, verified and highly-engaged Sugargirls.",
+      "viewAll": "View all",
+      "online": "Online",
+      "verified": "Verified",
+      "recent": "Active"
+    },
+    "quickDiscover": {
+      "title": "Quick Discover",
+      "subtitle": "Jump straight to what interests you.",
+      "items": {
+        "verified":  "Verified",
+        "new":       "New",
+        "live":      "Live now",
+        "asia":      "Asia",
+        "hotVideos": "Hot videos",
+        "highReply": "High reply",
+        "nearby":    "Nearby",
+        "vip":       "VIP picks"
+      }
+    },
+    "safety": {
+      "title": "Safety, Privacy & Adult Platform Rules",
+      "desc": "Sugardating is for adults 18+. We prioritize identity verification, privacy protection, content moderation and safe interactions. Any content involving minors, fraud, coercion, harassment, illegal transactions or non-consensual behavior is not allowed.",
+      "tags": {
+        "18+":           "18+",
+        "resumeReview":  "Profile Reviewed",
+        "reportBlock":   "Report & Block",
+        "privacy":       "Privacy Protected",
+        "antiFraud":     "Anti-fraud",
+        "localLaw":      "Local Law Compliance"
+      },
+      "cta": "View safety rules"
     }
   },
   "meta": {

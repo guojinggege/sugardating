@@ -269,6 +269,48 @@
       "primary": "免费加入",
       "secondary": "浏览 Sugargirl",
       "imageAlt": "Sugardating 社群"
+    },
+    "filterBar": {
+      "region": "地区",   "regionPh": "选择地区",
+      "city": "城市",     "cityPh": "选择城市",
+      "online": "在线",   "onlinePh": "在线状态",
+      "verified": "认证", "verifiedPh": "认证资料",
+      "cta": "搜索 Sugargirls"
+    },
+    "featuredGrid": {
+      "title": "热门 Sugargirls",
+      "subtitle": "浏览近期活跃、资料完整、互动热度较高的 Sugargirls。",
+      "viewAll": "查看全部",
+      "online": "在线",
+      "verified": "认证",
+      "recent": "最近活跃"
+    },
+    "quickDiscover": {
+      "title": "快速发现",
+      "subtitle": "按你感兴趣的类型进入。",
+      "items": {
+        "verified":  "认证 Sugargirls",
+        "new":       "新加入",
+        "live":      "正在直播",
+        "asia":      "亚洲 Sugargirls",
+        "hotVideos": "热门视频",
+        "highReply": "高回复率",
+        "nearby":    "附近地区",
+        "vip":       "VIP 推荐"
+      }
+    },
+    "safety": {
+      "title": "安全、隐私与成年人平台规则",
+      "desc": "Sugardating 面向 18 岁以上成年人。平台重视资料真实性、隐私保护、内容审核和安全互动。任何未成年人内容、诈骗、胁迫、骚扰、违法交易或非自愿行为都不被允许。",
+      "tags": {
+        "18+":           "18+",
+        "resumeReview":  "资料审核",
+        "reportBlock":   "举报拉黑",
+        "privacy":       "隐私保护",
+        "antiFraud":     "反诈骗提醒",
+        "localLaw":      "遵守当地法律"
+      },
+      "cta": "查看安全规则"
     }
   },
   "meta": {

@@ -4,11 +4,13 @@ import SectionHeader from "@/components/SectionHeader";
 import Img from "@/components/Img";
 import Reveal from "@/components/Reveal";
 import Stat from "@/components/Stat";
-import CreatorRail from "@/components/CreatorRail";
 import Testimonials from "@/components/Home/Testimonials";
 import FAQ from "@/components/Home/FAQ";
+import SugargirlSearchBar from "@/components/Home/SugargirlSearchBar";
+import SugargirlGrid from "@/components/Home/SugargirlGrid";
+import QuickDiscoverChips from "@/components/Home/QuickDiscoverChips";
+import SafetyNotice from "@/components/Home/SafetyNotice";
 import { Arrow } from "@/components/icons";
-import { listCreators } from "@/lib/queries";
 import { photos, pick } from "@/lib/images";
 import { getTranslations } from "next-intl/server";
 
@@ -91,14 +93,41 @@ const highlightKeys = [
 ] as const;
 
 export default async function Home() {
-  const [creators, t] = await Promise.all([listCreators(), getTranslations("home")]);
+  const t = await getTranslations("home");
 
   return (
     <>
       <HomeHero photos={photos} />
       <div className="container">
 
-        {/* 1. Why Choose Sugardating */}
+        {/* 0. 目录型搜索筛选条 — Hero 下方紧凑入口 */}
+        <Reveal>
+          <SugargirlSearchBar />
+        </Reveal>
+
+        {/* 1. 热门 Sugargirls — 4-col portrait grid (目录型核心) */}
+        <section className="sec">
+          <Reveal>
+            <SectionHeader
+              title={t("featuredGrid.title")}
+              count={t("featuredGrid.subtitle")}
+              moreHref="/creators"
+              moreText={t("featuredGrid.viewAll")}
+            />
+          </Reveal>
+          <Reveal>
+            <SugargirlGrid limit={12} />
+          </Reveal>
+        </section>
+
+        {/* 2. 快速发现 chips — 目录型次导航 */}
+        <section className="sec">
+          <Reveal>
+            <QuickDiscoverChips />
+          </Reveal>
+        </section>
+
+        {/* 3. Why Choose Sugardating */}
         <section className="sec">
           <Reveal>
             <SectionHeader title={t("whyChoose.title")} count={t("whyChoose.subtitle")} />
@@ -156,21 +185,6 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 4. Featured Sugargirls */}
-        <section className="sec">
-          <Reveal>
-            <SectionHeader
-              title={t("featured.title")}
-              count={t("featured.subtitle")}
-              moreHref="/male-artists"
-              moreText={t("featured.viewAll")}
-            />
-          </Reveal>
-          <Reveal>
-            <CreatorRail items={creators} photos={photos} />
-          </Reveal>
-        </section>
-
         {/* 5. Platform Highlights */}
         <section className="sec">
           <Reveal>
@@ -209,7 +223,14 @@ export default async function Home() {
           </Reveal>
         </section>
 
-        {/* 8. Footer CTA */}
+        {/* 8a. 安全 / 隐私 / 成年人平台规则 — 轻量提示 */}
+        <section className="sec">
+          <Reveal>
+            <SafetyNotice />
+          </Reveal>
+        </section>
+
+        {/* 8b. Footer CTA */}
         <section className="sec">
           <Reveal>
             <div className="banner">

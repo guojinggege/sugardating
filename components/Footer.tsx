@@ -19,7 +19,6 @@ export default async function Footer() {
             <li><Link href="/video">{t("links.video")}</Link></li>
             <li><Link href="/art-services">{t("links.services")}</Link></li>
             <li><Link href="/male-artists">{t("links.sugargirls")}</Link></li>
-            <li><Link href="/ai-artists">{t("links.ai")}</Link></li>
           </ul>
         </div>
         <div>

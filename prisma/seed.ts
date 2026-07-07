@@ -79,7 +79,7 @@ async function main() {
   await prisma.region.deleteMany();
 
   // Category — 从 channels 取真正的"内容门类",过滤掉直播/社区这种非创作分类
-  const categorySlugs = ["photography", "video", "art-services", "ai-artists", "male-artists"];
+  const categorySlugs = ["photography", "video", "art-services", "male-artists"];
   const categoryLabelBySlug: Record<string, string> = Object.fromEntries(
     channels.filter((c) => categorySlugs.includes(c.slug)).map((c) => [c.slug, c.label]),
   );
@@ -87,7 +87,6 @@ async function main() {
     动态推荐: "photography",
     视频专区: "video",
     专属服务: "art-services",
-    "在线伴侣": "ai-artists",
     SugarGirl: "male-artists",
   };
 

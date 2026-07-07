@@ -4,7 +4,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Img from "@/components/Img";
-import { pick } from "@/lib/images";
 import ApplyForm from "@/components/Apply/ApplyForm";
 import ApplyStickyCTA from "@/components/Apply/ApplyStickyCTA";
 
@@ -83,20 +82,22 @@ const FAQS = [
 ];
 
 export default function ApplyPage() {
-  const heroBg = pick(0, 5) ?? "/images/placeholder.png";
-  const narrativeImg = pick(2, 0) ?? "/images/placeholder.png";
+  // 图片资源:public/new · Next.js serve 为 /new/*
+  // 每个大模块用不同图,不重复
+  const heroBg       = "/new/KUGA-BKK--4100437-6a1cd4e3cd890.webp";
+  const narrativeImg = "/new/Coco--4098629-68c99c05d1429.webp";
   const shootImgs = [
-    pick(0, 12) ?? "/images/placeholder.png",
-    pick(1, 8)  ?? "/images/placeholder.png",
-    pick(2, 4)  ?? "/images/placeholder.png",
+    "/new/bn2p.webp",
+    "/new/hcfm.webp",
+    "/new/xmui.webp",
   ];
-  const previewCover = pick(0, 3) ?? "/images/placeholder.png";
+  const previewCover = "/new/wtng.jpg";
 
   return (
     <>
       {/* ═══ 1. Hero ═══ */}
       <section className="ap-hero">
-        <div className="ap-hero-media"><Img src={heroBg} alt="" sizes="100vw" priority /></div>
+        <div className="ap-hero-media"><Img src={heroBg} alt="Sugargirl 入驻形象展示" sizes="100vw" priority /></div>
         <div className="ap-hero-veil" />
         <div className="ap-hero-inner">
           <div className="ap-hero-badges">
@@ -129,7 +130,7 @@ export default function ApplyPage() {
               而不是一张普通资料卡。
             </p>
           </div>
-          <div className="ap-narrative-img"><Img src={narrativeImg} alt="" sizes="(max-width:900px) 100vw, 560px" /></div>
+          <div className="ap-narrative-img"><Img src={narrativeImg} alt="高端 sugargirl 主页展示" sizes="(max-width:900px) 100vw, 560px" /></div>
         </div>
       </section>
 
@@ -174,7 +175,7 @@ export default function ApplyPage() {
         <div className="ap-shoot-grid">
           {SHOOT_STEPS.map((s, i) => (
             <article key={s.n} className="ap-shoot-card">
-              <div className="ap-shoot-cover"><Img src={shootImgs[i]} alt="" sizes="(max-width:900px) 100vw, 380px" /></div>
+              <div className="ap-shoot-cover"><Img src={shootImgs[i]} alt={`Sugardating 免费拍摄支持 · ${s.title}`} sizes="(max-width:900px) 100vw, 380px" /></div>
               <div className="ap-shoot-body">
                 <div className="ap-shoot-n">第 {s.n} 步</div>
                 <h3>{s.title}</h3>
@@ -211,7 +212,7 @@ export default function ApplyPage() {
         <p className="ap-lead">动态视频封面 · 头像与认证 · 个人简介 · 基础资料 · 生活方式 · 服务入口 · 作品相册 · 视频展示 · 礼物 · 评价 · 推荐曝光 —— 一体化呈现。</p>
         <div className="ap-preview">
           <div className="ap-preview-frame">
-            <div className="ap-preview-hero"><Img src={previewCover} alt="" sizes="(max-width:640px) 100vw, 640px" /></div>
+            <div className="ap-preview-hero"><Img src={previewCover} alt="sugargirl 主页视觉预览" sizes="(max-width:640px) 100vw, 640px" /></div>
             <div className="ap-preview-row">
               <div className="ap-preview-ava">S</div>
               <div>

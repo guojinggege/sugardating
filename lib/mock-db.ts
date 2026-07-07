@@ -225,10 +225,12 @@ export interface UserProfile {
   bio?: string;
   phone?: string;
   gender?: string;
-  birthday?: string;
+  birthday?: string;        // ISO date
+  age?: number;             // 派生自 birthday
   city?: string;
   country?: string;
   language?: string;
+  languages?: string[];
   interests: string[];
   preferences: UserPreferences;
   membership: {
@@ -300,13 +302,42 @@ globalThis.__sgBookings     = bookings;
 globalThis.__sgGifts        = gifts;
 
 // ─── UserProfile CRUD ─────────────────────────
-export function createUserProfile(userId: string, displayName: string): UserProfile {
+export interface CreateProfileInit {
+  birthday?: string;
+  gender?: string;
+  country?: string;
+  city?: string;
+  languages?: string[];
+  interests?: string[];
+  bio?: string;
+  preferences?: UserPreferences;
+}
+
+function computeAge(birthday?: string): number | undefined {
+  if (!birthday) return undefined;
+  const d = new Date(birthday);
+  if (isNaN(d.getTime())) return undefined;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age >= 0 && age < 150 ? age : undefined;
+}
+
+export function createUserProfile(userId: string, displayName: string, init?: CreateProfileInit): UserProfile {
   const now = new Date().toISOString();
   const profile: UserProfile = {
     userId,
     displayName,
-    interests: [],
-    preferences: {},
+    bio:       init?.bio,
+    gender:    init?.gender,
+    birthday:  init?.birthday,
+    age:       computeAge(init?.birthday),
+    country:   init?.country,
+    city:      init?.city,
+    languages: init?.languages,
+    interests: init?.interests ?? [],
+    preferences: init?.preferences ?? {},
     membership: { tier: "free", status: "active" },
     privacy: { showOnlineStatus: true, showLastActive: true, receivePromo: false },
     createdAt: now, updatedAt: now,
@@ -322,7 +353,6 @@ export function getUserProfile(userId: string): UserProfile | null {
 export function updateUserProfile(userId: string, patch: Partial<UserProfile>): UserProfile | null {
   const cur = userProfiles.get(userId);
   if (!cur) return null;
-  // Merge — 保护 immutable/system 字段
   const next: UserProfile = {
     ...cur,
     ...patch,
@@ -334,6 +364,10 @@ export function updateUserProfile(userId: string, patch: Partial<UserProfile>): 
     privacy:     { ...cur.privacy,     ...(patch.privacy     ?? {}) },
     interests: Array.isArray(patch.interests) ? patch.interests.slice(0, 30) : cur.interests,
   };
+  // 生日变了自动重算年龄
+  if (patch.birthday !== undefined && patch.birthday !== cur.birthday) {
+    next.age = computeAge(next.birthday);
+  }
   userProfiles.set(userId, next);
   return next;
 }

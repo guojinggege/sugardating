@@ -12,13 +12,30 @@ export interface AuthUser {
   email?: string;
 }
 
+export interface RegisterPayload {
+  displayName: string;
+  email: string;
+  password: string;
+  birthDate?: string;
+  gender?: string;
+  country?: string;
+  city?: string;
+  languages?: string[];
+  interests?: string[];
+  bio?: string;
+  preferredCities?: string[];
+  datingPreferences?: string[];
+  budgetRange?: [number, number];
+  acceptTerms?: boolean;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
   hydrated: boolean;
   login: (u?: Partial<AuthUser>) => void;   // Legacy: 直接 set(用于测试);推荐用 loginWithApi
   loginWithApi: (email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>;
-  registerWithApi: (name: string, email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>;
+  registerWithApi: (payload: RegisterPayload) => Promise<{ ok: true } | { ok: false; message: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
   modalOpen: boolean;
@@ -81,12 +98,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const registerWithApi = useCallback<AuthContextValue["registerWithApi"]>(async (name, email, password) => {
+  const registerWithApi = useCallback<AuthContextValue["registerWithApi"]>(async (payload) => {
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(payload),
         credentials: "include",
       });
       const data = await res.json().catch(() => ({}));

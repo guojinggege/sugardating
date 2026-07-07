@@ -15,6 +15,8 @@ export function middleware(request: NextRequest) {
 
   // 只 redirect 有 /m/ 实现的路径 — 其它 mobile UA 上看到 desktop 层 (responsive CSS 已保底)
   // Phase 2 覆盖: / · /creators · /photography · /video · /membership · /login · /live · /me
+  // /me 是 protected 个人中心,session-aware,不 UA-redirect (避免登录后混乱)
+  // /login /register 有独立表单,也不 auto-redirect (让用户在 desktop 登录后能进 /me)
   const HAS_M =
     pathname === "/" ||
     pathname === "/creators" || pathname.startsWith("/creators/") ||
@@ -22,9 +24,7 @@ export function middleware(request: NextRequest) {
     pathname === "/photography" ||
     pathname === "/video" ||
     pathname === "/membership" ||
-    pathname === "/login" ||
-    pathname === "/live" ||
-    pathname === "/me";
+    pathname === "/live";
   if (!isMobileRoute && HAS_M && MOBILE_UA.test(ua)) {
     const url = request.nextUrl.clone();
     url.pathname = `/m${pathname === "/" ? "" : pathname}`;

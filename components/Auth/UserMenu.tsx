@@ -49,18 +49,25 @@ export default function UserMenu() {
             </div>
           </div>
           <div className="user-pop-divider" />
-          <Link href="#" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
+          <Link href="/me" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
             <svg viewBox="0 0 24 24" aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" /></svg>
-            {t("profile")}
+            我的主页
           </Link>
-          <Link href="#" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
+          <Link href="/me" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
             <svg viewBox="0 0 24 24" aria-hidden><path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" /></svg>
-            {t("messages")}
+            我的关注
           </Link>
-          <Link href="#" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
-            <svg viewBox="0 0 24 24" aria-hidden><path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2h16z" /><path d="M10 20a2 2 0 0 0 4 0" /></svg>
-            {t("notifications")}
-          </Link>
+          {user.role === "creator" ? (
+            <Link href="/me" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
+              <svg viewBox="0 0 24 24" aria-hidden><path d="M12 2l2.4 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.6z" /></svg>
+              创作者中心
+            </Link>
+          ) : (
+            <Link href="/apply" role="menuitem" className="user-pop-item" onClick={() => setOpen(false)}>
+              <svg viewBox="0 0 24 24" aria-hidden><path d="M12 5v14M5 12h14" /></svg>
+              申请成为创作者
+            </Link>
+          )}
           <div className="user-pop-divider" />
           <button type="button" role="menuitem" className="user-pop-item user-pop-logout" onClick={() => { logout(); setOpen(false); }}>
             <svg viewBox="0 0 24 24" aria-hidden><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>

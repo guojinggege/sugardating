@@ -1,6 +1,6 @@
 // POST /api/auth/register — 创建用户 + 自动登录
 import { NextResponse } from "next/server";
-import { createUser, toPublicUser } from "@/lib/mock-db";
+import { createUser, createUserProfile, toPublicUser } from "@/lib/mock-db";
 import { setSessionCookie } from "@/lib/session";
 import { isValidEmail, isValidPassword, isValidName } from "@/lib/validation";
 
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
 
   try {
     const user = createUser({ name, email, password });
+    createUserProfile(user.id, user.name);   // 自动生成 UserProfile,不留空白
     setSessionCookie(user.id);
     return NextResponse.json({ ok: true, user: toPublicUser(user) });
   } catch (e: unknown) {

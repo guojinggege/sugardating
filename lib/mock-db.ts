@@ -200,6 +200,172 @@ export function getProfileBySlug(slug: string): CreatorProfileDraft | null {
   return id ? profiles.get(id) ?? null : null;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// UserProfile — 普通用户账号资料 (与 CreatorProfileDraft 分离)
+// 注册时自动创建 · /me 页面读写
+// ═══════════════════════════════════════════════════════════════
+export type MembershipTierLite = "free" | "basic" | "premium" | "elite";
+export type MembershipStatus = "active" | "expired" | "cancelled";
+
+export interface UserPreferences {
+  interestedCities?: string[];
+  interestedLanguages?: string[];
+  interestedTypes?: string[];      // 服务类型偏好
+  ageRange?: [number, number];
+  onlinePriority?: boolean;
+  verifiedPriority?: boolean;
+  priceRange?: [number, number];
+}
+
+export interface UserProfile {
+  userId: string;
+  displayName: string;
+  username?: string;
+  avatar?: string;
+  bio?: string;
+  phone?: string;
+  gender?: string;
+  birthday?: string;
+  city?: string;
+  country?: string;
+  language?: string;
+  interests: string[];
+  preferences: UserPreferences;
+  membership: {
+    tier: MembershipTierLite;
+    status: MembershipStatus;
+    startedAt?: string;
+    expiresAt?: string;
+  };
+  privacy: {
+    showOnlineStatus: boolean;
+    showLastActive: boolean;
+    receivePromo: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Following / Saved / Booking / Gift — 简易结构
+export interface SavedItem {
+  id: string;
+  kind: "creator" | "post" | "photo" | "video" | "service";
+  targetSlug: string;   // creator slug or post slug
+  savedAt: string;
+}
+export interface BookingRecord {
+  id: string;
+  creatorSlug: string;
+  creatorName: string;
+  serviceType: string;
+  date: string;
+  city?: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  price?: string;
+  createdAt: string;
+}
+export interface GiftRecord {
+  id: string;
+  creatorSlug: string;
+  creatorName: string;
+  giftType: string;
+  emoji?: string;
+  amount?: string;
+  message?: string;
+  status: "sent" | "received" | "refunded";
+  createdAt: string;
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __sgUserProfiles: Map<string, UserProfile> | undefined;
+  // eslint-disable-next-line no-var
+  var __sgFollowing: Map<string, Set<string>> | undefined;   // userId → Set(creatorSlug)
+  // eslint-disable-next-line no-var
+  var __sgSaved: Map<string, SavedItem[]> | undefined;       // userId → items
+  // eslint-disable-next-line no-var
+  var __sgBookings: Map<string, BookingRecord[]> | undefined;
+  // eslint-disable-next-line no-var
+  var __sgGifts: Map<string, GiftRecord[]> | undefined;
+}
+const userProfiles = globalThis.__sgUserProfiles ?? new Map<string, UserProfile>();
+const following    = globalThis.__sgFollowing    ?? new Map<string, Set<string>>();
+const saved        = globalThis.__sgSaved        ?? new Map<string, SavedItem[]>();
+const bookings     = globalThis.__sgBookings     ?? new Map<string, BookingRecord[]>();
+const gifts        = globalThis.__sgGifts        ?? new Map<string, GiftRecord[]>();
+globalThis.__sgUserProfiles = userProfiles;
+globalThis.__sgFollowing    = following;
+globalThis.__sgSaved        = saved;
+globalThis.__sgBookings     = bookings;
+globalThis.__sgGifts        = gifts;
+
+// ─── UserProfile CRUD ─────────────────────────
+export function createUserProfile(userId: string, displayName: string): UserProfile {
+  const now = new Date().toISOString();
+  const profile: UserProfile = {
+    userId,
+    displayName,
+    interests: [],
+    preferences: {},
+    membership: { tier: "free", status: "active" },
+    privacy: { showOnlineStatus: true, showLastActive: true, receivePromo: false },
+    createdAt: now, updatedAt: now,
+  };
+  userProfiles.set(userId, profile);
+  return profile;
+}
+
+export function getUserProfile(userId: string): UserProfile | null {
+  return userProfiles.get(userId) ?? null;
+}
+
+export function updateUserProfile(userId: string, patch: Partial<UserProfile>): UserProfile | null {
+  const cur = userProfiles.get(userId);
+  if (!cur) return null;
+  // Merge — 保护 immutable/system 字段
+  const next: UserProfile = {
+    ...cur,
+    ...patch,
+    userId: cur.userId,
+    createdAt: cur.createdAt,
+    updatedAt: new Date().toISOString(),
+    preferences: { ...cur.preferences, ...(patch.preferences ?? {}) },
+    membership:  { ...cur.membership,  ...(patch.membership  ?? {}) },
+    privacy:     { ...cur.privacy,     ...(patch.privacy     ?? {}) },
+    interests: Array.isArray(patch.interests) ? patch.interests.slice(0, 30) : cur.interests,
+  };
+  userProfiles.set(userId, next);
+  return next;
+}
+
+// ─── Following ────────────────────────────────
+export function getFollowing(userId: string): string[] {
+  return Array.from(following.get(userId) ?? []);
+}
+export function addFollowing(userId: string, creatorSlug: string): boolean {
+  let set = following.get(userId);
+  if (!set) { set = new Set(); following.set(userId, set); }
+  if (set.has(creatorSlug)) return false;
+  set.add(creatorSlug);
+  return true;
+}
+export function removeFollowing(userId: string, creatorSlug: string): boolean {
+  const set = following.get(userId);
+  if (!set) return false;
+  return set.delete(creatorSlug);
+}
+
+// ─── Saved / Bookings / Gifts (Read-only listings — write hooks 未来接入) ─────
+export function getSaved(userId: string): SavedItem[] {
+  return saved.get(userId) ?? [];
+}
+export function getBookings(userId: string): BookingRecord[] {
+  return bookings.get(userId) ?? [];
+}
+export function getGifts(userId: string): GiftRecord[] {
+  return gifts.get(userId) ?? [];
+}
+
 // ─── Utility: slug validation & generation ─────────
 export function normalizeSlug(raw: string): string {
   return raw

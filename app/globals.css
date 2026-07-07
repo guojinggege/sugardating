@@ -1703,35 +1703,31 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 @media(max-width:1024px){.ap-hero{height:680px}}
 @media(max-width:640px){.ap-hero{height:640px}}
 
-/* Media — Desktop 定位到右 66% (左文右人构图);Mobile 全屏铺 */
+/* Media — full-bleed 沉浸背景 (整站海报感,非硬切) · 人物偏右 object-position */
 .ap-hero-media{position:absolute;inset:0}
-.ap-hero-media img{object-fit:cover;object-position:68% center}
-@media(min-width:900px){
-  /* NOT setting inset:auto here — it 是 shorthand,会覆盖前面的 top/right/bottom/left */
-  .ap-hero-media{left:auto;right:0;top:0;bottom:0;width:66%}
-  .ap-hero-media img{object-position:60% center}
+.ap-hero-media img{
+  object-fit:cover;
+  object-position:68% center;              /* 人物在右侧黄金位 */
+  filter:brightness(.72) contrast(1.06) saturate(.96);   /* editorial 暗化滤镜 */
 }
 @media(max-width:899px){
-  .ap-hero-media img{object-position:65% center}
+  .ap-hero-media img{object-position:65% center;filter:brightness(.68) contrast(1.06)}
 }
 
-/* Veil — Desktop 强左侧渐变 (保左侧文案可读);Mobile 底部深化 */
+/* Veil — 多层遮罩:暖色 + 左强渐变 + 底部 fade · 整体沉浸不硬切
+   Desktop: 左强右透保左文可读,人物层次不闷
+   Mobile:  底部深化配 bottom-align 文案 */
 .ap-hero-veil{position:absolute;inset:0;background:
-  radial-gradient(140% 90% at 30% 100%, rgba(0,0,0,.75) 0%, rgba(0,0,0,.35) 45%, transparent 70%),
-  linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.15) 30%, rgba(0,0,0,.65) 95%)}
-@media(min-width:900px){
+  /* Base dark wash */
+  linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.18) 65%, rgba(0,0,0,.55) 100%),
+  /* Left→right dark for text region */
+  linear-gradient(90deg, rgba(0,0,0,.70) 0%, rgba(0,0,0,.42) 40%, rgba(0,0,0,.12) 70%, transparent 100%),
+  /* Subtle champagne warm tint (Sugardating 黑金基调) */
+  linear-gradient(115deg, rgba(28,20,12,.30) 0%, rgba(60,45,25,.12) 50%, rgba(0,0,0,.04) 100%)}
+@media(max-width:899px){
   .ap-hero-veil{background:
-    linear-gradient(90deg,
-      rgba(10,10,12,.88) 0%,
-      rgba(10,10,12,.72) 28%,
-      rgba(10,10,12,.42) 46%,
-      rgba(10,10,12,.18) 60%,
-      rgba(10,10,12,.04) 75%,
-      transparent 100%),
-    linear-gradient(180deg,
-      transparent 0%,
-      rgba(0,0,0,.06) 55%,
-      rgba(0,0,0,.36) 100%)}
+    linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,.18) 30%, rgba(0,0,0,.55) 75%, rgba(0,0,0,.78) 100%),
+    linear-gradient(115deg, rgba(28,20,12,.22) 0%, rgba(0,0,0,.06) 60%)}
 }
 
 .ap-hero-inner{position:relative;max-width:1200px;margin:0 auto;padding:0 32px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:72px}

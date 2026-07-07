@@ -1,14 +1,19 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/Auth/AuthProvider";
 
 export default function Page() {
-  const { loginWithApi } = useAuth();
+  const { loginWithApi, user, hydrated } = useAuth();
   const router = useRouter();
   const sp = useSearchParams();
   const next = sp.get("next") || "/me";     // 默认进 /me (spec §五)
+
+  // 已登录访问 /login → 自动跳 next (client-side · 避 middleware cookie loop)
+  useEffect(() => {
+    if (hydrated && user) router.replace(next);
+  }, [hydrated, user, next, router]);
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState<string | null>(null);

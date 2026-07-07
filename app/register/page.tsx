@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/Auth/AuthProvider";
 
 const INTEREST_OPTIONS = [
@@ -26,10 +26,15 @@ function computeAge(iso: string): number | null {
 }
 
 export default function Page() {
-  const { registerWithApi } = useAuth();
+  const { registerWithApi, user, hydrated } = useAuth();
   const router = useRouter();
   const sp = useSearchParams();
   const next = sp.get("next") || "/me";     // 默认进 /me (spec §六)
+
+  // 已登录访问 /register → 自动跳 next
+  useEffect(() => {
+    if (hydrated && user) router.replace(next);
+  }, [hydrated, user, next, router]);
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");

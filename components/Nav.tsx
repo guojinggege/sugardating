@@ -73,7 +73,7 @@ export default function Nav() {
           ) : (
             <>
               <Link href="/login" className="nav-btn nav-btn-out">{tA("login")}</Link>
-              <Link href="/register" className="nav-btn nav-btn-ink">{tA("register")}</Link>
+              <Link href="/apply" className="nav-btn nav-btn-ink">{tA("register")}</Link>
             </>
           )}
           <LanguageSwitcher />
@@ -124,7 +124,7 @@ export default function Nav() {
         ) : (
           <>
             <Link href="/login" onClick={() => setOpen(false)}>{tA("login")}</Link>
-            <Link href="/register" onClick={() => setOpen(false)}>{tA("register")}</Link>
+            <Link href="/apply" onClick={() => setOpen(false)}>{tA("register")}</Link>
           </>
         )}
         <div className="mm-lang"><LanguageSwitcher /></div>

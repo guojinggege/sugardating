@@ -2,12 +2,24 @@
 // 全局 Login Modal — 在 RootLayout 内统一挂载
 // 由任何 requireLogin() 调用触发 (通过 AuthProvider 的 modalOpen 状态)
 import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "./AuthProvider";
 
 export default function LoginModal() {
   const t = useTranslations("auth.modal");
-  const { modalOpen, closeLoginModal, login } = useAuth();
+  const { modalOpen, closeLoginModal } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname() || "/";
+
+  const gotoLogin = () => {
+    closeLoginModal();
+    router.push(`/login?next=${encodeURIComponent(pathname)}`);
+  };
+  const gotoRegister = () => {
+    closeLoginModal();
+    router.push(`/register?next=${encodeURIComponent(pathname)}`);
+  };
 
   useEffect(() => {
     if (!modalOpen) return;
@@ -48,10 +60,10 @@ export default function LoginModal() {
         </div>
 
         <div className="auth-modal-acts">
-          <button type="button" className="btn btn-ink auth-modal-primary" onClick={() => login({ name: "Demo" })}>
+          <button type="button" className="btn btn-ink auth-modal-primary" onClick={gotoLogin}>
             {t("login")}
           </button>
-          <button type="button" className="btn btn-out auth-modal-secondary" onClick={() => login({ name: "Demo" })}>
+          <button type="button" className="btn btn-out auth-modal-secondary" onClick={gotoRegister}>
             {t("register")}
           </button>
         </div>

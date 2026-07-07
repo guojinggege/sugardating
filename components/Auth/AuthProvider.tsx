@@ -1,55 +1,119 @@
 "use client";
-// Guest Mode auth 框架 — 当前为 demo (localStorage 假登录),
-// 接入真实 NextAuth/Clerk 时只需把 user 来源换成 session,API surface 不变
+// Auth Provider — 与服务端 session cookie 同步
+// 首次挂载时 fetch /api/auth/me 拿真实登录状态 · login/logout 通过 API 完成
+// 保留旧 API surface (user / login / logout / requireLogin / modal) 兼容现有调用点
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export interface AuthUser {
   id: string;
   name: string;
-  avatarChar: string;   // 用于头像首字母占位
+  avatarChar: string;
+  role?: "user" | "creator" | "admin";
+  email?: string;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  hydrated: boolean;    // SSR 首屏后是否已同步 localStorage,避免视觉 flash
-  login: (u?: Partial<AuthUser>) => void;
-  logout: () => void;
+  hydrated: boolean;
+  login: (u?: Partial<AuthUser>) => void;   // Legacy: 直接 set(用于测试);推荐用 loginWithApi
+  loginWithApi: (email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>;
+  registerWithApi: (name: string, email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>;
+  logout: () => Promise<void>;
+  refresh: () => Promise<void>;
   modalOpen: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
 }
 
 const Ctx = createContext<AuthContextValue | null>(null);
-const STORAGE_KEY = "sg.auth";
+
+function toClientUser(u: { id: string; name: string; email?: string; role?: string }): AuthUser {
+  return {
+    id: u.id,
+    name: u.name,
+    avatarChar: (u.name?.[0] || "?").toUpperCase(),
+    role: (u.role as AuthUser["role"]) || "user",
+    email: u.email,
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw));
-    } catch {}
-    setHydrated(true);
+      const res = await fetch("/api/auth/me", { credentials: "include", cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data?.user ? toClientUser(data.user) : null);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const loginWithApi = useCallback<AuthContextValue["loginWithApi"]>(async (email, password) => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.ok) {
+        setUser(toClientUser(data.user));
+        setModalOpen(false);
+        return { ok: true };
+      }
+      return { ok: false, message: data?.message || "登录失败" };
+    } catch {
+      return { ok: false, message: "网络错误,请稍后重试" };
+    }
+  }, []);
+
+  const registerWithApi = useCallback<AuthContextValue["registerWithApi"]>(async (name, email, password) => {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.ok) {
+        setUser(toClientUser(data.user));
+        return { ok: true };
+      }
+      return { ok: false, message: data?.message || "注册失败" };
+    } catch {
+      return { ok: false, message: "网络错误,请稍后重试" };
+    }
   }, []);
 
   const login = useCallback((u?: Partial<AuthUser>) => {
-    const nu: AuthUser = {
+    // Legacy sync setter (仅供 fallback/测试;真登录请用 loginWithApi)
+    setUser({
       id: u?.id ?? "demo-user",
       name: u?.name ?? "Demo",
       avatarChar: u?.avatarChar ?? (u?.name?.[0]?.toUpperCase() ?? "D"),
-    };
-    setUser(nu);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(nu)); } catch {}
+      role: u?.role ?? "user",
+    });
     setModalOpen(false);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try { await fetch("/api/auth/logout", { method: "POST", credentials: "include" }); } catch {}
     setUser(null);
-    try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }, []);
 
   const openLoginModal = useCallback(() => setModalOpen(true), []);
@@ -57,16 +121,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      user,
-      isAuthenticated: !!user,
-      hydrated,
-      login,
-      logout,
-      modalOpen,
-      openLoginModal,
-      closeLoginModal,
+      user, isAuthenticated: !!user, hydrated,
+      login, loginWithApi, registerWithApi, logout, refresh,
+      modalOpen, openLoginModal, closeLoginModal,
     }),
-    [user, hydrated, modalOpen, login, logout, openLoginModal, closeLoginModal]
+    [user, hydrated, modalOpen, login, loginWithApi, registerWithApi, logout, refresh, openLoginModal, closeLoginModal],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -78,14 +137,6 @@ export function useAuth(): AuthContextValue {
   return v;
 }
 
-/**
- * 受保护操作的统一 gate。用法:
- *   const requireLogin = useRequireLogin();
- *   const onClick = () => { if (!requireLogin()) return; doWrite(); };
- *
- * 未登录: 自动弹出全局 Login Modal,返回 false (调用方早退)
- * 已登录: 返回 true (调用方继续执行写操作)
- */
 export function useRequireLogin(): () => boolean {
   const { isAuthenticated, openLoginModal } = useAuth();
   return useCallback(() => {

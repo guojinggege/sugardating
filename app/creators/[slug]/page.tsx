@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getProfileBySlug } from "@/lib/mock-db";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { pick } from "@/lib/images";
@@ -94,9 +95,26 @@ export default async function Page({ params }: { params: { slug: string } }) {
   if (dbDetail) {
     creator = dbDetail.creator; baseBio = dbDetail.bio;
   } else {
+    // 优先 SugarGirl mock;若不匹配则查用户提交的 CreatorProfileDraft
     const fromSg = loadFromSugarGirls(params.slug);
-    if (!fromSg) notFound();
-    creator = fromSg.creator; baseBio = fromSg.bio; sgSource = fromSg.sg; comments = [];
+    if (fromSg) {
+      creator = fromSg.creator; baseBio = fromSg.bio; sgSource = fromSg.sg; comments = [];
+    } else {
+      // 第三层:mock-db 中的用户申请资料
+      const draft = getProfileBySlug(params.slug);
+      if (!draft) notFound();
+      creator = {
+        slug: draft.slug,
+        name: draft.displayName,
+        category: "SugarGirl",
+        specialty: draft.slogan || draft.bio || "",
+        region: [draft.country, draft.city].filter(Boolean).join(" · ") || "—",
+        price: "—", tier: "elite" as Tier,
+        subs: "—", followers: "0", works: "0",
+      };
+      baseBio = draft.bio || "";
+      comments = [];
+    }
   }
 
   const off = offsetFromSlug(creator.slug);

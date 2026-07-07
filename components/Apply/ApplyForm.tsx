@@ -149,7 +149,7 @@ export default function ApplyForm() {
     return (
       <div className="ap-form-card" style={{ textAlign: "center" }}>
         <h2 className="ap-form-h1">先登录 · 再提交申请</h2>
-        <p className="ap-form-sub">Sugardating 会审核每一位创作者的申请。登录或注册后,你可以填写主页信息 · 保存草稿 · 随时修改。</p>
+        <p className="ap-form-sub">Sugardating 会审核每一位 sugargirl 的申请。登录或注册后,你可以填写主页信息 · 保存草稿 · 随时修改。</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 12 }}>
           <Link href="/login?next=/apply" className="ap-btn-primary">登录</Link>
           <Link href="/register?next=/apply" className="ap-btn-ghost" style={{ background: "var(--page)", color: "var(--ink)", border: "1px solid var(--line)" }}>创建账号</Link>
@@ -164,7 +164,7 @@ export default function ApplyForm() {
       <div className="ap-form-card" style={{ textAlign: "center" }}>
         <div style={{ fontSize: 44, marginBottom: 12, color: "#16a34a" }}>✓</div>
         <h2 className="ap-form-h1">申请已提交</h2>
-        <p className="ap-form-sub">我们会尽快审核你的资料。审核通过后,你的创作者主页将进入 Sugargirl 频道展示。</p>
+        <p className="ap-form-sub">我们会尽快审核你的资料。审核通过后,你的 sugargirl 主页将进入 Sugargirl 频道展示。</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
           <Link href={success.url} className="ap-btn-primary">预览我的主页</Link>
           <Link href="/me" className="ap-btn-ghost" style={{ background: "var(--page)", color: "var(--ink)", border: "1px solid var(--line)" }}>返回个人中心</Link>
@@ -175,8 +175,8 @@ export default function ApplyForm() {
 
   return (
     <form onSubmit={onSubmit} className="ap-form-card">
-      <h2 className="ap-form-h1">申请加入 Sugardating Creator</h2>
-      <p className="ap-form-sub">填写基础信息后,我们会进行审核。通过后你将获得创作者主页和平台展示机会。</p>
+      <h2 className="ap-form-h1">申请加入 Sugardating sugargirl</h2>
+      <p className="ap-form-sub">填写基础信息后,我们会进行审核。通过后你将获得 sugargirl 主页和平台展示机会。</p>
 
       <fieldset className="ap-fs">
         <legend className="ap-fs-legend">1. 基础信息</legend>
@@ -210,7 +210,7 @@ export default function ApplyForm() {
           <F label="一句话介绍 / Slogan"><input maxLength={140} value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Life is short — dine well." /></F>
           <F label="个人简介 / Bio"><textarea rows={4} maxLength={800} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="介绍你的生活方式、性格、想被看见的一面…" /></F>
           <div className="ap-fs-row">
-            <F label="职业 / Occupation"><input maxLength={60} value={occupation} onChange={(e) => setOccupation(e.target.value)} placeholder="Travel Creator" /></F>
+            <F label="职业"><input maxLength={60} value={occupation} onChange={(e) => setOccupation(e.target.value)} placeholder="旅行博主" /></F>
             <F label="可展示城市 (逗号分隔)"><input value={availableCities} onChange={(e) => setAvailableCities(e.target.value)} placeholder="新加坡, 东京, 首尔" /></F>
           </div>
           <F label={`兴趣爱好 * (已选 ${interests.length} · 至少 3)`}>
@@ -265,9 +265,9 @@ export default function ApplyForm() {
       <fieldset className="ap-fs" style={{ marginBottom: 16 }}>
         <legend className="ap-fs-legend">5. 安全确认</legend>
         <div className="ap-fs-body">
-          <label className="ap-confirm"><input type="checkbox" checked={confirmAdult} onChange={(e) => setConfirmAdult(e.target.checked)} /><span>我确认已满 <b>18 岁</b>,自愿申请成为 Sugardating Creator。</span></label>
+          <label className="ap-confirm"><input type="checkbox" checked={confirmAdult} onChange={(e) => setConfirmAdult(e.target.checked)} /><span>我确认已满 <b>18 岁</b>,自愿申请成为 Sugardating sugargirl。</span></label>
           <label className="ap-confirm"><input type="checkbox" checked={confirmTruth} onChange={(e) => setConfirmTruth(e.target.checked)} /><span>我确认提交的所有资料真实,不存在冒用他人身份或虚假信息。</span></label>
-          <label className="ap-confirm"><input type="checkbox" checked={acceptRules} onChange={(e) => setAcceptRules(e.target.checked)} /><span>我已阅读并同意 <Link href="/community/guidelines" style={{ color: "var(--ink)", fontWeight: 600 }}>平台规则</Link>,理解部分资料会用于创作者主页展示;不发布未成年内容,遵守当地法律。</span></label>
+          <label className="ap-confirm"><input type="checkbox" checked={acceptRules} onChange={(e) => setAcceptRules(e.target.checked)} /><span>我已阅读并同意 <Link href="/community/guidelines" style={{ color: "var(--ink)", fontWeight: 600 }}>平台规则</Link>,理解部分资料会用于 sugargirl 主页展示;不发布未成年内容,遵守当地法律。</span></label>
         </div>
       </fieldset>
 

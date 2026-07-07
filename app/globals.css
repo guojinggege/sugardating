@@ -1707,7 +1707,8 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .ap-hero-media{position:absolute;inset:0}
 .ap-hero-media img{object-fit:cover;object-position:68% center}
 @media(min-width:900px){
-  .ap-hero-media{left:auto;right:0;top:0;bottom:0;width:66%;inset:auto}
+  /* NOT setting inset:auto here — it 是 shorthand,会覆盖前面的 top/right/bottom/left */
+  .ap-hero-media{left:auto;right:0;top:0;bottom:0;width:66%}
   .ap-hero-media img{object-position:60% center}
 }
 @media(max-width:899px){

@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return err("INVALID_CREDENTIALS", 401, "邮箱或密码错误");
   }
 
-  setSessionCookie(user.id);
+  setSessionCookie({ userId: user.id, name: user.name, email: user.email, role: user.role });
   return NextResponse.json({ ok: true, user: toPublicUser(user) });
 }
 

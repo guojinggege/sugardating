@@ -29,7 +29,7 @@ export default function Page() {
   const { registerWithApi } = useAuth();
   const router = useRouter();
   const sp = useSearchParams();
-  const next = sp.get("next") || "/";     // 默认回首页(登录态);"我的主页"点击才进 /me
+  const next = sp.get("next") || "/me";     // 默认进 /me (spec §六)
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");

@@ -59,6 +59,7 @@ export async function POST(req: Request) {
 
   try {
     const user = createUser({ name: name as string, email: email as string, password: password as string });
+    setSessionCookie({ userId: user.id, name: user.name, email: user.email, role: user.role });
     createUserProfile(user.id, user.name, {
       birthday:  normBirth,
       gender,
@@ -73,7 +74,6 @@ export async function POST(req: Request) {
         priceRange:       budgetRange && Number.isFinite(budgetRange[0]) && Number.isFinite(budgetRange[1]) ? budgetRange : undefined,
       },
     });
-    setSessionCookie(user.id);
     return NextResponse.json({ ok: true, user: toPublicUser(user) });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "";

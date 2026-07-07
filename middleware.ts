@@ -31,6 +31,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 已登录用户访问 /login /register /sign-in /sign-up → 自动跳 /me (spec §五 §六)
+  // 仅检 cookie 存在性 (middleware 边运行不能用 node:crypto 签验);/me 会做完整验证
+  const AUTH_PAGES = ["/login", "/register", "/sign-in", "/sign-up"];
+  const hasSession = !!request.cookies.get("sg_sess")?.value;
+  if (AUTH_PAGES.includes(pathname) && hasSession) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/me";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
   // Set x-pathname header for layout 判断
   const response = NextResponse.next();
   response.headers.set("x-pathname", pathname);

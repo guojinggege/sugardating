@@ -1,25 +1,23 @@
-// GET /api/auth/me — 当前用户 (未登录 401)
+// GET /api/auth/me — 从 session cookie 拿 user (不依赖 mock-db,Vercel serverless-safe)
 import { NextResponse } from "next/server";
-import { getSessionUserId } from "@/lib/session";
-import { findUserById, getApplicationByUser, toPublicUser } from "@/lib/mock-db";
+import { getSession } from "@/lib/session";
+import { getUserProfile, createUserProfile, getApplicationByUser } from "@/lib/mock-db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const uid = getSessionUserId();
-  if (!uid) return NextResponse.json({ ok: false, code: "NOT_AUTHENTICATED" }, { status: 401 });
+  const s = getSession();
+  if (!s) return NextResponse.json({ ok: false, code: "NOT_AUTHENTICATED" }, { status: 401 });
 
-  const user = findUserById(uid);
-  // Session 有效但 user 不存在 (in-memory 冷启动 reset) — 返 null 让前端登出
-  if (!user) return NextResponse.json({ ok: false, code: "USER_NOT_FOUND" }, { status: 401 });
+  // profile 若缺失 (跨 serverless 实例 in-memory 丢),即时从 session 补建骨架
+  const profile = getUserProfile(s.userId) || createUserProfile(s.userId, s.name);
+  const application = getApplicationByUser(s.userId);
 
-  const application = getApplicationByUser(uid);
   return NextResponse.json({
     ok: true,
-    user: toPublicUser(user),
-    application: application
-      ? { id: application.id, slug: application.slug, status: application.status }
-      : null,
+    user: { id: s.userId, name: s.name, email: s.email, role: s.role, createdAt: new Date(s.iat * 1000).toISOString() },
+    profile,
+    creatorApplication: application ? { slug: application.slug, status: application.status } : null,
   });
 }

@@ -8,7 +8,7 @@ export default function Page() {
   const { loginWithApi } = useAuth();
   const router = useRouter();
   const sp = useSearchParams();
-  const next = sp.get("next") || "/";     // 默认回首页(登录态);"我的主页"点击才进 /me
+  const next = sp.get("next") || "/me";     // 默认进 /me (spec §五)
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState<string | null>(null);

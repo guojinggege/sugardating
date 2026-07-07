@@ -1702,21 +1702,49 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .ap-hero{position:relative;height:760px;overflow:hidden;background:#0a0a0c;color:#fff}
 @media(max-width:1024px){.ap-hero{height:680px}}
 @media(max-width:640px){.ap-hero{height:640px}}
+
+/* Media — Desktop 定位到右 66% (左文右人构图);Mobile 全屏铺 */
 .ap-hero-media{position:absolute;inset:0}
-.ap-hero-media img{object-fit:cover;filter:brightness(.55)}
+.ap-hero-media img{object-fit:cover;object-position:68% center}
+@media(min-width:900px){
+  .ap-hero-media{left:auto;right:0;top:0;bottom:0;width:66%;inset:auto}
+  .ap-hero-media img{object-position:60% center}
+}
+@media(max-width:899px){
+  .ap-hero-media img{object-position:65% center}
+}
+
+/* Veil — Desktop 强左侧渐变 (保左侧文案可读);Mobile 底部深化 */
 .ap-hero-veil{position:absolute;inset:0;background:
-  radial-gradient(120% 90% at 25% 100%, rgba(0,0,0,.7) 0%, rgba(0,0,0,.35) 35%, transparent 65%),
-  linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.15) 30%, rgba(0,0,0,.55) 90%)}
+  radial-gradient(140% 90% at 30% 100%, rgba(0,0,0,.75) 0%, rgba(0,0,0,.35) 45%, transparent 70%),
+  linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.15) 30%, rgba(0,0,0,.65) 95%)}
+@media(min-width:900px){
+  .ap-hero-veil{background:
+    linear-gradient(90deg,
+      rgba(10,10,12,.88) 0%,
+      rgba(10,10,12,.72) 28%,
+      rgba(10,10,12,.42) 46%,
+      rgba(10,10,12,.18) 60%,
+      rgba(10,10,12,.04) 75%,
+      transparent 100%),
+    linear-gradient(180deg,
+      transparent 0%,
+      rgba(0,0,0,.06) 55%,
+      rgba(0,0,0,.36) 100%)}
+}
+
 .ap-hero-inner{position:relative;max-width:1200px;margin:0 auto;padding:0 32px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:72px}
 @media(max-width:640px){.ap-hero-inner{padding:0 20px 48px}}
-.ap-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.ap-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;max-width:560px}
 .ap-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:999px;backdrop-filter:blur(10px)}
 .ap-hero-eye{font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-style:italic;font-size:22px;color:#d4bf95;margin-bottom:14px;letter-spacing:.02em}
-.ap-hero-title{font-size:64px;font-weight:800;line-height:1.05;letter-spacing:-.028em;margin:0 0 20px;max-width:900px}
-@media(max-width:1024px){.ap-hero-title{font-size:52px}}
-@media(max-width:640px){.ap-hero-title{font-size:38px}}
-.ap-hero-sub{font-size:17px;line-height:1.65;color:rgba(255,255,255,.82);max-width:640px;margin:0 0 32px;font-weight:400}
-@media(max-width:640px){.ap-hero-sub{font-size:15px;margin-bottom:24px}}
+/* Title / Sub 收紧到左侧文案区 (spec: max 560~620 · 不穿到人物区) */
+.ap-hero-title{font-size:64px;font-weight:800;line-height:1.05;letter-spacing:-.028em;margin:0 0 20px;max-width:560px}
+@media(max-width:1024px){.ap-hero-title{font-size:52px;max-width:520px}}
+@media(max-width:640px){.ap-hero-title{font-size:38px;max-width:100%}}
+.ap-hero-sub{font-size:17px;line-height:1.65;color:rgba(255,255,255,.85);max-width:500px;margin:0 0 32px;font-weight:400}
+@media(max-width:640px){.ap-hero-sub{font-size:15px;margin-bottom:24px;max-width:100%}}
+.ap-hero-cta{max-width:560px}
 .ap-hero-cta{display:flex;gap:12px;flex-wrap:wrap}
 .ap-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 28px;background:linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%);color:#1a1409;font-weight:800;font-size:14.5px;letter-spacing:.02em;border-radius:999px;transition:transform .18s,box-shadow .2s;border:0;cursor:pointer;font-family:inherit}
 .ap-btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px -12px rgba(212,191,149,.55)}

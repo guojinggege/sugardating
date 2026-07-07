@@ -1,383 +1,279 @@
-"use client";
-// 创作者入驻 — 单页多字段表单 (未来可拆步骤 wizard)
-// 未登录 → 引导登录 · 登录后填写 → 提交 → 生成 CreatorProfileDraft + role 升级 creator
+// /apply — Sugardating Creator Recruitment Landing
+// 高端招募落地页 · 12 sections · 面向 18+ 成年女性创作者
+// 允许未登录访问 (读故事);表单本身要求登录
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/Auth/AuthProvider";
+import Img from "@/components/Img";
+import { pick } from "@/lib/images";
+import ApplyForm from "@/components/Apply/ApplyForm";
+import ApplyStickyCTA from "@/components/Apply/ApplyStickyCTA";
 
-const BODY_TYPES  = ["纤细", "标准", "运动型", "曲线"];
-const SKIN_TONES  = ["白皙", "自然", "小麦色", "浅古铜"];
-const HAIR_COLORS = ["黑色", "棕色", "深棕", "栗色", "亚麻色", "金色"];
-const EYE_COLORS  = ["黑色", "深棕色", "棕色", "琥珀色", "灰色"];
-const ZODIACS     = ["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
-const BLOOD_TYPES = ["A","B","AB","O"];
-const EDUCATIONS  = ["Bachelor","Master","PhD","College"];
-const SMOKING     = ["不吸烟","偶尔","社交场合"];
-const DRINKING    = ["不饮酒","偶尔","社交场合","享受红酒"];
-const DIETS       = ["无禁忌","弹性素食","地中海","低碳饮食","轻食主义"];
+export const dynamic = "force-dynamic";
 
-interface ServiceState { enabled: boolean; price: string; duration: string }
-const emptyService = (): ServiceState => ({ enabled: false, price: "", duration: "" });
+export const metadata: Metadata = {
+  title: "成为 Sugardating 创作者 · 高端 Creator 入驻",
+  description:
+    "加入 Sugardating,建立你的高端创作者主页,连接更成熟的用户群体。平台提供曝光 · 认证 · 安全体系 · 免费写真与视频拍摄支持。面向 18+ 成年创作者。",
+};
 
-export default function Page() {
-  const { user, hydrated, openLoginModal } = useAuth();
-  const router = useRouter();
+// ─── Icon helpers ──────────────────
+const Ic = {
+  users:    (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M22 21c0-2.5-2-4.5-5-4.5"/></svg>),
+  megaphone:(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h2l6 5V4l-6 5H5a2 2 0 0 0-2 2z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>),
+  shield:   (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg>),
+  star:     (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l2.5 6 6.5.6-5 4.5 1.5 6.5L12 17l-5.5 3.6L8 14.1l-5-4.5 6.5-.6z"/></svg>),
+  camera:   (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg>),
+  chat:     (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 12z"/></svg>),
+  check:    (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l4 4 10-10"/></svg>),
+};
 
-  const [form, setForm] = useState({
-    displayName: "",
-    username:    "",
-    slogan:      "",
-    bio:         "",
-    city:        "",
-    country:     "",
-    age:         "" as string,
-    height:      "" as string,
-    weight:      "" as string,
-    bodyType:    "",
-    skinTone:    "",
-    hairColor:   "",
-    eyeColor:    "",
-    occupation:  "",
-    education:   "",
-    zodiac:      "",
-    bloodType:   "",
-    languages:   "",   // comma-separated
-    interests:   "",
-    avatar:      "",
-    coverImage:  "",
-    coverVideo:  "",
-    smoking:     "",
-    drinking:    "",
-    diet:        "",
-    fitness:     "",
-    travel:      "",
-    datingPref:  "",
-    replyTime:   "",
-    timezone:    "GMT+8",
-  });
-  const [services, setServices] = useState<Record<string, ServiceState>>({
-    chat:         emptyService(),
-    videoChat:    emptyService(),
-    privatePhoto: emptyService(),
-    dating:       emptyService(),
-    travel:       emptyService(),
-    shooting:     emptyService(),
-  });
-  const [agree, setAgree] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<{ slug: string; url: string } | null>(null);
+const BENEFITS = [
+  { icon: Ic.users,     title: "高端用户人群",     desc: "平台面向成熟、真实、有消费能力的用户,减少无效社交和低质量打扰。" },
+  { icon: Ic.megaphone, title: "更多曝光机会",     desc: "创作者主页 · 动态推荐 · Sugargirl 列表 · 视频专区 · 社区推荐等多入口曝光。" },
+  { icon: Ic.shield,    title: "安全验证体系",     desc: "身份认证 · 手机认证 · 邮箱认证 · 真人识别 · 安全见面认证等机制,降低风险。" },
+  { icon: Ic.star,      title: "个人主页包装",     desc: "以更高级的方式展示头像 · 封面 · 简介 · 兴趣 · 服务和内容。" },
+  { icon: Ic.camera,    title: "免费写真与视频",   desc: "符合条件的创作者可获得平台支持的免费写真与短视频拍摄,用于主页展示。" },
+  { icon: Ic.chat,      title: "多种转化入口",     desc: "聊天 · 视频 · 私拍 · 预约 · 打赏 · 会员内容等多种互动方式。" },
+];
 
-  useEffect(() => {
-    if (hydrated && !user) openLoginModal();
-  }, [hydrated, user, openLoginModal]);
+const AUDIENCE = [
+  { k: "Verified Users",   v: "真实资料审核 · 减少小号骚扰" },
+  { k: "High Intent",      v: "有明确意愿的高质量访问" },
+  { k: "Mature Audience",  v: "更成熟、更尊重边界的用户群体" },
+  { k: "Privacy Respect",  v: "重视隐私 · 尊重创作者边界" },
+  { k: "Premium Members",  v: "会员用户优先推荐" },
+  { k: "Safer Comm",       v: "反诈骗 · 举报拉黑等安全机制" },
+  { k: "18+ Verified",     v: "年龄验证 · 严格准入" },
+  { k: "Curated Growth",   v: "持续增长的高意向用户群体" },
+];
 
-  // Load existing draft if any
-  useEffect(() => {
-    if (!user) return;
-    fetch("/api/creator/apply", { credentials: "include" })
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => {
-        if (data?.application) {
-          const a = data.application;
-          setForm((f) => ({
-            ...f,
-            displayName: a.displayName || "",
-            username:    a.username || "",
-            slogan:      a.slogan || "",
-            bio:         a.bio || "",
-            city:        a.city || "",
-            country:     a.country || "",
-            age:         a.age ? String(a.age) : "",
-            height:      a.height ? String(a.height) : "",
-            weight:      a.weight ? String(a.weight) : "",
-            bodyType:    a.bodyType || "",
-            skinTone:    a.skinTone || "",
-            hairColor:   a.hairColor || "",
-            eyeColor:    a.eyeColor || "",
-            occupation:  a.occupation || "",
-            education:   a.education || "",
-            zodiac:      a.zodiac || "",
-            bloodType:   a.bloodType || "",
-            languages:   (a.languages || []).join(", "),
-            interests:   (a.interests || []).join(", "),
-            avatar:      a.avatar || "",
-            coverImage:  a.coverImage || "",
-            coverVideo:  a.coverVideo || "",
-            smoking:     a.lifestyle?.smoking || "",
-            drinking:    a.lifestyle?.drinking || "",
-            diet:        a.lifestyle?.diet || "",
-            fitness:     a.lifestyle?.fitness || "",
-            travel:      a.lifestyle?.travel || "",
-            datingPref:  a.lifestyle?.datingPref || "",
-            replyTime:   a.availability?.replyTime || "",
-            timezone:    a.availability?.timezone || "GMT+8",
-          }));
-          if (a.services) setServices((s) => ({ ...s, ...normalizeServices(a.services) }));
-        }
-      })
-      .catch(() => {});
-  }, [user]);
+const SHOOT_STEPS = [
+  { n: "01", title: "形象定位", desc: "确认你的风格 · 城市 · 语言 · 兴趣与主页定位,由平台内容顾问对接。" },
+  { n: "02", title: "内容拍摄", desc: "提供写真与短视频拍摄支持,帮助主页更有质感和电影感。" },
+  { n: "03", title: "主页上线", desc: "生成完整 Creator Profile,进入 Sugargirl 频道推荐与曝光流量池。" },
+];
 
-  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
-  const setSvc = (k: string, patch: Partial<ServiceState>) =>
-    setServices((s) => ({ ...s, [k]: { ...s[k], ...patch } }));
+const SAFETY_TAGS = [
+  { label: "18+ Verified" },
+  { label: "Identity Review" },
+  { label: "Phone Verification" },
+  { label: "Email Verification" },
+  { label: "Face Check" },
+  { label: "Safe Meet" },
+  { label: "Privacy First" },
+  { label: "Report & Block" },
+];
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErr(null);
-    if (!agree) return setErr("请先同意平台规则");
+const PROCESS = [
+  { n: "01", t: "提交基础资料", d: "昵称 · 城市 · 年龄 · 语言 · 兴趣 · 个人介绍" },
+  { n: "02", t: "安全验证",     d: "确认 18+ · 联系方式 · 资料真实性" },
+  { n: "03", t: "主页内容",     d: "上传头像 · 封面 · 照片 · 视频,或申请平台拍摄支持" },
+  { n: "04", t: "审核通过上线", d: "主页进入 Sugargirl 频道公开展示" },
+  { n: "05", t: "曝光与互动",   d: "通过主页 · 动态 · 推荐 · 视频 · 社区获得关注" },
+];
 
-    setLoading(true);
-    const payload = {
-      displayName: form.displayName,
-      username:    form.username,
-      slogan:      form.slogan || undefined,
-      bio:         form.bio || undefined,
-      city:        form.city || undefined,
-      country:     form.country || undefined,
-      age:         form.age ? Number(form.age) : undefined,
-      height:      form.height ? Number(form.height) : undefined,
-      weight:      form.weight ? Number(form.weight) : undefined,
-      bodyType:    form.bodyType || undefined,
-      skinTone:    form.skinTone || undefined,
-      hairColor:   form.hairColor || undefined,
-      eyeColor:    form.eyeColor || undefined,
-      occupation:  form.occupation || undefined,
-      education:   form.education || undefined,
-      zodiac:      form.zodiac || undefined,
-      bloodType:   form.bloodType || undefined,
-      languages:   splitTags(form.languages),
-      interests:   splitTags(form.interests),
-      avatar:      form.avatar || undefined,
-      coverImage:  form.coverImage || undefined,
-      coverVideo:  form.coverVideo || undefined,
-      lifestyle: {
-        smoking: form.smoking, drinking: form.drinking, diet: form.diet,
-        fitness: form.fitness, travel: form.travel, datingPref: form.datingPref,
-      },
-      services,
-      availability: { replyTime: form.replyTime, timezone: form.timezone },
-    };
+const FAQS = [
+  { q: "入驻需要费用吗?", a: "基础入驻不收取费用。符合条件的创作者还可以申请平台写真与视频拍摄支持。" },
+  { q: "我必须公开真实姓名吗?", a: "不需要。公开主页展示的是你选择展示的昵称和资料,敏感信息不会公开。" },
+  { q: "平台会审核用户吗?", a: "我们会逐步完善用户验证、举报和安全机制,努力减少低质量和不真实互动。" },
+  { q: "拍摄支持是免费的吗?", a: "符合条件的创作者可申请平台支持的写真或短视频拍摄,具体安排以审核后沟通为准。" },
+  { q: "我可以控制展示哪些信息吗?", a: "可以。你的公开主页只展示你同意展示的内容。敏感资料在后台自持,不会公开。" },
+  { q: "入驻后一定会有收益吗?", a: "平台提供曝光 · 主页展示和互动工具,实际结果取决于个人资料完整度、内容质量、用户互动和平台审核机制。平台不承诺固定收益。" },
+  { q: "我可以之后退出吗?", a: "可以随时申请关闭或隐藏主页,平台会提供对应的账号和资料处理方式。" },
+];
 
-    try {
-      const res = await fetch("/api/creator/apply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        setErr(data?.message || "提交失败");
-        return;
-      }
-      setSuccess({ slug: data.application.slug, url: data.profilePreview.url });
-      router.refresh();
-    } catch {
-      setErr("网络错误,请稍后重试");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!hydrated) return null;
-
-  if (!user) {
-    return (
-      <div className="container" style={{ paddingTop: 40, paddingBottom: 60 }}>
-        <div className="authwrap" style={{ textAlign: "center" }}>
-          <h1>创作者入驻</h1>
-          <p className="s">请先登录或注册,再申请成为创作者。</p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 16 }}>
-            <Link className="btn btn-ink" href="/login?next=/apply">登录</Link>
-            <Link className="btn" href="/register?next=/apply">注册</Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="container" style={{ paddingTop: 40, paddingBottom: 60 }}>
-        <div className="authwrap" style={{ textAlign: "center", maxWidth: 520 }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>✓</div>
-          <h1>申请已提交</h1>
-          <p className="s">你的创作者资料已进入 <b>pending 待审核</b>。审核通过后主页正式对外可见。</p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 20 }}>
-            <Link className="btn btn-ink" href={success.url}>预览我的主页</Link>
-            <Link className="btn" href="/apply" onClick={() => setSuccess(null)}>继续编辑</Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+export default function ApplyPage() {
+  const heroBg = pick(0, 5) ?? "/images/placeholder.png";
+  const narrativeImg = pick(2, 0) ?? "/images/placeholder.png";
+  const shootImgs = [
+    pick(0, 12) ?? "/images/placeholder.png",
+    pick(1, 8)  ?? "/images/placeholder.png",
+    pick(2, 4)  ?? "/images/placeholder.png",
+  ];
+  const previewCover = pick(0, 3) ?? "/images/placeholder.png";
 
   return (
-    <div className="container" style={{ paddingTop: 32, paddingBottom: 60 }}>
-      <header style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".14em", color: "var(--accent)", textTransform: "uppercase" }}>Sugardating Creator Apply</div>
-        <h1 style={{ margin: "6px 0 0", fontSize: 30, fontWeight: 800, letterSpacing: "-.02em" }}>创作者入驻</h1>
-        <p className="s" style={{ marginTop: 8 }}>填写下面信息生成你的公开创作者主页。审核通过后正式对外展示。</p>
-      </header>
+    <>
+      {/* ═══ 1. Hero ═══ */}
+      <section className="ap-hero">
+        <div className="ap-hero-media"><Img src={heroBg} alt="" sizes="100vw" priority /></div>
+        <div className="ap-hero-veil" />
+        <div className="ap-hero-inner">
+          <div className="ap-hero-badges">
+            <span className="ap-hero-badge">18+ Creator Application</span>
+            <span className="ap-hero-badge">Verified High-end Community</span>
+            <span className="ap-hero-badge">Privacy First</span>
+          </div>
+          <div className="ap-hero-eye">Sugardating Creator Invitation</div>
+          <h1 className="ap-hero-title">让你的美,<br />不只是被浏览,<br />而是被认真选择</h1>
+          <p className="ap-hero-sub">
+            加入 Sugardating,建立你的高端创作者主页,连接更成熟、更真实、更有消费能力的用户群体。
+            平台提供曝光、认证、安全体系,以及免费的写真与视频内容支持。
+          </p>
+          <div className="ap-hero-cta">
+            <a href="#apply-form" className="ap-btn-primary">申请入驻</a>
+            <a href="#benefits" className="ap-btn-ghost">了解平台优势</a>
+          </div>
+        </div>
+      </section>
 
-      <form onSubmit={onSubmit} className="ap-form">
-        <Section title="1. 账号与身份">
-          <Row>
-            <Field label="主页昵称 *"><input required maxLength={60} value={form.displayName} onChange={(e) => set("displayName", e.target.value)} placeholder="Aria" /></Field>
-            <Field label="Username / URL *" hint="仅字母/数字/短横线,3-32 位。将作为主页地址 /creators/{username}">
-              <input required maxLength={32} value={form.username} onChange={(e) => set("username", e.target.value)} placeholder="aria" />
-            </Field>
-          </Row>
-          <Row>
-            <Field label="国家"><input maxLength={60} value={form.country} onChange={(e) => set("country", e.target.value)} placeholder="新加坡" /></Field>
-            <Field label="常驻城市"><input maxLength={60} value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="新加坡" /></Field>
-          </Row>
-          <Row>
-            <Field label="语言 (逗号分隔)"><input value={form.languages} onChange={(e) => set("languages", e.target.value)} placeholder="中文, English, 日本語" /></Field>
-            <Field label="职业"><input maxLength={60} value={form.occupation} onChange={(e) => set("occupation", e.target.value)} placeholder="Travel Creator" /></Field>
-          </Row>
-        </Section>
+      {/* ═══ 2. Narrative ═══ */}
+      <section className="ap-sec">
+        <div className="ap-narrative">
+          <div>
+            <div className="ap-eye">Your Story</div>
+            <h2 className="ap-h2">你不缺被看见,<br />缺的是被更好地看见</h2>
+            <p className="ap-lead">
+              很多平台只让人停留在照片表面。Sugardating 更关注完整的你 —— 气质 · 生活方式 · 语言 · 城市 ·
+              兴趣 · 服务和你自己定义的边界。我们帮助你把个人形象做成一个真正有吸引力的 Creator Profile,
+              而不是一张普通资料卡。
+            </p>
+          </div>
+          <div className="ap-narrative-img"><Img src={narrativeImg} alt="" sizes="(max-width:900px) 100vw, 560px" /></div>
+        </div>
+      </section>
 
-        <Section title="2. 主页公开信息">
-          <Field label="Slogan (一句话签名)"><input maxLength={140} value={form.slogan} onChange={(e) => set("slogan", e.target.value)} placeholder="Life is short — dine well." /></Field>
-          <Field label="Bio (个人简介)">
-            <textarea rows={4} maxLength={800} value={form.bio} onChange={(e) => set("bio", e.target.value)} placeholder="介绍你的生活方式、性格、兴趣..." />
-          </Field>
-          <Field label="兴趣标签 (逗号分隔)"><input value={form.interests} onChange={(e) => set("interests", e.target.value)} placeholder="旅行, 摄影, 咖啡, Luxury" /></Field>
-        </Section>
-
-        <Section title="3. 外貌与基础资料">
-          <Row>
-            <Field label="年龄 (18+)"><input type="number" min={18} max={99} value={form.age} onChange={(e) => set("age", e.target.value)} placeholder="26" /></Field>
-            <Field label="身高 (cm)"><input type="number" min={120} max={220} value={form.height} onChange={(e) => set("height", e.target.value)} placeholder="168" /></Field>
-            <Field label="体重 (kg)"><input type="number" min={30} max={200} value={form.weight} onChange={(e) => set("weight", e.target.value)} placeholder="52" /></Field>
-          </Row>
-          <Row>
-            <Field label="体型"><Select value={form.bodyType} onChange={(v) => set("bodyType", v)} options={BODY_TYPES} /></Field>
-            <Field label="肤色"><Select value={form.skinTone} onChange={(v) => set("skinTone", v)} options={SKIN_TONES} /></Field>
-            <Field label="发色"><Select value={form.hairColor} onChange={(v) => set("hairColor", v)} options={HAIR_COLORS} /></Field>
-            <Field label="眼睛"><Select value={form.eyeColor} onChange={(v) => set("eyeColor", v)} options={EYE_COLORS} /></Field>
-          </Row>
-          <Row>
-            <Field label="星座"><Select value={form.zodiac} onChange={(v) => set("zodiac", v)} options={ZODIACS} /></Field>
-            <Field label="血型"><Select value={form.bloodType} onChange={(v) => set("bloodType", v)} options={BLOOD_TYPES} /></Field>
-            <Field label="学历"><Select value={form.education} onChange={(v) => set("education", v)} options={EDUCATIONS} /></Field>
-          </Row>
-        </Section>
-
-        <Section title="4. 生活方式">
-          <Row>
-            <Field label="吸烟"><Select value={form.smoking} onChange={(v) => set("smoking", v)} options={SMOKING} /></Field>
-            <Field label="饮酒"><Select value={form.drinking} onChange={(v) => set("drinking", v)} options={DRINKING} /></Field>
-            <Field label="饮食"><Select value={form.diet} onChange={(v) => set("diet", v)} options={DIETS} /></Field>
-          </Row>
-          <Row>
-            <Field label="运动习惯"><input value={form.fitness} onChange={(e) => set("fitness", e.target.value)} placeholder="每周 3-5 次" /></Field>
-            <Field label="旅行频率"><input value={form.travel} onChange={(e) => set("travel", e.target.value)} placeholder="经常旅行" /></Field>
-            <Field label="约会偏好"><input value={form.datingPref} onChange={(e) => set("datingPref", e.target.value)} placeholder="咖啡 / 晚餐" /></Field>
-          </Row>
-          <Row>
-            <Field label="平均回复"><input value={form.replyTime} onChange={(e) => set("replyTime", e.target.value)} placeholder="7 分钟" /></Field>
-            <Field label="时区"><input value={form.timezone} onChange={(e) => set("timezone", e.target.value)} placeholder="GMT+8" /></Field>
-          </Row>
-        </Section>
-
-        <Section title="5. 服务入口">
-          <p className="s" style={{ marginTop: -8, marginBottom: 12 }}>启用你愿意提供的服务并填价格。所有交互均遵守平台规则、双方自愿、18+。</p>
-          {[
-            { k: "chat",         label: "💬 聊天",        placeholderP: "S$ 8",    placeholderD: "即时"    },
-            { k: "videoChat",    label: "📹 视频聊天",    placeholderP: "S$ 48",   placeholderD: "30 分钟" },
-            { k: "privatePhoto", label: "📸 私拍内容",    placeholderP: "S$ 680",  placeholderD: "3 小时"  },
-            { k: "dating",       label: "☕ 约会",        placeholderP: "S$ 280",  placeholderD: "2 小时"  },
-            { k: "travel",       label: "✈️ 旅游",       placeholderP: "S$ 1,200", placeholderD: "1 天"    },
-            { k: "shooting",     label: "🎬 拍摄",        placeholderP: "S$ 680",  placeholderD: "3 小时"  },
-          ].map((s) => (
-            <div key={s.k} className="ap-svc-row">
-              <label className="ap-svc-toggle">
-                <input type="checkbox" checked={services[s.k].enabled} onChange={(e) => setSvc(s.k, { enabled: e.target.checked })} />
-                <span>{s.label}</span>
-              </label>
-              <input placeholder={s.placeholderP} disabled={!services[s.k].enabled} value={services[s.k].price} onChange={(e) => setSvc(s.k, { price: e.target.value })} />
-              <input placeholder={s.placeholderD} disabled={!services[s.k].enabled} value={services[s.k].duration} onChange={(e) => setSvc(s.k, { duration: e.target.value })} />
+      {/* ═══ 3. Benefits ═══ */}
+      <section id="benefits" className="ap-sec" style={{ paddingTop: 48 }}>
+        <div className="ap-eye">Why Sugardating</div>
+        <h2 className="ap-h2">为什么选择我们</h2>
+        <p className="ap-lead">六个核心价值,让你的每一分投入都被认真回应。</p>
+        <div className="ap-benefits">
+          {BENEFITS.map((b) => (
+            <div key={b.title} className="ap-bcard">
+              <div className="ap-bcard-ic">{b.icon}</div>
+              <h3>{b.title}</h3>
+              <p>{b.desc}</p>
             </div>
           ))}
-        </Section>
-
-        <Section title="6. 媒体资料">
-          <p className="s" style={{ marginTop: -8, marginBottom: 12 }}>当前阶段填写公开图片 / 视频 URL 即可。未来将支持直接上传。</p>
-          <Field label="头像 URL"><input value={form.avatar} onChange={(e) => set("avatar", e.target.value)} placeholder="https://.../avatar.jpg" /></Field>
-          <Field label="Cover 图 URL"><input value={form.coverImage} onChange={(e) => set("coverImage", e.target.value)} placeholder="https://.../cover.jpg" /></Field>
-          <Field label="Cover 视频 URL (可选)"><input value={form.coverVideo} onChange={(e) => set("coverVideo", e.target.value)} placeholder="https://.../cover.mp4" /></Field>
-        </Section>
-
-        <Section title="7. 提交确认">
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: "var(--ink2)", lineHeight: 1.6 }}>
-            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 3 }} />
-            <span>
-              我确认以上信息真实。我已阅读并同意 <Link href="/community/guidelines" style={{ color: "var(--ink)", fontWeight: 600 }}>平台规则</Link>,承诺遵守当地法律 · 不发布未成年内容 · 不进行诈骗/胁迫/骚扰或非自愿行为 · 所有互动 18+ 双方自愿。
-            </span>
-          </label>
-        </Section>
-
-        {err && <div style={{ color: "var(--live)", fontWeight: 600, marginBottom: 10 }}>{err}</div>}
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <button type="submit" className="btn btn-ink" disabled={loading}>
-            {loading ? "提交中…" : "提交申请"}
-          </button>
-          <span className="s">提交后状态为 pending 待审核。</span>
         </div>
-      </form>
+      </section>
 
-      <style jsx>{`
-        .ap-form { display: flex; flex-direction: column; gap: 24px; max-width: 880px; }
-        .ap-svc-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: center; margin-bottom: 10px; }
-        .ap-svc-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--ink); user-select: none; }
-        @media (max-width: 640px) { .ap-svc-row { grid-template-columns: 1fr; } }
-      `}</style>
-    </div>
-  );
-}
+      {/* ═══ 4. Audience (dark) ═══ */}
+      <section className="ap-dark">
+        <div className="ap-sec">
+          <div className="ap-eye" style={{ color: "#d4bf95" }}>Our Community</div>
+          <h2 className="ap-h2">我们不追求所有人,只连接更匹配的人</h2>
+          <p className="ap-lead">Sugardating 的用户不是随机流量 · 而是更明确 · 更成熟 · 更尊重边界的人群。</p>
+          <div className="ap-audience-row">
+            {AUDIENCE.map((a) => (
+              <div key={a.k} className="ap-a-item">
+                <div className="k">{a.k}</div>
+                <div className="v">{a.v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <fieldset style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 16, padding: 20, margin: 0 }}>
-      <legend style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".14em", color: "var(--muted)", textTransform: "uppercase", padding: "0 8px" }}>{title}</legend>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>{children}</div>
-    </fieldset>
-  );
-}
-function Row({ children }: { children: React.ReactNode }) {
-  return <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>{children}</div>;
-}
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--ink2)", marginBottom: 4 }}>{label}</label>
-      {children}
-      {hint && <div className="s" style={{ marginTop: 4, fontSize: 11 }}>{hint}</div>}
-    </div>
-  );
-}
-function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: readonly string[] }) {
-  return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">选择…</option>
-      {options.map((o) => <option key={o} value={o}>{o}</option>)}
-    </select>
-  );
-}
+      {/* ═══ 5. Shoot Support ═══ */}
+      <section id="shoot-support" className="ap-sec">
+        <div className="ap-eye">Content Support</div>
+        <h2 className="ap-h2">我们不只给你一个页面,<br />也帮你打造被选择的第一印象</h2>
+        <p className="ap-lead">符合条件的入驻创作者,可申请平台支持的免费写真与短视频拍摄。所有素材用于主页展示与内容包装。</p>
+        <div className="ap-shoot-grid">
+          {SHOOT_STEPS.map((s, i) => (
+            <article key={s.n} className="ap-shoot-card">
+              <div className="ap-shoot-cover"><Img src={shootImgs[i]} alt="" sizes="(max-width:900px) 100vw, 380px" /></div>
+              <div className="ap-shoot-body">
+                <div className="ap-shoot-n">STEP {s.n}</div>
+                <h3>{s.title}</h3>
+                <p>{s.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
-function splitTags(s: string): string[] {
-  return s.split(/[,，]/g).map((x) => x.trim()).filter(Boolean).slice(0, 20);
-}
-function normalizeServices(s: Record<string, unknown>): Record<string, ServiceState> {
-  const out: Record<string, ServiceState> = {};
-  for (const [k, v] of Object.entries(s)) {
-    const obj = (v ?? {}) as { enabled?: boolean; price?: string; duration?: string };
-    out[k] = { enabled: !!obj.enabled, price: obj.price ?? "", duration: obj.duration ?? "" };
-  }
-  return out;
+      {/* ═══ 6. Safety (dark) ═══ */}
+      <section className="ap-dark">
+        <div className="ap-sec">
+          <div className="ap-eye" style={{ color: "#d4bf95" }}>Safety & Privacy</div>
+          <h2 className="ap-h2">安全,是我们认真做这件事的底线</h2>
+          <p className="ap-lead">
+            平台面向 18 岁以上成年人 · 严格审核创作者与用户资料 · 保护隐私 · 尊重边界 · 反诈骗 · 举报拉黑机制。
+          </p>
+          <div className="ap-safety-badges">
+            {SAFETY_TAGS.map((t) => (
+              <div key={t.label} className="ap-sbadge">
+                {Ic.check}
+                <b>{t.label}</b>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 7. Profile Preview ═══ */}
+      <section className="ap-sec">
+        <div className="ap-eye">Your Profile</div>
+        <h2 className="ap-h2">你将拥有的,不只是资料页,<br />而是一个高级个人主页</h2>
+        <p className="ap-lead">动态视频封面 · 头像与认证 · 个人简介 · 基础资料 · 生活方式 · 服务入口 · 作品相册 · 视频展示 · 礼物 · 评价 · 推荐曝光 —— 一体化呈现。</p>
+        <div className="ap-preview">
+          <div className="ap-preview-frame">
+            <div className="ap-preview-hero"><Img src={previewCover} alt="" sizes="(max-width:640px) 100vw, 640px" /></div>
+            <div className="ap-preview-row">
+              <div className="ap-preview-ava">S</div>
+              <div>
+                <div className="ap-preview-name">Sugargirl · Verified</div>
+                <div className="ap-preview-sub">新加坡 · 26 · 中文 / English · Travel Creator</div>
+              </div>
+            </div>
+            <div className="ap-preview-chips">
+              <span className="ap-preview-chip">旅行</span><span className="ap-preview-chip">摄影</span>
+              <span className="ap-preview-chip">咖啡</span><span className="ap-preview-chip">美食</span>
+              <span className="ap-preview-chip">Luxury</span>
+            </div>
+            <div className="ap-preview-cta-row">
+              <div className="ap-preview-cta gold">🎁 打赏</div>
+              <div className="ap-preview-cta dark">💬 聊天</div>
+              <div className="ap-preview-cta ghost">📅 约她</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 8. Process Timeline ═══ */}
+      <section className="ap-sec">
+        <div className="ap-eye">How it Works</div>
+        <h2 className="ap-h2">入驻很简单,但我们会认真审核</h2>
+        <div className="ap-process">
+          {PROCESS.map((p) => (
+            <div key={p.n} className="ap-step">
+              <div className="ap-step-n">{p.n}</div>
+              <h3>{p.t}</h3>
+              <p>{p.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ 9. Apply Form ═══ */}
+      <section id="apply-form" className="ap-form-wrap">
+        <div className="ap-form-inner">
+          <ApplyForm />
+        </div>
+      </section>
+
+      {/* ═══ 10. FAQ ═══ */}
+      <section className="ap-sec">
+        <div className="ap-eye">FAQ</div>
+        <h2 className="ap-h2">你可能想知道</h2>
+        <div className="ap-faq-list">
+          {FAQS.map((f, i) => (
+            <details key={f.q} className="ap-faq-item" name="apply-faq" open={i === 0}>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+        <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 32, textAlign: "center" }}>
+          Sugardating 面向 18 岁以上成年人 · 遵守当地法律 · 严格审核 · 隐私优先 · 不撮合面对面交易 · 平台不做任何收益承诺。
+        </p>
+      </section>
+
+      {/* ═══ 11. Sticky CTA ═══ */}
+      <ApplyStickyCTA />
+    </>
+  );
 }

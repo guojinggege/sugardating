@@ -29,11 +29,28 @@ export async function POST(req: Request) {
   try { body = await req.json(); } catch { return err("INVALID_JSON", 400); }
   const b = (body ?? {}) as Record<string, unknown>;
 
-  // ── Required ─────
+  // ── Required + 18+ / 平台规则 gate ─────
   if (!isNonEmptyString(b.displayName, 60))     return err("INVALID_NAME", 400,     "请填写主页昵称");
   if (!isNonEmptyString(b.username, 32))        return err("INVALID_USERNAME", 400, "请填写 username");
   const slug = normalizeSlug(String(b.username));
   if (!isValidSlug(slug))                       return err("INVALID_SLUG", 400,     "username 仅允许字母/数字/短横线,3-32 位");
+
+  // 18+ age gate (from birthDate) — 若前端漏,后端兜底
+  if (typeof b.birthDate === "string" && b.birthDate.trim()) {
+    const d = new Date(b.birthDate);
+    if (isNaN(d.getTime())) return err("INVALID_BIRTHDATE", 400, "出生日期格式错误");
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    if (age < 18) return err("UNDERAGE", 403, "平台仅面向 18 岁以上成年人");
+    if (age > 120) return err("INVALID_BIRTHDATE", 400, "出生日期无效");
+  }
+
+  // 三条平台规则确认必须为 true
+  if (b.confirmAdult !== true)  return err("MUST_CONFIRM_ADULT",  400, "请勾选:我已满 18 岁");
+  if (b.confirmTruth !== true)  return err("MUST_CONFIRM_TRUTH",  400, "请勾选:资料真实");
+  if (b.acceptRules !== true)   return err("MUST_ACCEPT_RULES",   400, "请勾选:同意平台规则");
 
   // 判 slug 冲突时先看是不是本人已有的
   const existing = getApplicationByUser(uid);

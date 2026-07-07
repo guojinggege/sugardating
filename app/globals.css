@@ -1703,15 +1703,17 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 @media(max-width:1024px){.ap-hero{height:680px}}
 @media(max-width:640px){.ap-hero{height:640px}}
 
-/* Media — full-bleed 沉浸背景 (整站海报感,非硬切) · 人物偏右 object-position */
+/* Media — full-bleed 沉浸背景 · 人物右移到黄金比例位
+   object-position X% 低 → 图像内容右移 (显示更多源图左侧部分)
+   35% desktop 让人物落在容器 62-70% 视觉黄金位 */
 .ap-hero-media{position:absolute;inset:0}
 .ap-hero-media img{
   object-fit:cover;
-  object-position:68% center;              /* 人物在右侧黄金位 */
-  filter:brightness(.72) contrast(1.06) saturate(.96);   /* editorial 暗化滤镜 */
+  object-position:35% center;              /* 人物右移到黄金位 (spec §"推荐尝试 35~38%") */
+  filter:brightness(.72) contrast(1.06) saturate(.96);
 }
 @media(max-width:899px){
-  .ap-hero-media img{object-position:65% center;filter:brightness(.68) contrast(1.06)}
+  .ap-hero-media img{object-position:50% center;filter:brightness(.68) contrast(1.06)}
 }
 
 /* Veil — 多层遮罩:暖色 + 左强渐变 + 底部 fade · 整体沉浸不硬切

@@ -7,6 +7,7 @@ import Link from "next/link";
 import Img from "@/components/Img";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
+import { useChat } from "@/components/chat/ChatProvider";
 import type { Creator } from "@/lib/types";
 import type { AvailabilityData, GiftRank } from "@/lib/creatorProfileMock";
 import CreatorSidebarMediaCard from "./CreatorSidebarMediaCard";
@@ -34,6 +35,18 @@ export default function RightSidebar({
   const t   = useTranslations("creatorProfile.sidebar");
   const tG  = useTranslations("creatorProfile.gifts.items");
   const requireLogin = useRequireLogin();
+  const { openChatWith } = useChat();
+
+  function openChat() {
+    if (!requireLogin()) return;
+    openChatWith({
+      slug: creator.slug,
+      name: creator.name,
+      avatar: imageSrc,
+      languages: ["zh", "en"],
+      online: availability?.isOnline,
+    });
+  }
 
   const giftsOfInterest = ["rose", "coffee", "dinner", "diamond"];
   const giftStats = giftBoard.filter((g) => giftsOfInterest.includes(g.key));
@@ -73,7 +86,7 @@ export default function RightSidebar({
             </button>
             <button
               type="button"
-              onClick={() => requireLogin()}
+              onClick={openChat}
               className="h-11 rounded-full bg-[var(--ink)] text-white text-[13px] font-semibold hover:bg-black transition inline-flex items-center justify-center gap-1.5"
             >
               <span aria-hidden>💬</span>

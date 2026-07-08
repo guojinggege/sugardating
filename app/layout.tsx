@@ -8,6 +8,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { AuthProvider } from "@/components/Auth/AuthProvider";
 import LoginModal from "@/components/Auth/LoginModal";
+import { ChatProvider } from "@/components/chat/ChatProvider";
+import ChatDrawer from "@/components/chat/ChatDrawer";
 
 // 子页面调 DB(如 listCreators, listSugarGirls 等),全应用走 SSR
 export const dynamic = "force-dynamic";
@@ -53,11 +55,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            {!isMobileRoute && <Nav />}
-            <main>{children}</main>
-            {!isMobileRoute && <Footer />}
-            <LoginModal />
-            {!isMobileRoute && <BottomNav />}
+            <ChatProvider>
+              {!isMobileRoute && <Nav />}
+              <main>{children}</main>
+              {!isMobileRoute && <Footer />}
+              <LoginModal />
+              <ChatDrawer />
+              {!isMobileRoute && <BottomNav />}
+            </ChatProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

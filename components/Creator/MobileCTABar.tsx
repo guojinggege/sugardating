@@ -4,14 +4,23 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
+import { useChat } from "@/components/chat/ChatProvider";
 
-export default function MobileCTABar() {
+interface Props {
+  creatorSlug: string;
+  creatorName: string;
+  creatorAvatar?: string;
+}
+
+export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar }: Props) {
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
+  const { openChatWith } = useChat();
   const [following, setFollowing] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
+  const openChat = guard(() => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] }));
 
   return (
     <div className="cr-mcta">
@@ -40,7 +49,7 @@ export default function MobileCTABar() {
       <button type="button" onClick={guard(() => {})} className="cr-mcta-secondary">
         {t("bookDate")}
       </button>
-      <button type="button" onClick={guard(() => {})} className="cr-mcta-primary">
+      <button type="button" onClick={openChat} className="cr-mcta-primary">
         {t("chat")}
       </button>
     </div>

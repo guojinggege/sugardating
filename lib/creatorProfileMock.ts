@@ -3,6 +3,7 @@
 // 真实素材接入后,把这里换成 DB query 即可
 
 import { pick } from "@/lib/images";
+import { deriveLockRule } from "@/lib/media-access";
 
 export interface FeedPost {
   id: string;
@@ -17,17 +18,23 @@ export interface FeedPost {
 export interface VideoItem {
   id: string;
   title: string;
-  cover: string;
+  cover: string;           // 已解锁=真实封面;锁定=另一张 preview 图,不含 videoUrl
   duration: string;        // mm:ss
   views: number;
   daysAgo: number;
+  isLocked?: boolean;
+  price?: number;
+  unlockType?: "coins";
 }
 
 export interface GalleryItem {
   id: string;
-  src: string;
+  src: string;             // 未锁定=公开真实 src;锁定=另一张 preview 图 (不是原图 blur)
   alt: string;
   category: "旅行" | "时尚" | "拍摄" | "生活";
+  isLocked?: boolean;
+  price?: number;
+  unlockType?: "coins";
 }
 
 export interface ServiceItem {
@@ -73,6 +80,20 @@ const SERVICE_PRICE = {
   "video-chat": { price: "S$ 48 起",   duration: "30 分钟" },
 };
 
+// Resolve a mediaId back to its real src — 服务端 only,不通过 client 传播
+// mediaId 格式:${slug}-g${N} · ${slug}-v${N} · ${slug}-p${N} (post 只锁整贴,单张不锁)
+export function resolveCreatorMediaSrc(slug: string, mediaId: string): string | null {
+  const off = hashSlug(slug);
+  const m = /^(.+?)-([gvp])(\d+)$/.exec(mediaId);
+  if (!m || m[1] !== slug) return null;
+  const kind = m[2];
+  const idx = parseInt(m[3], 10) - 1;
+  if (isNaN(idx) || idx < 0) return null;
+  if (kind === "g") return pick(idx, off + 3) ?? null;
+  if (kind === "v") return pick(idx + 5, off + 7) ?? null;
+  return null;
+}
+
 export function makeFeed(slug: string): FeedPost[] {
   const off = hashSlug(slug);
   const times = ["2 小时前", "5 小时前", "昨天", "2 天前", "3 天前", "5 天前", "1 周前", "2 周前"];
@@ -96,30 +117,43 @@ export function makeFeed(slug: string): FeedPost[] {
 
 export function makeVideos(slug: string): VideoItem[] {
   const off = hashSlug(slug);
-  return VIDEO_TITLES.map((title, i) => ({
-    id: `${slug}-v${i + 1}`,
-    title,
-    cover: pick(i + 5, off + 7) ?? "",
-    duration:
-      i === 0 ? "01:42" :
-      i === 1 ? "03:18" :
-      i === 2 ? "00:58" :
-      i === 3 ? "02:24" :
-      i === 4 ? "05:36" : "01:12",
-    views: 1200 + ((off + i * 71) % 8400),
-    daysAgo: (i + 1) * 3,
-  }));
+  return VIDEO_TITLES.map((title, i) => {
+    const lock = deriveLockRule(slug, i);
+    // Locked 视频用不同图作 preview,真实 cover 只有 unlock 后 API 返回
+    const previewCover = lock.isLocked ? (pick(i + 200, off + 900) ?? "") : (pick(i + 5, off + 7) ?? "");
+    return {
+      id: `${slug}-v${i + 1}`,
+      title,
+      cover: previewCover,
+      duration:
+        i === 0 ? "01:42" :
+        i === 1 ? "03:18" :
+        i === 2 ? "00:58" :
+        i === 3 ? "02:24" :
+        i === 4 ? "05:36" : "01:12",
+      views: 1200 + ((off + i * 71) % 8400),
+      daysAgo: (i + 1) * 3,
+      isLocked: lock.isLocked,
+      price: lock.price,
+      unlockType: lock.isLocked ? "coins" as const : undefined,
+    };
+  });
 }
 
 export function makeGallery(slug: string): GalleryItem[] {
   const off = hashSlug(slug);
   const items: GalleryItem[] = [];
   for (let i = 0; i < 12; i++) {
+    const lock = deriveLockRule(slug, i);
+    const publicSrc = lock.isLocked ? (pick(i + 200, off + 900) ?? "") : (pick(i, off + 3) ?? "");
     items.push({
       id: `${slug}-g${i + 1}`,
-      src: pick(i, off + 3) ?? "",
+      src: publicSrc,
       alt: `作品 ${i + 1}`,
       category: GALLERY_CATS[i % GALLERY_CATS.length],
+      isLocked: lock.isLocked,
+      price: lock.price,
+      unlockType: lock.isLocked ? "coins" as const : undefined,
     });
   }
   return items;

@@ -4,10 +4,18 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
+import { useChat } from "@/components/chat/ChatProvider";
 
-export default function FloatingCTA() {
+interface Props {
+  creatorSlug: string;
+  creatorName: string;
+  creatorAvatar?: string;
+}
+
+export default function FloatingCTA({ creatorSlug, creatorName, creatorAvatar }: Props) {
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
+  const { openChatWith } = useChat();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -29,10 +37,11 @@ export default function FloatingCTA() {
   }, []);
 
   const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
+  const openChat = guard(() => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] }));
 
   return (
     <div className={"cr-fab" + (visible ? " visible" : "")} aria-hidden={!visible}>
-      <button type="button" onClick={guard(() => {})} className="cr-fab-btn cr-fab-primary" title={t("chat")}>
+      <button type="button" onClick={openChat} className="cr-fab-btn cr-fab-primary" title={t("chat")}>
         <svg viewBox="0 0 24 24" aria-hidden><path d="M21 11.5a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 11.5z" /></svg>
       </button>
       <button type="button" onClick={guard(() => {})} className="cr-fab-btn" title={t("videoCall")}>

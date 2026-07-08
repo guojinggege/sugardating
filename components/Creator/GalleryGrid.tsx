@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type { GalleryItem } from "@/lib/creatorProfileMock";
+import LockedMediaCard from "@/components/media/LockedMediaCard";
 
 const CATS: GalleryItem["category"][] = ["旅行", "时尚", "拍摄", "生活"];
 
-export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
+interface Props {
+  items: GalleryItem[];
+  creatorSlug: string;
+  creatorName: string;
+}
+
+export default function GalleryGrid({ items, creatorSlug, creatorName }: Props) {
   const t = useTranslations("creatorProfile.gallery");
   const [cat, setCat] = useState<GalleryItem["category"] | "all">("all");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
@@ -48,28 +55,46 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
       </div>
 
       <div className="cr-gallery-grid">
-        {list.map((it, i) => (
-          <button
-            key={it.id}
-            type="button"
-            onClick={() => setOpenIdx(i)}
-            className="cr-gallery-tile"
-            aria-label={t("openLarge")}
-          >
-            <Image
-              src={it.src}
-              alt={it.alt}
-              fill
-              loading="lazy"
-              sizes="(max-width: 768px) 50vw, 33vw"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-            />
-            <div className="cr-gallery-veil" />
-          </button>
-        ))}
+        {list.map((it, i) => {
+          if (it.isLocked && it.price) {
+            return (
+              <div key={it.id} className="cr-gallery-tile cr-gallery-tile--locked">
+                <LockedMediaCard
+                  creatorSlug={creatorSlug}
+                  creatorName={creatorName}
+                  mediaId={it.id}
+                  type="image"
+                  price={it.price}
+                  previewSrc={it.src}
+                  aspect="1x1"
+                  onOpenLightbox={() => setOpenIdx(i)}
+                />
+              </div>
+            );
+          }
+          return (
+            <button
+              key={it.id}
+              type="button"
+              onClick={() => setOpenIdx(i)}
+              className="cr-gallery-tile"
+              aria-label={t("openLarge")}
+            >
+              <Image
+                src={it.src}
+                alt={it.alt}
+                fill
+                loading="lazy"
+                sizes="(max-width: 768px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+              />
+              <div className="cr-gallery-veil" />
+            </button>
+          );
+        })}
       </div>
 
-      {openIdx !== null && list[openIdx] && (
+      {openIdx !== null && list[openIdx] && !list[openIdx].isLocked && (
         <div
           className="cr-lightbox"
           role="dialog"

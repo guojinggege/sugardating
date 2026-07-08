@@ -205,11 +205,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
             </section>
 
             <section id="gallery" className="cr-section" aria-label={t("sections.gallery")}>
-              <GalleryGrid items={gallery} />
+              <GalleryGrid items={gallery} creatorSlug={creator.slug} creatorName={creator.name} />
             </section>
 
             <section id="videos" className="cr-section" aria-label={t("sections.videos")}>
-              <VideoGrid videos={videos} />
+              <VideoGrid videos={videos} creatorSlug={creator.slug} creatorName={creator.name} />
             </section>
 
             <section id="services" className="cr-section" aria-label={t("sections.services")}>
@@ -248,8 +248,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
       </div>
 
       {/* 9) Floating CTA + Mobile CTA Bar */}
-      <FloatingCTA />
-      <MobileCTABar />
+      <FloatingCTA creatorSlug={creator.slug} creatorName={creator.name} creatorAvatar={avatar} />
+      <MobileCTABar creatorSlug={creator.slug} creatorName={creator.name} creatorAvatar={avatar} />
     </div>
   );
 }

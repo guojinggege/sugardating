@@ -37,8 +37,9 @@ export default function RightSidebar({
   const requireLogin = useRequireLogin();
   const { openChatWith } = useChat();
 
+  // 聊天不做前置 auth gate — ChatDrawer 内部会在未登录时显示 inline 登录提示
+  // 直接 gate 会与 auth hydration race,导致已登录用户首次点击弹出登录 Modal
   function openChat() {
-    if (!requireLogin()) return;
     openChatWith({
       slug: creator.slug,
       name: creator.name,

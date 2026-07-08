@@ -20,7 +20,8 @@ export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar }
   const [saved, setSaved] = useState(false);
 
   const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
-  const openChat = guard(() => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] }));
+  // 聊天入口不走 requireLogin — ChatDrawer 未登录时显示内嵌登录提示
+  const openChat = () => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] });
 
   return (
     <div className="cr-mcta">

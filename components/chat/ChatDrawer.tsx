@@ -12,7 +12,7 @@ import type { SupportedLocale } from "@/lib/translation";
 
 export default function ChatDrawer() {
   const { target, open, closeChat } = useChat();
-  const { user } = useAuth();
+  const { user, hydrated } = useAuth();
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,6 +23,7 @@ export default function ChatDrawer() {
   const creatorLang: SupportedLocale = target?.languages?.[0] ?? "zh";
 
   // 打开时 · 创建/获取 conversation → 拉消息
+  // API 失败时 fallback 到 local conversation,UI 不阻断
   useEffect(() => {
     if (!open || !target || !user) { setConversation(null); setMessages([]); return; }
     let alive = true;
@@ -32,6 +33,7 @@ export default function ChatDrawer() {
         const r1 = await fetch("/api/chat/conversations", {
           method: "POST",
           headers: { "content-type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             creatorSlug: target.slug,
             creatorName: target.name,
@@ -39,14 +41,45 @@ export default function ChatDrawer() {
             creatorLanguages: target.languages ?? ["zh"],
           }),
         });
-        const d1 = await r1.json();
-        if (!alive || !d1.ok) return;
+        const d1 = await r1.json().catch(() => ({ ok: false }));
+        if (!alive) return;
+        if (!d1.ok || !d1.conversation) {
+          // fallback:local conversation,允许 UI 继续,消息发送时再尝试
+          setConversation({
+            id: `local-${target.slug}`,
+            userId: user.id,
+            creatorSlug: target.slug,
+            creatorName: target.name,
+            creatorAvatar: target.avatar,
+            creatorLanguages: target.languages ?? ["zh"],
+            unreadCount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          } as Conversation);
+          setMessages([]);
+          return;
+        }
         setConversation(d1.conversation);
 
-        const r2 = await fetch(`/api/chat/conversations/${d1.conversation.id}/messages`);
-        const d2 = await r2.json();
-        if (!alive || !d2.ok) return;
-        setMessages(d2.messages);
+        const r2 = await fetch(`/api/chat/conversations/${d1.conversation.id}/messages`, { credentials: "include" });
+        const d2 = await r2.json().catch(() => ({ ok: false, messages: [] }));
+        if (!alive) return;
+        setMessages(d2.ok ? d2.messages : []);
+      } catch {
+        // network fail → fallback local conversation
+        if (!alive) return;
+        setConversation({
+          id: `local-${target.slug}`,
+          userId: user.id,
+          creatorSlug: target.slug,
+          creatorName: target.name,
+          creatorAvatar: target.avatar,
+          creatorLanguages: target.languages ?? ["zh"],
+          unreadCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as Conversation);
+        setMessages([]);
       } finally { if (alive) setLoading(false); }
     })();
     return () => { alive = false; };
@@ -66,7 +99,7 @@ export default function ChatDrawer() {
   }, [open, closeChat]);
 
   async function handleSend(text: string) {
-    if (!conversation || sending) return;
+    if (!conversation || sending || !target) return;
     setSending(true);
     // 乐观 append
     const optimistic: ChatMessage = {
@@ -80,9 +113,32 @@ export default function ChatDrawer() {
     };
     setMessages((prev) => [...prev, optimistic]);
     try {
-      const r = await fetch(`/api/chat/conversations/${conversation.id}/messages`, {
+      // Local-fallback conversation → 先尝试真实创建
+      let convoId = conversation.id;
+      if (convoId.startsWith("local-")) {
+        const rc = await fetch("/api/chat/conversations", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            creatorSlug: target.slug,
+            creatorName: target.name,
+            creatorAvatar: target.avatar,
+            creatorLanguages: target.languages ?? ["zh"],
+          }),
+        });
+        const dc = await rc.json().catch(() => ({ ok: false }));
+        if (dc.ok && dc.conversation) {
+          setConversation(dc.conversation);
+          convoId = dc.conversation.id;
+        } else {
+          throw new Error("聊天连接失败,请稍后重试");
+        }
+      }
+      const r = await fetch(`/api/chat/conversations/${convoId}/messages`, {
         method: "POST",
         headers: { "content-type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ text, translateTo }),
       });
       const data = await r.json();
@@ -96,9 +152,8 @@ export default function ChatDrawer() {
         }
         return next;
       });
-    } catch (e) {
+    } catch {
       setMessages((prev) => prev.map((m) => m.id === optimistic.id ? { ...m, status: "failed" as const } : m));
-      alert(e instanceof Error ? e.message : "发送失败");
     } finally { setSending(false); }
   }
 
@@ -129,7 +184,9 @@ export default function ChatDrawer() {
 
         {/* Body */}
         <div className="cd-body" ref={scrollRef}>
-          {!user ? (
+          {!hydrated ? (
+            <div className="cd-loading">加载中…</div>
+          ) : !user ? (
             <div className="cd-empty">
               <div className="cd-empty-ic">🔒</div>
               <div className="cd-empty-title">登录后开始对话</div>

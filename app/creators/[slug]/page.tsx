@@ -213,7 +213,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             </section>
 
             <section id="services" className="cr-section" aria-label={t("sections.services")}>
-              <ServiceCards services={services} />
+              <ServiceCards services={services} creatorSlug={creator.slug} creatorName={creator.name} creatorAvatar={avatar} />
             </section>
 
             <section id="gifts" className="cr-section" aria-label={t("sections.gifts")}>

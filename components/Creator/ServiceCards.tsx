@@ -19,8 +19,16 @@ const ICONS: Record<ServiceItem["key"], React.ReactNode> = {
   ),
 };
 
-export default async function ServiceCards({ services }: { services: ServiceItem[] }) {
+interface Props {
+  services: ServiceItem[];
+  creatorSlug: string;
+  creatorName: string;
+  creatorAvatar?: string;
+}
+
+export default async function ServiceCards({ services, creatorSlug, creatorName, creatorAvatar }: Props) {
   const t = await getTranslations("creatorProfile.services");
+  const tA = await getTranslations("creatorProfile.actions");
   return (
     <div className="cr-services">
       {services.map((s) => (
@@ -33,7 +41,13 @@ export default async function ServiceCards({ services }: { services: ServiceItem
               <b>{s.price}</b>
               <span>· {s.duration}</span>
             </div>
-            <ServiceCtaButton label={t("book")} />
+            <ServiceCtaButton
+              label={s.key === "video-chat" ? tA("chat") : t("book")}
+              serviceKey={s.key}
+              creatorSlug={creatorSlug}
+              creatorName={creatorName}
+              creatorAvatar={creatorAvatar}
+            />
           </div>
         </article>
       ))}

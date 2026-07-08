@@ -37,7 +37,8 @@ export default function FloatingCTA({ creatorSlug, creatorName, creatorAvatar }:
   }, []);
 
   const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
-  const openChat = guard(() => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] }));
+  // 聊天入口不走 requireLogin — 避免 auth hydration race,ChatDrawer 内嵌未登录提示
+  const openChat = () => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] });
 
   return (
     <div className={"cr-fab" + (visible ? " visible" : "")} aria-hidden={!visible}>

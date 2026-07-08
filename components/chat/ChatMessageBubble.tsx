@@ -40,7 +40,8 @@ export default function ChatMessageBubble({ msg, showTranslation = true }: Props
         )}
         <div className="cb-meta">
           <span className="cb-time">{fmtTime(msg.createdAt)}</span>
-          {isUser && <span className="cb-status">{msg.status === "read" ? "✓✓" : msg.status === "delivered" ? "✓✓" : "✓"}</span>}
+          {isUser && msg.status === "failed" && <span className="cb-status cb-failed">! 发送失败</span>}
+          {isUser && msg.status !== "failed" && <span className="cb-status">{msg.status === "read" ? "✓✓" : msg.status === "delivered" ? "✓✓" : "✓"}</span>}
         </div>
       </div>
       <style jsx>{`

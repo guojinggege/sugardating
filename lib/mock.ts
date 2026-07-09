@@ -1,11 +1,12 @@
 import { Channel, Creator, Work, LiveItem, Post } from "./types";
 
 // 所有频道入口（导航 + 路由）
-// 顺序: 动态推荐 → SugarGirl → 定制服务 → 视频专区 → 互动社区
+// 顺序: 动态推荐 → SugarGirl → 情趣按摩 → 定制服务 → 视频专区 → 互动社区
 // URL slug 保留旧值,label 走 i18n,这里 label 仅作 fallback
 export const channels: Channel[] = [
   { slug: "photography",  label: "动态推荐" },
   { slug: "male-artists", label: "SugarGirl" },
+  { slug: "massage",      label: "情趣按摩" },
   { slug: "art-services", label: "定制服务", children: [
     { slug: "dating",     label: "约会" },
     { slug: "travel",     label: "旅游" },

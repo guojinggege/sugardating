@@ -1,7 +1,7 @@
 import { Channel, Creator, Work, LiveItem, Post } from "./types";
 
 // 所有频道入口（导航 + 路由）
-// 顺序: 动态推荐 → SugarGirl → 定制服务 → 视频专区 → 观看直播 → 互动社区
+// 顺序: 动态推荐 → SugarGirl → 定制服务 → 视频专区 → 互动社区
 // URL slug 保留旧值,label 走 i18n,这里 label 仅作 fallback
 export const channels: Channel[] = [
   { slug: "photography",  label: "动态推荐" },
@@ -13,7 +13,6 @@ export const channels: Channel[] = [
     { slug: "video-chat", label: "视频聊天" },
   ]},
   { slug: "video",        label: "视频专区" },
-  { slug: "live",         label: "观看直播", flag: "live" },
   { slug: "community",    label: "互动社区" },
 ];
 

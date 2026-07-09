@@ -5,7 +5,6 @@ import { getTranslations } from "next-intl/server";
 const CHIPS = [
   { keyName: "verified",     emoji: "🛡️", href: "/creators?verified=1" },
   { keyName: "new",          emoji: "✨", href: "/creators?sort=new" },
-  { keyName: "live",         emoji: "🔴", href: "/live" },
   { keyName: "asia",         emoji: "🌏", href: "/creators?region=asia" },
   { keyName: "hotVideos",    emoji: "▶", href: "/video" },
   { keyName: "highReply",    emoji: "💬", href: "/creators?filter=replyRate" },

@@ -24,7 +24,6 @@ export default async function Footer() {
         <div>
           <h5>{t("platform")}</h5>
           <ul>
-            <li><Link href="/live">{t("links.live")}</Link></li>
             <li><Link href="/community">{t("links.community")}</Link></li>
             <li><Link href="/rankings">{t("links.rankings")}</Link></li>
             <li><Link href="/studio">{t("links.studio")}</Link></li>

@@ -79,7 +79,6 @@ export default function MobileHeader() {
                 { href: "/m/creators",        label: safeT(tN, "sugargirl", "Sugargirl") },
                 { href: "/m/community",       label: safeT(tN, "community", "互动社区") },
                 { href: "/m/video",           label: safeT(tN, "video", "视频专区") },
-                { href: "/m/live",            label: safeT(tN, "live", "观看直播") },
                 { href: "/m/membership",      label: safeT(tN, "membership", "开通会员") },
                 { href: "/m/login",           label: safeT(tN, "login", "登录") },
               ].map((it) => (

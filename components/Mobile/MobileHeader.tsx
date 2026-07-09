@@ -77,6 +77,7 @@ export default function MobileHeader() {
                 { href: "/m",                 label: safeT(tN, "home", "首页") },
                 { href: "/m/photography",     label: safeT(tN, "photography", "动态推荐") },
                 { href: "/m/creators",        label: safeT(tN, "sugargirl", "Sugargirl") },
+                { href: "/sugarboy",          label: safeT(tN, "sugarboy", "Sugarboy") },
                 { href: "/massage",           label: safeT(tN, "massage", "情趣按摩") },
                 { href: "/m/community",       label: safeT(tN, "community", "互动社区") },
                 { href: "/m/video",           label: safeT(tN, "video", "视频专区") },

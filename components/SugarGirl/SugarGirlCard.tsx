@@ -12,7 +12,7 @@ const TAG_STYLE: Record<SugarTag, string> = {
   New:      "bg-emerald-400/15 text-emerald-200 border border-emerald-300/30",
 };
 
-export default function SugarGirlCard({ entry }: { entry: SugarGirlEntry }) {
+export default function SugarGirlCard({ entry, basePath = "/creators" }: { entry: SugarGirlEntry; basePath?: string }) {
   const t = useTranslations("sugarGirl.card");
   const requireLogin = useRequireLogin();
   const [fav, setFav] = useState(false);
@@ -35,7 +35,7 @@ export default function SugarGirlCard({ entry }: { entry: SugarGirlEntry }) {
       <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-transparent transition group-hover:ring-gold/30" />
 
       {/* 大图 3:4 */}
-      <Link href={`/creators/${entry.id}`} className="relative block overflow-hidden" style={{ aspectRatio: "3/4" }}>
+      <Link href={`${basePath}/${entry.id}`} className="relative block overflow-hidden" style={{ aspectRatio: "3/4" }}>
         <Image
           src={entry.cover}
           alt={entry.name}
@@ -108,7 +108,7 @@ export default function SugarGirlCard({ entry }: { entry: SugarGirlEntry }) {
             {entry.height} cm · {entry.languages[0]}
           </span>
           <Link
-            href={`/creators/${entry.id}`}
+            href={`${basePath}/${entry.id}`}
             className="inline-flex items-center gap-1 rounded-pill border border-feed-line2 px-3 py-1.5 text-[12px] font-semibold text-feed-ink transition hover:border-gold hover:text-gold"
           >
             {t("viewProfile")}

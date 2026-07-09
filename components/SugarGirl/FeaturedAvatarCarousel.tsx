@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { SugarGirlEntry } from "@/lib/sugarGirlMock";
 
-export default function FeaturedAvatarCarousel({ items }: { items: SugarGirlEntry[] }) {
+export default function FeaturedAvatarCarousel({ items, basePath = "/creators" }: { items: SugarGirlEntry[]; basePath?: string }) {
   const t = useTranslations("sugarGirl.featured");
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -51,16 +51,16 @@ export default function FeaturedAvatarCarousel({ items }: { items: SugarGirlEntr
         ref={railRef}
         className="flex snap-x snap-proximity gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {items.map((e) => <Avatar key={e.id} e={e} />)}
+        {items.map((e) => <Avatar key={e.id} e={e} basePath={basePath} />)}
       </div>
     </section>
   );
 }
 
-function Avatar({ e }: { e: SugarGirlEntry }) {
+function Avatar({ e, basePath = "/creators" }: { e: SugarGirlEntry; basePath?: string }) {
   return (
     <Link
-      href={`/creators/${e.id}`}
+      href={`${basePath}/${e.id}`}
       className="group flex w-[88px] shrink-0 snap-start flex-col items-center gap-2 md:w-[96px]"
       title={e.name}
     >

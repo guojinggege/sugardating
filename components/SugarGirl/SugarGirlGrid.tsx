@@ -31,7 +31,7 @@ function matchesPersonTag(e: SugarGirlEntry, tag: SugarFilters["personTag"]): bo
   }
 }
 
-export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }) {
+export default function SugarGirlGrid({ entries, basePath = "/creators" }: { entries: SugarGirlEntry[]; basePath?: string }) {
   const t = useTranslations("sugarGirl");
   const [filters, setFilters] = useState<SugarFilters>(DEFAULT_FILTERS);
   const [activeQuick, setActiveQuick] = useState<QuickKey>("all");
@@ -120,7 +120,7 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
     <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-8">
       {/* 1. 推荐 SugarGirl — 横向圆形头像滚动 */}
       {featuredAvatars.length > 0 && (
-        <FeaturedAvatarCarousel items={featuredAvatars} />
+        <FeaturedAvatarCarousel items={featuredAvatars} basePath={basePath} />
       )}
 
       {/* 2. 主目录 = Sidebar + (FilterBar + Grid) */}
@@ -156,7 +156,7 @@ export default function SugarGirlGrid({ entries }: { entries: SugarGirlEntry[] }
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
-                {list.map((e) => (<SugarGirlCard key={e.id} entry={e} />))}
+                {list.map((e) => (<SugarGirlCard key={e.id} entry={e} basePath={basePath} />))}
               </div>
             )}
 

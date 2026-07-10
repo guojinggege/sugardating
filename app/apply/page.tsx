@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Img from "@/components/Img";
 import { pick } from "@/lib/images";
-import ApplyForm from "@/components/Apply/ApplyForm";
+import ApplyGate from "@/components/ApplyWizard/ApplyGate";
 import ApplyStickyCTA from "@/components/Apply/ApplyStickyCTA";
 
 export const dynamic = "force-dynamic";
@@ -111,7 +111,7 @@ export default function ApplyPage() {
             平台提供曝光、认证、安全体系,以及免费的写真与视频内容支持。
           </p>
           <div className="ap-hero-cta">
-            <a href="#apply-form" className="ap-btn-primary">申请入驻</a>
+            <Link href="/apply/start" className="ap-btn-primary">申请入驻</Link>
             <a href="#benefits" className="ap-btn-ghost">了解平台优势</a>
           </div>
         </div>
@@ -248,10 +248,10 @@ export default function ApplyPage() {
         </div>
       </section>
 
-      {/* ═══ 9. Apply Form ═══ */}
-      <section id="apply-form" className="ap-form-wrap">
+      {/* ═══ 9. Apply Gate ═══ 登录状态感知 · 引导进入 /apply/start 分步向导 */}
+      <section id="apply-form" className="ap-gate-wrap">
         <div className="ap-form-inner">
-          <ApplyForm />
+          <ApplyGate />
         </div>
       </section>
 

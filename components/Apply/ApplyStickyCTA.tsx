@@ -1,6 +1,8 @@
 "use client";
-// 页面 Sticky CTA — 滚动 > 500px 出现,点击 scrollTo #apply-form
+// Sticky CTA — 滚动 > 500px 出现 · 直接跳 /apply/start 分步向导
+// (向导内部 handle auth · 未登录会跳 /login?next=/apply/start)
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function ApplyStickyCTA() {
   const [visible, setVisible] = useState(false);
@@ -11,18 +13,9 @@ export default function ApplyStickyCTA() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollToForm = () => {
-    const el = document.getElementById("apply-form");
-    if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - 40;
-    window.scrollTo({ top, behavior: "smooth" });
-  };
-
   return (
     <div className={"ap-scta" + (visible ? " on" : "")}>
-      <button type="button" onClick={scrollToForm} className="ap-btn-primary">
-        申请入驻
-      </button>
+      <Link href="/apply/start" className="ap-btn-primary">申请入驻</Link>
       <a href="#shoot-support" className="ap-btn-ghost" style={{ background: "#fff", color: "var(--ink)", border: "1px solid var(--line)" }}>
         了解拍摄支持
       </a>

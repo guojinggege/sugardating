@@ -3,11 +3,12 @@
 import { useState } from "react";
 
 interface TopUpPackage { coins: number; price: string; badge?: string }
+// 与 lib/membership-plans.ts:CREDIT_PACKAGES 保持一致
 const PACKAGES: TopUpPackage[] = [
-  { coins: 50,  price: "S$5" },
-  { coins: 100, price: "S$9",  badge: "最受欢迎" },
-  { coins: 300, price: "S$25", badge: "推荐" },
-  { coins: 500, price: "S$40" },
+  { coins: 100,  price: "S$ 59",  badge: "适合体验" },
+  { coins: 350,  price: "S$ 169", badge: "最受欢迎" },
+  { coins: 800,  price: "S$ 329", badge: "高频用户" },
+  { coins: 1800, price: "S$ 649", badge: "最佳价值" },
 ];
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export default function TopUpModal({ open, balance, onClose, onSuccess }: Props) {
-  const [selected, setSelected] = useState<number>(100);
+  const [selected, setSelected] = useState<number>(350);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

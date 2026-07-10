@@ -69,10 +69,11 @@ function addTx(input: Omit<WalletTx, "id" | "createdAt">): WalletTx {
   return tx;
 }
 
-// 充值套餐(mock)
+// 充值套餐 (mock) · 与 /membership 页 CREDIT_PACKAGES 保持一致
+// 来源:lib/membership-plans.ts 中的 CREDIT_PACKAGES · 复用避免价格漂移
 export const TOPUP_PACKAGES = [
-  { coins: 50,  price: "S$ 5",   badge: null as string | null },
-  { coins: 100, price: "S$ 9",   badge: "最受欢迎" },
-  { coins: 300, price: "S$ 25",  badge: null },
-  { coins: 500, price: "S$ 39",  badge: "超值" },
+  { coins: 100,  price: "S$ 59",  badge: "适合体验" as string | null },
+  { coins: 350,  price: "S$ 169", badge: "最受欢迎" },
+  { coins: 800,  price: "S$ 329", badge: "高频用户" },
+  { coins: 1800, price: "S$ 649", badge: "最佳价值" },
 ];

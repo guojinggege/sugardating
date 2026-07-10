@@ -31,6 +31,9 @@ const NAV: NavGroup[] = [
     { label: "图片视频库",       href: "/admin/media" },
     { label: "付费内容",         href: "/admin/media?locked=1" },
   ]},
+  { label: "Community", items: [
+    { label: "注册用户",         href: "/admin/users" },
+  ]},
   { label: "Commerce", items: [
     { label: "Credits",          href: "/admin/wallet", soon: true },
     { label: "会员",             href: "/admin/membership", soon: true },

@@ -915,38 +915,86 @@ export const journalPosts: JournalPost[] = [
 // Helpers
 // ══════════════════════════════════════
 
+// Runtime status/overlay accessors — 读取 CMS 后台修改
+// 通过 globalThis 无循环依赖 (repository.ts 也读同一 key)
+function getOverride(slug: string): any {
+  const m: Map<string, any> | undefined = (globalThis as any).__sgCmsJournalOverride;
+  return m?.get(slug);
+}
+function getNewPosts(): JournalPost[] {
+  const m: Map<string, any> | undefined = (globalThis as any).__sgCmsJournalNew;
+  if (!m) return [];
+  return Array.from(m.values()).map((p) => ({
+    ...p,
+    updatedAt: p.updatedAt ?? p.publishedAt,
+  })) as JournalPost[];
+}
+
+// 应用 override 到 post (title / featured / popular / status)
+function withOverride(p: JournalPost): JournalPost & { status?: string } {
+  const o = getOverride(p.slug);
+  if (!o) return { ...p, status: "published" };
+  return {
+    ...p,
+    title: o.title ?? p.title,
+    featured: o.featured ?? p.featured,
+    popular: o.popular ?? p.popular,
+    status: o.status ?? "published",
+  } as JournalPost & { status?: string };
+}
+
+// 返回全部 posts (base + new) · 已应用 override
+function allWithStatus(): (JournalPost & { status?: string })[] {
+  const base = journalPosts.map(withOverride);
+  const news = getNewPosts().map((p) => ({ ...p, status: (p as any).status ?? "draft" }));
+  return [...news, ...base];
+}
+
+function isPublic(p: { status?: string }): boolean {
+  return (p.status ?? "published") === "published";
+}
+
 export function getPost(categorySlug: string, postSlug: string): JournalPost | undefined {
-  return journalPosts.find((p) => p.categorySlug === categorySlug && p.slug === postSlug);
+  const all = allWithStatus();
+  const p = all.find((x) => x.categorySlug === categorySlug && x.slug === postSlug);
+  if (!p || !isPublic(p)) return undefined;
+  return p;
 }
 
 export function getPostBySlug(postSlug: string): JournalPost | undefined {
-  return journalPosts.find((p) => p.slug === postSlug);
+  const all = allWithStatus();
+  const p = all.find((x) => x.slug === postSlug);
+  if (!p || !isPublic(p)) return undefined;
+  return p;
 }
 
 export function listPostsByCategory(categorySlug: string): JournalPost[] {
-  return journalPosts
-    .filter((p) => p.categorySlug === categorySlug)
+  return allWithStatus()
+    .filter((p) => p.categorySlug === categorySlug && isPublic(p))
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
 export function listAllPosts(): JournalPost[] {
-  return [...journalPosts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  return allWithStatus()
+    .filter(isPublic)
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
 export function featuredPosts(): JournalPost[] {
-  return journalPosts.filter((p) => p.featured);
+  return allWithStatus().filter((p) => isPublic(p) && p.featured);
 }
 
 export function popularPosts(limit = 5): JournalPost[] {
-  return journalPosts.filter((p) => p.popular).slice(0, limit);
+  return allWithStatus().filter((p) => isPublic(p) && p.popular).slice(0, limit);
 }
 
 export function relatedPosts(post: JournalPost, limit = 3): JournalPost[] {
-  // 同分类优先;不足则按 tag 交集
-  const sameCategory = journalPosts
+  // 同分类优先;不足则按 tag 交集 · 也过滤 draft/archived
+  const all = allWithStatus().filter(isPublic);
+  const sameCategory = all
     .filter((p) => p.categorySlug === post.categorySlug && p.slug !== post.slug);
   if (sameCategory.length >= limit) return sameCategory.slice(0, limit);
-  const tagOverlap = journalPosts
+  const tagOverlap = all
     .filter((p) => p.slug !== post.slug && !sameCategory.includes(p))
     .map((p) => ({ post: p, overlap: p.tags.filter((t) => post.tags.includes(t)).length }))
     .filter((x) => x.overlap > 0)

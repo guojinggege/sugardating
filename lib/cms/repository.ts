@@ -7,12 +7,14 @@ import { randomBytes } from "node:crypto";
 import { sugarGirls } from "@/lib/sugarGirlMock";
 import { sugarBoys } from "@/lib/sugarBoyMock";
 import { providers as massageProviders } from "@/lib/massage-data";
-import { journalPosts, journalCategories } from "@/lib/journal-data";
+import { journalPosts, journalCategories, type JournalPost } from "@/lib/journal-data";
 import { pick } from "@/lib/images";
 import type {
   CmsDashboardMetrics, CmsCreatorRow, CmsApplicationRow,
-  CmsJournalPostRow, CmsMediaItem, CmsCustomRequestRow,
-  CmsHomeContent, CmsSettings,
+  CmsJournalPostRow, CmsJournalPostFull, CmsJournalCreateInput,
+  CmsMediaItem, CmsCustomRequestRow,
+  CmsHomeContent, CmsSettings, CmsStatus,
+  CmsUserRow, CmsUserDetail, CmsUserNote, CmsWalletTx,
 } from "./types";
 
 // ══════════════════════════════════════
@@ -83,14 +85,26 @@ declare global {
   // eslint-disable-next-line no-var
   var __sgCmsMedia: CmsMediaItem[] | undefined;
   // eslint-disable-next-line no-var
-  var __sgCmsJournalOverride: Map<string, { status?: string; featured?: boolean; popular?: boolean }> | undefined;
+  var __sgCmsJournalOverride: Map<string, Partial<CmsJournalPostFull>> | undefined;
+  // eslint-disable-next-line no-var
+  var __sgCmsJournalNew: Map<string, CmsJournalPostFull> | undefined;
+  // eslint-disable-next-line no-var
+  var __sgCmsUserNotes: Map<string, Array<{ id: string; text: string; author: string; createdAt: string }>> | undefined;
+  // eslint-disable-next-line no-var
+  var __sgCmsUserStatus: Map<string, { status: "active" | "suspended" | "banned"; suspendedAt?: string; suspensionReason?: string }> | undefined;
 }
 const homeStore = globalThis.__sgCmsHome ?? defaultHomeContent();
 globalThis.__sgCmsHome = homeStore;
 const settingsStore = globalThis.__sgCmsSettings ?? defaultSettings();
 globalThis.__sgCmsSettings = settingsStore;
-const journalOverrides = globalThis.__sgCmsJournalOverride ?? new Map();
+const journalOverrides = globalThis.__sgCmsJournalOverride ?? new Map<string, Partial<CmsJournalPostFull>>();
 globalThis.__sgCmsJournalOverride = journalOverrides;
+const journalNewPosts = globalThis.__sgCmsJournalNew ?? new Map<string, CmsJournalPostFull>();
+globalThis.__sgCmsJournalNew = journalNewPosts;
+const userNotes = globalThis.__sgCmsUserNotes ?? new Map<string, Array<{ id: string; text: string; author: string; createdAt: string }>>();
+globalThis.__sgCmsUserNotes = userNotes;
+const userStatus = globalThis.__sgCmsUserStatus ?? new Map<string, { status: "active" | "suspended" | "banned"; suspendedAt?: string; suspensionReason?: string }>();
+globalThis.__sgCmsUserStatus = userStatus;
 
 // ══════════════════════════════════════
 // Media (seed from creator galleries)
@@ -231,38 +245,169 @@ export const cmsRepo = {
     return appStore[idx];
   },
 
-  // Journal
+  // Journal ═════════════════════════════════════════════════
   listJournalPosts(): CmsJournalPostRow[] {
-    return journalPosts.map((p) => {
-      const override = journalOverrides.get(p.slug);
-      const status: any = override?.status ?? "published";
-      return {
+    const rows: CmsJournalPostRow[] = [];
+    // Base seed posts (with overrides applied)
+    for (const p of journalPosts) {
+      const o = journalOverrides.get(p.slug);
+      rows.push({
+        id: p.id, slug: p.slug,
+        title: o?.title ?? p.title,
+        categorySlug: o?.categorySlug ?? p.categorySlug,
+        categoryTitle: journalCategories.find((c) => c.slug === (o?.categorySlug ?? p.categorySlug))?.title ?? p.categorySlug,
+        status: (o?.status ?? "published") as CmsStatus,
+        featured: o?.featured ?? !!p.featured,
+        popular: o?.popular ?? !!p.popular,
+        publishedAt: o?.publishedAt ?? p.publishedAt,
+        updatedAt: o?.updatedAt ?? p.updatedAt ?? p.publishedAt,
+        readingTime: o?.readingTime ?? p.readingTime,
+        language: o?.language ?? p.language,
+        wordCount: (o?.body ?? p.body).reduce((s: number, b: any) => s + (b.text?.length ?? (b.items?.join("").length ?? 0)), 0),
+      });
+    }
+    // Admin-created new posts
+    for (const p of journalNewPosts.values()) {
+      rows.push({
         id: p.id, slug: p.slug, title: p.title,
         categorySlug: p.categorySlug,
         categoryTitle: journalCategories.find((c) => c.slug === p.categorySlug)?.title ?? p.categorySlug,
-        status,
-        featured: override?.featured ?? !!p.featured,
-        popular: override?.popular ?? !!p.popular,
-        publishedAt: p.publishedAt,
-        updatedAt: p.updatedAt ?? p.publishedAt,
-        readingTime: p.readingTime,
-        language: p.language,
-        wordCount: p.body.reduce((s, b) => s + ("text" in b ? b.text.length : "items" in b ? b.items.join("").length : 0), 0),
-      };
-    });
+        status: p.status,
+        featured: p.featured, popular: p.popular,
+        publishedAt: p.publishedAt, updatedAt: p.updatedAt ?? p.publishedAt,
+        readingTime: p.readingTime, language: p.language,
+        wordCount: p.body.reduce((s, b) => s + (b.text?.length ?? (b.items?.join("").length ?? 0)), 0),
+      });
+    }
+    return rows.sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""));
   },
-  toggleJournalPublish(slug: string): CmsJournalPostRow | null {
+
+  getJournalPost(slug: string): CmsJournalPostFull | null {
+    // Prefer new post over base+override
+    const newPost = journalNewPosts.get(slug);
+    if (newPost) return newPost;
+    const base = journalPosts.find((p) => p.slug === slug);
+    if (!base) return null;
+    const o = journalOverrides.get(slug) ?? {};
+    return {
+      id: base.id,
+      slug: base.slug,
+      title: o.title ?? base.title,
+      subtitle: o.subtitle ?? base.subtitle,
+      excerpt: o.excerpt ?? base.excerpt,
+      categorySlug: o.categorySlug ?? base.categorySlug,
+      language: (o.language ?? base.language) as "zh" | "en",
+      coverImage: o.coverImage ?? base.coverImage,
+      author: o.author ?? base.author,
+      publishedAt: o.publishedAt ?? base.publishedAt,
+      updatedAt: o.updatedAt ?? base.updatedAt,
+      readingTime: o.readingTime ?? base.readingTime,
+      tags: o.tags ?? base.tags,
+      featured: o.featured ?? !!base.featured,
+      popular: o.popular ?? !!base.popular,
+      status: (o.status ?? "published") as CmsStatus,
+      body: (o.body ?? base.body) as any,
+      cta: (o.cta ?? base.cta) as string[],
+      seo: o.seo,
+    };
+  },
+
+  createJournalPost(input: CmsJournalCreateInput, actorEmail?: string): CmsJournalPostFull {
+    const slug = input.slug.trim() || `p_${randomBytes(4).toString("hex")}`;
+    // Collision guard: don't overwrite base post
+    if (journalPosts.some((p) => p.slug === slug) || journalNewPosts.has(slug)) {
+      throw new Error("SLUG_TAKEN");
+    }
+    const now = new Date().toISOString();
+    const post: CmsJournalPostFull = {
+      id: `n_${randomBytes(4).toString("hex")}`,
+      slug,
+      title: input.title,
+      subtitle: input.subtitle,
+      excerpt: input.excerpt,
+      categorySlug: input.categorySlug,
+      language: input.language,
+      coverImage: input.coverImage || (pick(0, Math.floor(Math.random() * 100)) ?? "/images/placeholder.png"),
+      author: input.author || (actorEmail ?? "Sugardating Editorial"),
+      publishedAt: input.status === "published" ? now : now,
+      updatedAt: now,
+      readingTime: input.readingTime || "5 min read",
+      tags: input.tags || [],
+      featured: !!input.featured,
+      popular: !!input.popular,
+      status: input.status ?? "draft",
+      body: input.body,
+      cta: input.cta || [],
+      seo: input.seo,
+      isNewPost: true,
+    };
+    journalNewPosts.set(slug, post);
+    return post;
+  },
+
+  updateJournalPost(slug: string, patch: Partial<CmsJournalPostFull>): CmsJournalPostFull | null {
+    const now = new Date().toISOString();
+    if (journalNewPosts.has(slug)) {
+      const cur = journalNewPosts.get(slug)!;
+      const updated = { ...cur, ...patch, slug, updatedAt: now };
+      if (patch.status === "published" && !cur.publishedAt) updated.publishedAt = now;
+      journalNewPosts.set(slug, updated);
+      return updated;
+    }
+    const base = journalPosts.find((p) => p.slug === slug);
+    if (!base) return null;
     const cur = journalOverrides.get(slug) ?? {};
-    const next = cur.status === "draft" ? "published" : "draft";
-    journalOverrides.set(slug, { ...cur, status: next });
+    const next: Partial<CmsJournalPostFull> = { ...cur, ...patch, updatedAt: now };
+    if (patch.status === "published" && !next.publishedAt) next.publishedAt = now;
+    journalOverrides.set(slug, next);
+    return this.getJournalPost(slug);
+  },
+
+  deleteJournalPost(slug: string): boolean {
+    // Delete admin-created posts fully; base posts get archived override
+    if (journalNewPosts.has(slug)) {
+      journalNewPosts.delete(slug);
+      return true;
+    }
+    if (journalPosts.some((p) => p.slug === slug)) {
+      const cur = journalOverrides.get(slug) ?? {};
+      journalOverrides.set(slug, { ...cur, status: "archived", updatedAt: new Date().toISOString() });
+      return true;
+    }
+    return false;
+  },
+
+  toggleJournalPublish(slug: string): CmsJournalPostRow | null {
+    const post = this.getJournalPost(slug);
+    if (!post) return null;
+    const nextStatus: CmsStatus = post.status === "published" ? "draft" : "published";
+    this.updateJournalPost(slug, { status: nextStatus });
     return this.listJournalPosts().find((p) => p.slug === slug) ?? null;
   },
   toggleJournalFeatured(slug: string): CmsJournalPostRow | null {
-    const cur = journalOverrides.get(slug) ?? {};
-    const post = journalPosts.find((p) => p.slug === slug);
-    const currentVal = cur.featured ?? !!post?.featured;
-    journalOverrides.set(slug, { ...cur, featured: !currentVal });
+    const post = this.getJournalPost(slug);
+    if (!post) return null;
+    this.updateJournalPost(slug, { featured: !post.featured });
     return this.listJournalPosts().find((p) => p.slug === slug) ?? null;
+  },
+  toggleJournalPopular(slug: string): CmsJournalPostRow | null {
+    const post = this.getJournalPost(slug);
+    if (!post) return null;
+    this.updateJournalPost(slug, { popular: !post.popular });
+    return this.listJournalPosts().find((p) => p.slug === slug) ?? null;
+  },
+
+  // Journal Categories ══════════════════════════════════════
+  listCategories() {
+    return journalCategories.map((c) => ({
+      slug: c.slug,
+      title: c.title,
+      titleZh: c.titleZh,
+      description: c.description,
+      accent: c.accent,
+      postCount: journalPosts.filter((p) => p.categorySlug === c.slug).length
+        + Array.from(journalNewPosts.values()).filter((p) => p.categorySlug === c.slug).length,
+    }));
   },
 
   // Media
@@ -309,7 +454,171 @@ export const cmsRepo = {
     if (patch.flags) settingsStore.flags = { ...settingsStore.flags, ...patch.flags };
     return settingsStore;
   },
+
+  // Users ═════════════════════════════════════════════════
+  async listUsers(filter?: { search?: string; role?: string; status?: string; limit?: number }) {
+    // 延迟 import 防 client bundle 引 Prisma
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { prisma } = require("@/lib/db");
+    const where: any = {};
+    if (filter?.search) {
+      where.OR = [
+        { email: { contains: filter.search, mode: "insensitive" } },
+        { name:  { contains: filter.search, mode: "insensitive" } },
+      ];
+    }
+    if (filter?.role) where.role = filter.role;
+    const users = await prisma.user.findMany({
+      where,
+      take: filter?.limit ?? 200,
+      orderBy: { createdAt: "desc" },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getWallet } = require("@/lib/wallet");
+    return users.map((u: any) => {
+      const st = userStatus.get(u.id);
+      const filtered_status: UserStatusType = st?.status ?? "active";
+      if (filter?.status && filter.status !== filtered_status) return null;
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        status: filtered_status,
+        membership: "free" as const,       // TODO: 接会员系统
+        city: undefined as string | undefined,
+        country: undefined as string | undefined,
+        walletBalance: getWallet(u.id).coins,
+        followingCount: 0,                  // TODO: 接 follow 系统
+        savedCount: 0,
+        giftsCount: 0,
+        bookingsCount: 0,
+        createdAt: u.createdAt.toISOString?.() ?? String(u.createdAt),
+      } as CmsUserRow;
+    }).filter(Boolean) as CmsUserRow[];
+  },
+
+  async getUser(id: string): Promise<CmsUserDetail | null> {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { prisma } = require("@/lib/db");
+    const u = await prisma.user.findUnique({ where: { id } });
+    if (!u) return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const wallet = require("@/lib/wallet");
+    const w = wallet.getWallet(u.id);
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mockDb = require("@/lib/mock-db");
+    const profile = mockDb.getUserProfile?.(u.id);
+    const app = mockDb.getApplicationByUser?.(u.id);
+    const txStore: any[] = ((globalThis as any).__sgWalletTxByUser as Map<string, any[]>)?.get?.(u.id) ?? [];
+    const totalTop = txStore.filter((t) => t.type === "top-up").reduce((s, t) => s + t.amount, 0);
+    const totalSpend = txStore.filter((t) => t.type === "spend").reduce((s, t) => s + t.amount, 0);
+    const st = userStatus.get(u.id);
+    const notes = userNotes.get(u.id) ?? [];
+
+    return {
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      status: st?.status ?? "active",
+      membership: "free",
+      walletBalance: w.coins,
+      followingCount: 0,
+      savedCount: 0,
+      giftsCount: 0,
+      bookingsCount: 0,
+      createdAt: u.createdAt.toISOString?.() ?? String(u.createdAt),
+      // extended fields
+      phone: profile?.phone,
+      birthDate: profile?.birthday,
+      age: profile?.birthday ? computeAge(profile.birthday) : undefined,
+      gender: profile?.gender,
+      city: profile?.city,
+      country: profile?.country,
+      languages: profile?.languages,
+      interests: profile?.interests,
+      bio: profile?.bio,
+      preferredCities: profile?.preferences?.interestedCities,
+      datingPreferences: profile?.preferences?.interestedTypes,
+      budgetRange: profile?.preferences?.priceRange as [number, number] | undefined,
+      walletTransactions: txStore.slice(-20).reverse() as CmsWalletTx[],
+      walletTotalTopUp: totalTop,
+      walletTotalSpend: totalSpend,
+      creatorApplication: app ? {
+        id: app.id,
+        slug: app.slug,
+        status: app.status,
+        submittedAt: app.updatedAt,
+        profileType: "sugargirl",
+        completion: app.completion,
+      } : undefined,
+      membershipStatus: { tier: "free", autoRenew: false },
+      following: [],
+      saved: [],
+      gifts: [],
+      bookings: [],
+      chats: [],
+      notes: notes as any,
+      reportsAgainst: 0,
+      reportsBy: 0,
+      suspendedAt: st?.suspendedAt,
+      suspensionReason: st?.suspensionReason,
+    };
+  },
+
+  setUserStatus(id: string, status: "active" | "suspended" | "banned", reason?: string) {
+    userStatus.set(id, {
+      status,
+      suspendedAt: status !== "active" ? new Date().toISOString() : undefined,
+      suspensionReason: reason,
+    });
+  },
+
+  async setUserRole(id: string, role: string) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { prisma } = require("@/lib/db");
+    await prisma.user.update({ where: { id }, data: { role } });
+  },
+
+  adjustUserWallet(id: string, delta: number, memo?: string) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const wallet = require("@/lib/wallet");
+    if (delta > 0) return wallet.topUp(id, delta, memo || "admin adjust +");
+    return wallet.spend(id, -delta, memo || "admin adjust -");
+  },
+
+  addUserNote(id: string, text: string, author: string): CmsUserNote {
+    const arr = userNotes.get(id) ?? [];
+    const note = { id: `n_${randomBytes(4).toString("hex")}`, text, author, createdAt: new Date().toISOString() };
+    arr.unshift(note);
+    userNotes.set(id, arr);
+    return note;
+  },
+
+  removeUserNote(id: string, noteId: string): boolean {
+    const arr = userNotes.get(id);
+    if (!arr) return false;
+    const idx = arr.findIndex((n) => n.id === noteId);
+    if (idx === -1) return false;
+    arr.splice(idx, 1);
+    userNotes.set(id, arr);
+    return true;
+  },
 };
+
+type UserStatusType = "active" | "suspended" | "banned";
+
+function computeAge(iso: string): number | undefined {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return undefined;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age;
+}
 
 export function isDemoMode(): boolean {
   // 无真实 DB · 全部 in-memory

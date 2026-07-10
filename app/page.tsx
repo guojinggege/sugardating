@@ -9,7 +9,9 @@ import FAQ from "@/components/Home/FAQ";
 import SugargirlSearchBar from "@/components/Home/SugargirlSearchBar";
 import SugargirlGrid from "@/components/Home/SugargirlGrid";
 import QuickDiscoverChips from "@/components/Home/QuickDiscoverChips";
-import SafetyNotice from "@/components/Home/SafetyNotice";
+import ChatDecision from "@/components/Home/ChatDecision";
+import JournalPreview from "@/components/Home/JournalPreview";
+import FinalCta from "@/components/Home/FinalCta";
 import { Arrow } from "@/components/icons";
 import { photos, pick } from "@/lib/images";
 import { getTranslations } from "next-intl/server";
@@ -105,7 +107,25 @@ export default async function Home() {
           <SugargirlSearchBar />
         </Reveal>
 
-        {/* 1. 热门 Sugargirls — 4-col portrait grid (目录型核心) */}
+        {/* 1a. 平台数据 — 提前到热门 Sugargirl 之前,先建立信任再展示 profiles */}
+        <section className="sec">
+          <Reveal>
+            <SectionHeader title={t("highlights.title")} count={t("highlights.subtitle")} />
+          </Reveal>
+          <Reveal>
+            <div className="stats">
+              {highlightKeys.map((s) => (
+                <div key={s.key} className="sv">
+                  <span className="accent">{t(`highlights.items.${s.key}.eye`)}</span>
+                  <b><Stat value={s.num} /></b>
+                  <span>{t(`highlights.items.${s.key}.label`)}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </section>
+
+        {/* 1b. 热门 Sugargirls — 4-col portrait grid (目录型核心) */}
         <section className="sec">
           <Reveal>
             <SectionHeader
@@ -185,21 +205,10 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* 5. Platform Highlights */}
+        {/* 5. 先聊天,再决定 — Chat / Translate / Video 展示 */}
         <section className="sec">
           <Reveal>
-            <SectionHeader title={t("highlights.title")} count={t("highlights.subtitle")} />
-          </Reveal>
-          <Reveal>
-            <div className="stats">
-              {highlightKeys.map((s) => (
-                <div key={s.key} className="sv">
-                  <span className="accent">{t(`highlights.items.${s.key}.eye`)}</span>
-                  <b><Stat value={s.num} /></b>
-                  <span>{t(`highlights.items.${s.key}.label`)}</span>
-                </div>
-              ))}
-            </div>
+            <ChatDecision />
           </Reveal>
         </section>
 
@@ -223,34 +232,19 @@ export default async function Home() {
           </Reveal>
         </section>
 
-        {/* 8a. 安全 / 隐私 / 成年人平台规则 — 轻量提示 */}
+        {/* 8. Sugardating Journal 预览 — 4 篇文章卡片入口 */}
         <section className="sec">
           <Reveal>
-            <SafetyNotice />
+            <JournalPreview />
           </Reveal>
         </section>
 
-        {/* 8b. Footer CTA */}
-        <section className="sec">
-          <Reveal>
-            <div className="banner">
-              <div className="bn-l">
-                <span className="bn-eye"><i />{t("bottomCta.eyebrow")}</span>
-                <h2>{t("bottomCta.title")}</h2>
-                <p>{t("bottomCta.desc")}</p>
-                <div className="bn-acts">
-                  <Link href="/register" className="btn btn-w">{t("bottomCta.primary")}</Link>
-                  <Link href="/male-artists" className="btn btn-g">{t("bottomCta.secondary")}</Link>
-                </div>
-              </div>
-              <div className="bn-r">
-                <Img src={pick(0, 7)!} alt={t("bottomCta.imageAlt")} sizes="(max-width: 860px) 100vw, 320px" />
-              </div>
-            </div>
-          </Reveal>
-        </section>
+        {/* 9. 底部深色 CTA — 替换旧的旅程 CTA + 安全隐私模块 */}
+        <Reveal>
+          <FinalCta />
+        </Reveal>
 
-        <div style={{ height: 80 }} />
+        <div style={{ height: 40 }} />
       </div>
     </>
   );

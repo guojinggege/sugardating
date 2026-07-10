@@ -18,13 +18,15 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  email       String       @unique
-  name        String
-  role        String       @default("creator") // user | creator | admin
-  createdAt   DateTime     @default(now())
-  creator     Creator?
-  memberships Membership[]
+  id                 String       @id @default(cuid())
+  email              String       @unique
+  name               String
+  password           String       // PBKDF2 hash format: "pbkdf2$iters$saltHex$hashHex"
+  role               String       @default("creator") // user | creator | admin
+  createdAt          DateTime     @default(now())
+  passwordUpdatedAt  DateTime?
+  creator            Creator?
+  memberships        Membership[]
 }
 
 model Category {

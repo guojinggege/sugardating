@@ -119,6 +119,8 @@ async function main() {
       data: {
         email: `${c.slug}@lumina.local`,
         name: c.name,
+        // seed-only 占位密码 · 无法用于登录 (格式不匹配 PBKDF2)
+        password: `seed-placeholder-${c.slug}`,
         role: "creator",
       },
     });

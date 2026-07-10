@@ -1,8 +1,11 @@
-// POST /api/auth/register — 创建用户 + 完整 UserProfile + 自动登录
+// POST /api/auth/register — Neon Postgres 持久化 · 复用 PBKDF2 hashPassword
 // 必填:name/email/password/birthDate/country/city/interests(≥3) + acceptTerms
 // 校验:email 格式 · password ≥8 · 年龄 ≥18 (from birthDate)
 import { NextResponse } from "next/server";
-import { createUser, createUserProfile, toPublicUser } from "@/lib/mock-db";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db";
+import { hashPassword } from "@/lib/hash";
+import { createUserProfile } from "@/lib/mock-db";
 import { setSessionCookie } from "@/lib/session";
 import { isValidEmail, isValidPassword, isValidName } from "@/lib/validation";
 
@@ -22,13 +25,13 @@ export async function POST(req: Request) {
   const country      = b.country;
   const city         = b.city;
   const interests    = b.interests;
-  const acceptTerms  = b.acceptTerms !== false;   // default true (backward compat)
+  const acceptTerms  = b.acceptTerms !== false;
 
   if (!isValidName(name))         return err("INVALID_NAME", 400,     "请填写昵称");
   if (!isValidEmail(email))       return err("INVALID_EMAIL", 400,    "请输入合法邮箱");
   if (!isValidPassword(password)) return err("INVALID_PASSWORD", 400, "密码至少 8 位");
 
-  // birthDate + 18+ age gate (若提供)
+  // birthDate + 18+ age gate
   let normBirth: string | undefined = undefined;
   if (typeof birthDate === "string" && birthDate.trim()) {
     const d = new Date(birthDate);
@@ -58,8 +61,24 @@ export async function POST(req: Request) {
   const datingPrefs = strArr(b.datingPreferences, 20);
 
   try {
-    const user = createUser({ name: name as string, email: email as string, password: password as string });
-    setSessionCookie({ userId: user.id, name: user.name, email: user.email, role: user.role });
+    // 持久化到 Neon Postgres
+    const user = await prisma.user.create({
+      data: {
+        email: (email as string).trim().toLowerCase(),
+        name: (name as string).trim(),
+        password: hashPassword(password as string),
+        role: "user",
+      },
+    });
+
+    setSessionCookie({
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role: (user.role as "user" | "creator" | "admin"),
+    });
+
+    // UserProfile 仍在 mock-db (in-memory) — 独立问题,不在本次持久化范围
     createUserProfile(user.id, user.name, {
       birthday:  normBirth,
       gender,
@@ -74,10 +93,16 @@ export async function POST(req: Request) {
         priceRange:       budgetRange && Number.isFinite(budgetRange[0]) && Number.isFinite(budgetRange[1]) ? budgetRange : undefined,
       },
     });
-    return NextResponse.json({ ok: true, user: toPublicUser(user) });
+
+    return NextResponse.json({
+      ok: true,
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, createdAt: user.createdAt.toISOString() },
+    });
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : "";
-    if (msg === "EMAIL_TAKEN") return err("EMAIL_TAKEN", 409, "邮箱已注册,请直接登录");
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return err("EMAIL_TAKEN", 409, "邮箱已注册,请直接登录");
+    }
+    console.error("register failed:", e instanceof Error ? e.message : e);
     return err("SERVER_ERROR", 500, "服务错误,请稍后重试");
   }
 }

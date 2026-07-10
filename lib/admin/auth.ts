@@ -39,3 +39,18 @@ export function requireAdminOrErr(): { admin: AdminSession | null; code?: number
   if (s.role !== "admin" && !inEnv) return { admin: null, code: 403, message: "无后台访问权限" };
   return { admin: { ...s, adminRole: "admin" } };
 }
+
+/** Layout 三态检查 · 未登录 → 让页面跳登录 · 有 session 但非 admin → 展示 forbidden · 通过 → 返回 session */
+export type AdminAccessCheck =
+  | { state: "unauth" }
+  | { state: "forbidden"; email: string; name: string }
+  | { state: "admin"; admin: AdminSession };
+
+export function checkAdminAccess(): AdminAccessCheck {
+  const s = getSession();
+  if (!s) return { state: "unauth" };
+  const email = (s.email || "").toLowerCase();
+  const inEnv = adminEmailList().includes(email);
+  if (s.role !== "admin" && !inEnv) return { state: "forbidden", email: s.email, name: s.name };
+  return { state: "admin", admin: { ...s, adminRole: "admin" } };
+}

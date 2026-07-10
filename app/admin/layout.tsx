@@ -1,21 +1,31 @@
-// Admin layout · 服务器组件 · 权限 gate + 白色/米色底 + Sidebar + Topbar
+// Admin layout · server component
+// 三态权限:
+//   unauth      → redirect /login?next=... (登录后自动回跳)
+//   forbidden   → 全屏 <AdminForbidden /> · 保留侧栏无关的 403 页
+//   admin       → 正常 Sidebar + Topbar + main
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { getAdminSession } from "@/lib/admin/auth";
+import { checkAdminAccess } from "@/lib/admin/auth";
 import { isDemoMode } from "@/lib/cms/repository";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
+import AdminForbidden from "@/components/admin/AdminForbidden";
 
 export const dynamic = "force-dynamic";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const admin = getAdminSession();
-  if (!admin) {
-    // 拿当前路径塞 next=… 供登录后回跳
+  const access = checkAdminAccess();
+
+  if (access.state === "unauth") {
     const pathname = headers().get("x-pathname") || "/admin";
     redirect(`/login?next=${encodeURIComponent(pathname)}`);
   }
 
+  if (access.state === "forbidden") {
+    return <AdminForbidden email={access.email} name={access.name} />;
+  }
+
+  const admin = access.admin;
   return (
     <div className="admin-shell">
       <AdminSidebar />

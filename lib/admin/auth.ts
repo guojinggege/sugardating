@@ -1,11 +1,14 @@
-// Admin 权限判断 · 基于 ADMIN_EMAILS 环境变量 + session.role
-// 使用方式:
-//   const admin = requireAdmin();           // Server component / route handler
-//   if (!admin) redirect("/admin/forbidden") // 权限拒绝
+// Admin 权限判断
+// ⚠️ OPEN ACCESS MODE — 当前后台无需登录直接可用
+//    任何访问 /admin 的用户都能修改设置、审核入驻申请、发布/下架文章
+//    如需恢复权限保护:把 OPEN_ACCESS 常量改为 false 即可
 import { getSession } from "@/lib/session";
 import type { SessionPayload } from "@/lib/session";
 
 export type AdminRole = "admin" | "editor" | "operator" | "reviewer" | "support" | "finance";
+
+// ⚠️ 一键切换 · true = 开放访问 · false = 走原有 session + ADMIN_EMAILS 校验
+const OPEN_ACCESS = true;
 
 const DEFAULT_ADMIN_EMAILS = ["admin@sugardating.local"];
 
@@ -19,19 +22,31 @@ export interface AdminSession extends SessionPayload {
   adminRole: AdminRole;
 }
 
+function demoAdmin(): AdminSession {
+  return {
+    userId: "demo-admin",
+    email: "demo-admin@sugardating.local",
+    name: "Demo Admin",
+    role: "admin",
+    iat: Math.floor(Date.now() / 1000),
+    adminRole: "admin",
+  };
+}
+
 export function getAdminSession(): AdminSession | null {
+  if (OPEN_ACCESS) return demoAdmin();
   const s = getSession();
   if (!s) return null;
   const email = (s.email || "").toLowerCase();
   const inEnv = adminEmailList().includes(email);
   const isAdmin = s.role === "admin" || inEnv;
   if (!isAdmin) return null;
-  // 未来可根据 email 或 DB 字段区分 role;当前统一 admin
   return { ...s, adminRole: "admin" };
 }
 
 /** Route handler 用 · 未登录 401 · 无权 403 · 通过返回 admin session */
 export function requireAdminOrErr(): { admin: AdminSession | null; code?: number; message?: string } {
+  if (OPEN_ACCESS) return { admin: demoAdmin() };
   const s = getSession();
   if (!s) return { admin: null, code: 401, message: "请先登录" };
   const email = (s.email || "").toLowerCase();
@@ -40,13 +55,14 @@ export function requireAdminOrErr(): { admin: AdminSession | null; code?: number
   return { admin: { ...s, adminRole: "admin" } };
 }
 
-/** Layout 三态检查 · 未登录 → 让页面跳登录 · 有 session 但非 admin → 展示 forbidden · 通过 → 返回 session */
+/** Layout 三态检查 · unauth → 跳登录 · forbidden → 展示 403 · admin → 放行 */
 export type AdminAccessCheck =
   | { state: "unauth" }
   | { state: "forbidden"; email: string; name: string }
   | { state: "admin"; admin: AdminSession };
 
 export function checkAdminAccess(): AdminAccessCheck {
+  if (OPEN_ACCESS) return { state: "admin", admin: demoAdmin() };
   const s = getSession();
   if (!s) return { state: "unauth" };
   const email = (s.email || "").toLowerCase();

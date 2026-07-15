@@ -1,9 +1,14 @@
 "use client";
 // Admin Journal 文章编辑器 · new + edit 共用
-// 左侧:标题/摘要/正文 block editor · 右侧:发布状态/分类/SEO/CTA
+// 左:笔记导入 (可选) + 标题/摘要/正文 · 右:发布状态/关键词/SEO/SERP 预览/CTA
 import { useRouter } from "next/navigation";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import type { CmsJournalPostFull, CmsJournalBlock, CmsStatus, JournalBlockType } from "@/lib/cms/types";
+import type { ConversionOutput } from "@/lib/content-tools/conversion-types";
+import NoteImportPanel from "@/components/admin/journal/NoteImportPanel";
+import JournalSerpPreview from "@/components/admin/journal/JournalSerpPreview";
+import JournalSeoChecklist from "@/components/admin/journal/JournalSeoChecklist";
+import { analyzeSeo } from "@/lib/journal/seo";
 
 interface Category { slug: string; title: string; titleZh: string }
 
@@ -11,6 +16,8 @@ interface Props {
   post?: CmsJournalPostFull;
   categories: Category[];
   isNew?: boolean;
+  /** New-post 页面从 URL ?mode=import 传入 · 默认打开笔记导入面板 */
+  showImportInitially?: boolean;
 }
 
 const BLOCK_TYPES: { key: JournalBlockType; label: string; icon: string }[] = [
@@ -27,7 +34,7 @@ const CTA_OPTIONS = [
   "premium", "credits", "safety", "apply-creator", "video-profiles",
 ];
 
-export default function JournalEditor({ post, categories, isNew }: Props) {
+export default function JournalEditor({ post, categories, isNew, showImportInitially }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState<"" | "draft" | "publish">("");
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +58,14 @@ export default function JournalEditor({ post, categories, isNew }: Props) {
   const [seoDesc, setSeoDesc] = useState(post?.seo?.description ?? "");
   const [seoOg, setSeoOg] = useState(post?.seo?.ogImage ?? "");
   const [seoNoindex, setSeoNoindex] = useState(!!post?.seo?.noindex);
+  const [primaryKeyword, setPrimaryKeyword] = useState(post?.seo?.primaryKeyword ?? "");
+  const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>(post?.seo?.secondaryKeywords ?? []);
+  const [longTailKeywords, setLongTailKeywords] = useState<string[]>(post?.seo?.longTailKeywords ?? []);
+  const [secondaryDraft, setSecondaryDraft] = useState("");
+  const [longTailDraft, setLongTailDraft] = useState("");
+
+  // Import panel · new-post 页面从 URL 传入初始值
+  const [showImport, setShowImport] = useState(!!(isNew && showImportInitially));
 
   const currentStatus = post?.status ?? "draft";
 
@@ -89,6 +104,67 @@ export default function JournalEditor({ post, categories, isNew }: Props) {
 
   const toggleCta = (v: string) => setCtas((p) => p.includes(v) ? p.filter((x) => x !== v) : [...p, v]);
 
+  // ══════════════════════════════════════
+  // 笔记导入 → 直接 hydrate 表单
+  // ══════════════════════════════════════
+
+  const handleImportApply = (o: ConversionOutput) => {
+    setTitle((prev) => prev || o.title);
+    setSlug((prev) => prev || o.slug);
+    setExcerpt((prev) => prev || o.excerpt);
+    setCategorySlug(o.categorySlug);
+    setLanguage(o.language);
+    setReadingTime(o.readingTime);
+    setTagsRaw(o.tags.join(", "));
+    // Body blocks · 完全替换
+    setBlocks(o.body.length ? o.body : [{ type: "paragraph", text: "" }]);
+    // CTA · 合并
+    setCtas((prev) => Array.from(new Set([...prev, ...o.cta])).slice(0, 6));
+    // 主关键词:tag 里第一个作为 fallback · 不覆盖已填内容
+    setPrimaryKeyword((prev) => prev || (o.tags[0] ?? ""));
+    setSecondaryKeywords((prev) => prev.length ? prev : o.tags.slice(1, 4));
+    // SEO title/description 若为空 · 用生成内容预填
+    setSeoTitle((prev) => prev || o.title);
+    setSeoDesc((prev) => prev || o.excerpt);
+    setError(null);
+  };
+
+  // 关键词编辑
+  const addSecondary = (v?: string) => {
+    const raw = (v ?? secondaryDraft).trim();
+    if (!raw) return;
+    setSecondaryKeywords((p) => Array.from(new Set([...p, raw])).slice(0, 8));
+    setSecondaryDraft("");
+  };
+  const removeSecondary = (kw: string) => setSecondaryKeywords((p) => p.filter((x) => x !== kw));
+  const addLongTail = (v?: string) => {
+    const raw = (v ?? longTailDraft).trim();
+    if (!raw) return;
+    setLongTailKeywords((p) => Array.from(new Set([...p, raw])).slice(0, 6));
+    setLongTailDraft("");
+  };
+  const removeLongTail = (kw: string) => setLongTailKeywords((p) => p.filter((x) => x !== kw));
+
+  // 实时 SEO 分析
+  const seoReport = useMemo(() => {
+    const bodyText = blocks.map((b) => b.text ?? (b.items?.join(" ") ?? "")).join("\n");
+    const headings = blocks.filter((b) => b.type === "heading").map((b) => b.text ?? "");
+    return analyzeSeo({
+      title,
+      seoTitle: seoTitle || undefined,
+      slug,
+      excerpt,
+      seoDescription: seoDesc || undefined,
+      primaryKeyword: primaryKeyword || undefined,
+      secondaryKeywords,
+      bodyText,
+      headings,
+      categorySlug,
+      coverImage: coverImage || undefined,
+      ogImage: seoOg || undefined,
+    });
+  }, [title, seoTitle, slug, excerpt, seoDesc, primaryKeyword, secondaryKeywords, blocks, categorySlug, coverImage, seoOg]);
+
   async function save(action: "draft" | "publish") {
     if (action === "publish" && !canPublish) {
       setError("发布需要:标题、slug、摘要、分类、至少一段正文");
@@ -111,6 +187,9 @@ export default function JournalEditor({ post, categories, isNew }: Props) {
           description: seoDesc || undefined,
           ogImage: seoOg || undefined,
           noindex: seoNoindex,
+          primaryKeyword: primaryKeyword || undefined,
+          secondaryKeywords: secondaryKeywords.length ? secondaryKeywords : undefined,
+          longTailKeywords: longTailKeywords.length ? longTailKeywords : undefined,
         },
         status: (action === "publish" ? "published" : "draft") as CmsStatus,
       };
@@ -181,6 +260,22 @@ export default function JournalEditor({ post, categories, isNew }: Props) {
       </div>
 
       {error && <div className="je-err">{error}</div>}
+
+      {isNew && !showImport && (
+        <div className="je-mode-switch">
+          <span>创作模式:<b>手动撰写</b></span>
+          <button type="button" onClick={() => setShowImport(true)}>切换到「从笔记导入」</button>
+        </div>
+      )}
+
+      {isNew && showImport && (
+        <NoteImportPanel
+          categories={categories}
+          currentCategorySlug={categorySlug}
+          onApply={handleImportApply}
+          onDismiss={() => setShowImport(false)}
+        />
+      )}
 
       <div className="je-grid">
         {/* Left: title + subtitle + excerpt + block editor */}
@@ -342,25 +437,95 @@ export default function JournalEditor({ post, categories, isNew }: Props) {
             </div>
           </div>
 
+          {/* Keywords panel */}
+          <div className="je-panel">
+            <h4>关键词</h4>
+            <div className="je-row">
+              <label>主关键词 (必填 · 用于 Google SEO 定位)</label>
+              <input value={primaryKeyword} onChange={(e) => setPrimaryKeyword(e.target.value)} placeholder="例:london sugar dating" />
+              <span className="je-hint">建议 1 个 · 2-5 词 · 出现在标题/描述/正文</span>
+            </div>
+            <div className="je-row">
+              <label>次要关键词 (最多 8 个)</label>
+              <div className="je-kw-input">
+                <input
+                  value={secondaryDraft}
+                  onChange={(e) => setSecondaryDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSecondary(); } }}
+                  placeholder="回车添加 · 例:mayfair dating"
+                />
+                <button type="button" onClick={() => addSecondary()} disabled={!secondaryDraft.trim()}>+</button>
+              </div>
+              {secondaryKeywords.length > 0 && (
+                <div className="je-kw-chips">
+                  {secondaryKeywords.map((kw) => (
+                    <span key={kw} className="je-kw-chip">
+                      {kw}<button type="button" onClick={() => removeSecondary(kw)}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="je-row">
+              <label>长尾关键词 (最多 6 个)</label>
+              <div className="je-kw-input">
+                <input
+                  value={longTailDraft}
+                  onChange={(e) => setLongTailDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addLongTail(); } }}
+                  placeholder="回车添加 · 例:how to find verified sugargirls in london"
+                />
+                <button type="button" onClick={() => addLongTail()} disabled={!longTailDraft.trim()}>+</button>
+              </div>
+              {longTailKeywords.length > 0 && (
+                <div className="je-kw-chips">
+                  {longTailKeywords.map((kw) => (
+                    <span key={kw} className="je-kw-chip">
+                      {kw}<button type="button" onClick={() => removeLongTail(kw)}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <span className="je-hint">用于抓取具体意图 · 每条 5+ 词 · 命中长尾流量</span>
+            </div>
+          </div>
+
           {/* SEO panel */}
           <div className="je-panel">
-            <h4>SEO</h4>
+            <h4>Google SEO Metadata</h4>
             <div className="je-row">
-              <label>SEO Title</label>
-              <input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder="留空使用文章标题" />
+              <label>SEO Title <em>{(seoTitle || title).length}/60</em></label>
+              <input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder="留空使用文章标题" maxLength={80} />
             </div>
             <div className="je-row">
-              <label>SEO Description</label>
-              <textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)} placeholder="留空使用摘要" rows={2} />
+              <label>Meta Description <em>{(seoDesc || excerpt).length}/158</em></label>
+              <textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)} placeholder="留空使用摘要 · 建议 120-158 字符" rows={3} maxLength={200} />
             </div>
             <div className="je-row">
-              <label>OG Image</label>
+              <label>OG / 分享图</label>
               <input value={seoOg} onChange={(e) => setSeoOg(e.target.value)} placeholder="留空使用封面图" />
             </div>
             <label className="je-toggle">
               <input type="checkbox" checked={seoNoindex} onChange={(e) => setSeoNoindex(e.target.checked)} />
-              noindex (禁止搜索引擎收录)
+              noindex · 禁止 Google 收录
             </label>
+          </div>
+
+          {/* SERP preview */}
+          <div className="je-panel">
+            <h4>Google SERP 预览</h4>
+            <JournalSerpPreview
+              title={seoReport.effectiveTitle}
+              description={seoReport.effectiveDescription}
+              slug={slug}
+              categorySlug={categorySlug}
+            />
+          </div>
+
+          {/* SEO checklist */}
+          <div className="je-panel">
+            <h4>SEO 检查清单</h4>
+            <JournalSeoChecklist report={seoReport} />
           </div>
         </div>
       </div>
@@ -427,6 +592,20 @@ export default function JournalEditor({ post, categories, isNew }: Props) {
         .je-chips{display:flex;flex-wrap:wrap;gap:4px}
         .je-chip{padding:5px 10px;background:#F3F4F6;color:#374151;border:0;border-radius:99px;font:inherit;font-size:11px;font-weight:600;cursor:pointer;font-family:ui-monospace,monospace}
         .je-chip.is-active{background:#111;color:#EEDDB8}
+        .je-mode-switch{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#FBFAF7;border:1px dashed #EEE9DC;border-radius:10px;font-size:12.5px;color:#374151}
+        .je-mode-switch b{color:#111;font-weight:700}
+        .je-mode-switch button{background:#111;color:#EEDDB8;border:0;padding:6px 14px;font:inherit;font-size:11.5px;font-weight:700;border-radius:99px;cursor:pointer}
+        .je-mode-switch button:hover{background:#1a1a1c}
+        .je-hint{font-size:11px;color:#9CA3AF;margin-top:2px}
+        .je-row label em{font-style:normal;font-size:10.5px;color:#9CA3AF;font-weight:500;margin-left:6px;font-variant-numeric:tabular-nums}
+        .je-kw-input{display:flex;gap:6px;align-items:stretch}
+        .je-kw-input input{flex:1}
+        .je-kw-input button{background:#111;color:#EEDDB8;border:0;width:32px;font-size:15px;font-weight:700;border-radius:8px;cursor:pointer}
+        .je-kw-input button:disabled{opacity:.3;cursor:not-allowed}
+        .je-kw-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+        .je-kw-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;background:linear-gradient(135deg,#EEDDB8,#B8A789);color:#1a1409;font-size:11px;font-weight:600;border-radius:99px}
+        .je-kw-chip button{background:rgba(26,20,9,.15);color:#1a1409;border:0;width:16px;height:16px;font-size:11px;font-weight:700;border-radius:50%;cursor:pointer;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0}
+        .je-kw-chip button:hover{background:rgba(26,20,9,.3)}
         @media (max-width:1024px){.je-grid{grid-template-columns:1fr}.je-side{position:static}}
       `}</style>
     </div>

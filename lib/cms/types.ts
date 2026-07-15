@@ -273,6 +273,9 @@ export interface CmsJournalPostFull {
     description?: string;
     ogImage?: string;
     noindex?: boolean;
+    primaryKeyword?: string;
+    secondaryKeywords?: string[];
+    longTailKeywords?: string[];
   };
   isNewPost?: boolean;        // true = created via admin (not in base seed)
 }

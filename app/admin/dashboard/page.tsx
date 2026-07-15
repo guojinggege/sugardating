@@ -83,10 +83,10 @@ export default function AdminDashboardPage() {
               <b>新建 Journal 文章</b>
               <em>发布高端社交指南</em>
             </Link>
-            <Link href="/admin/tools/xhs-to-blog" className="db-quick-a db-quick-a--gold">
+            <Link href="/admin/journal/posts/new?mode=import" className="db-quick-a db-quick-a--gold">
               <span>✨</span>
-              <b>笔记转博客 · 内容工坊</b>
-              <em>小红书笔记 → Journal 草稿</em>
+              <b>笔记转博客 · 直接建文</b>
+              <em>小红书笔记 → Journal 编辑器</em>
             </Link>
             <Link href="/admin/creators" className="db-quick-a">
               <span>👥</span>

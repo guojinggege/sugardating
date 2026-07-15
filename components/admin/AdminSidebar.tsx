@@ -14,7 +14,7 @@ const NAV: NavGroup[] = [
     { label: "首页内容",         href: "/admin/content/home", soon: true },
     { label: "导航与 Footer",    href: "/admin/content/navigation", soon: true },
     { label: "Journal 文章",     href: "/admin/journal/posts" },
-    { label: "笔记转博客",       href: "/admin/tools/xhs-to-blog", badge: "NEW" },
+    { label: "笔记转博客",       href: "/admin/journal/posts/new?mode=import", badge: "NEW" },
     { label: "SEO 页面",         href: "/admin/seo", soon: true },
   ]},
   { label: "Creators", items: [

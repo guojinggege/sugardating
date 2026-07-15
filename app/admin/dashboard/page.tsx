@@ -83,6 +83,11 @@ export default function AdminDashboardPage() {
               <b>新建 Journal 文章</b>
               <em>发布高端社交指南</em>
             </Link>
+            <Link href="/admin/tools/xhs-to-blog" className="db-quick-a db-quick-a--gold">
+              <span>✨</span>
+              <b>笔记转博客 · 内容工坊</b>
+              <em>小红书笔记 → Journal 草稿</em>
+            </Link>
             <Link href="/admin/creators" className="db-quick-a">
               <span>👥</span>
               <b>管理 Creator 资料</b>
@@ -146,6 +151,8 @@ export default function AdminDashboardPage() {
         .db-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
         .db-quick-a{display:flex;flex-direction:column;padding:14px 16px;background:#FAFAF8;border:1px solid transparent;border-radius:10px;text-decoration:none;color:#111;transition:border-color .12s,background .12s}
         .db-quick-a:hover{border-color:#D6B980;background:#fff}
+        .db-quick-a--gold{background:linear-gradient(135deg,rgba(238,221,184,.28),rgba(184,167,137,.12));border-color:rgba(184,167,137,.45)}
+        .db-quick-a--gold:hover{background:linear-gradient(135deg,rgba(238,221,184,.42),rgba(184,167,137,.2))}
         .db-quick-a span{font-size:22px;margin-bottom:6px;line-height:1}
         .db-quick-a b{font-size:13px;font-weight:700;color:#111;letter-spacing:-0.005em}
         .db-quick-a em{font-size:11.5px;font-style:normal;color:#6B7280;margin-top:2px}

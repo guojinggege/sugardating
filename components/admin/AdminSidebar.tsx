@@ -14,6 +14,7 @@ const NAV: NavGroup[] = [
     { label: "首页内容",         href: "/admin/content/home", soon: true },
     { label: "导航与 Footer",    href: "/admin/content/navigation", soon: true },
     { label: "Journal 文章",     href: "/admin/journal/posts" },
+    { label: "笔记转博客",       href: "/admin/tools/xhs-to-blog", badge: "NEW" },
     { label: "SEO 页面",         href: "/admin/seo", soon: true },
   ]},
   { label: "Creators", items: [
@@ -73,6 +74,7 @@ export default function AdminSidebar() {
                   <li key={it.href}>
                     <Link href={it.href} className={"as-item" + (active ? " is-active" : "")}>
                       <span className="as-item-label">{it.label}</span>
+                      {it.badge && <span className="as-badge">{it.badge}</span>}
                       {it.soon && <span className="as-soon">Soon</span>}
                     </Link>
                   </li>
@@ -106,6 +108,7 @@ export default function AdminSidebar() {
         .as-item.is-active:before{content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:16px;background:#EEDDB8;border-radius:0 3px 3px 0}
         .as-item-label{flex:1}
         .as-soon{font-size:9.5px;letter-spacing:.06em;color:rgba(238,221,184,.55);text-transform:uppercase;font-weight:700;background:rgba(238,221,184,.08);padding:2px 6px;border-radius:4px}
+        .as-badge{font-size:9.5px;letter-spacing:.08em;color:#1a1409;text-transform:uppercase;font-weight:800;background:linear-gradient(135deg,#EEDDB8,#B8A789);padding:2px 6px;border-radius:4px}
         .as-foot{padding:14px 22px 20px;border-top:1px solid rgba(238,221,184,.08)}
         .as-back{font-size:12px;color:rgba(232,232,236,.6);text-decoration:none;transition:color .12s}
         .as-back:hover{color:#EEDDB8}

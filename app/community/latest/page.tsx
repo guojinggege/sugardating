@@ -1,5 +1,4 @@
-// 私语广场 · Whisper Square 首页 · 为你推荐 (混合流)
-// Sugardating Journal 已迁移到 /community/journal
+// 最新 · 按创建时间倒序 · 混合 story + question
 import type { Metadata } from "next";
 import WhisperSquareHero from "@/components/community/WhisperSquareHero";
 import CommunityFeedTabs from "@/components/community/CommunityFeedTabs";
@@ -10,21 +9,18 @@ import QuestionPostCard from "@/components/community/QuestionPostCard";
 import {
   CommunityTrendingPanel, CommunityUnansweredPanel, CommunityJournalPanel, CommunitySafetyCard,
 } from "@/components/community/CommunitySidebarPanels";
-import {
-  listForYou, listTrending, listUnanswered, scrubAuthor,
-} from "@/lib/community/store";
+import { listLatest, listTrending, listUnanswered, scrubAuthor } from "@/lib/community/store";
 import { featuredPosts } from "@/lib/journal-data";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "私语广场 · Sugardating Community | 真实故事与关系问答",
-  description:
-    "私语广场:高端 sugardating 社区 · 情感私话、匿名心事与关系问答 · 支持匿名 · 18+ · 隐私优先 · 尊重边界。",
+  title: "最新 · 私语广场 · Sugardating",
+  description: "私语广场最新内容 · 情感私话与问答按发布时间排序。",
 };
 
-export default function CommunityHubPage() {
-  const feed = listForYou(14);
+export default function LatestPage() {
+  const feed = listLatest();
   const trending = listTrending(5);
   const unanswered = listUnanswered();
   const journalPicks = featuredPosts().slice(0, 3);
@@ -34,7 +30,7 @@ export default function CommunityHubPage() {
       <WhisperSquareHero />
       <CommunityFeedTabs unansweredCount={unanswered.length} />
       <CommunityShell
-        activePath="/community"
+        activePath="/community/latest"
         right={
           <>
             <CommunityTrendingPanel items={trending} />

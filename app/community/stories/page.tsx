@@ -1,30 +1,25 @@
-// 私语广场 · Whisper Square 首页 · 为你推荐 (混合流)
-// Sugardating Journal 已迁移到 /community/journal
+// 情感私话 feed · 仅 story 类型
 import type { Metadata } from "next";
 import WhisperSquareHero from "@/components/community/WhisperSquareHero";
 import CommunityFeedTabs from "@/components/community/CommunityFeedTabs";
 import CommunityShell from "@/components/community/CommunityShell";
 import CommunityFab from "@/components/community/CommunityFab";
 import StoryPostCard from "@/components/community/StoryPostCard";
-import QuestionPostCard from "@/components/community/QuestionPostCard";
 import {
   CommunityTrendingPanel, CommunityUnansweredPanel, CommunityJournalPanel, CommunitySafetyCard,
 } from "@/components/community/CommunitySidebarPanels";
-import {
-  listForYou, listTrending, listUnanswered, scrubAuthor,
-} from "@/lib/community/store";
+import { listStories, listTrending, listUnanswered, scrubAuthor } from "@/lib/community/store";
 import { featuredPosts } from "@/lib/journal-data";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "私语广场 · Sugardating Community | 真实故事与关系问答",
-  description:
-    "私语广场:高端 sugardating 社区 · 情感私话、匿名心事与关系问答 · 支持匿名 · 18+ · 隐私优先 · 尊重边界。",
+  title: "情感私话 · 私语广场 · Sugardating",
+  description: "私语广场情感私话 · 真实经历、匿名心事与关系故事 · 高端 sugardating 社区。",
 };
 
-export default function CommunityHubPage() {
-  const feed = listForYou(14);
+export default function StoriesPage() {
+  const stories = listStories();
   const trending = listTrending(5);
   const unanswered = listUnanswered();
   const journalPicks = featuredPosts().slice(0, 3);
@@ -34,7 +29,7 @@ export default function CommunityHubPage() {
       <WhisperSquareHero />
       <CommunityFeedTabs unansweredCount={unanswered.length} />
       <CommunityShell
-        activePath="/community"
+        activePath="/community/stories"
         right={
           <>
             <CommunityTrendingPanel items={trending} />
@@ -44,11 +39,7 @@ export default function CommunityHubPage() {
           </>
         }
       >
-        {feed.map((p) => (
-          p.contentType === "story"
-            ? <StoryPostCard    key={p.id} post={p} author={scrubAuthor(p)} />
-            : <QuestionPostCard key={p.id} post={p} author={scrubAuthor(p)} />
-        ))}
+        {stories.map((p) => <StoryPostCard key={p.id} post={p} author={scrubAuthor(p)} />)}
       </CommunityShell>
       <CommunityFab />
     </>

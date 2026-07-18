@@ -19,7 +19,14 @@ const CTA_OPTIONS = [
 ];
 const LEN_LABEL: Record<string, string> = { brief: "简短 · 600-900 字", standard: "标准 · 1200-1800", deep: "深度 · 2000-3000" };
 const TONE_LABEL: Record<string, string> = { editorial: "编辑体", insider: "内行体", practical: "实用型", narrative: "叙事型" };
-const LANG_LABEL: Record<string, string> = { zh: "中文", en: "English (占位需翻译)", bilingual: "双语 (需人工补)" };
+const LANG_LABEL: Record<string, string> = {
+  zh: "中文",
+  en: "English (占位需翻译)",
+  bilingual: "中英双语 (需人工补)",
+  th: "ไทย (占位需翻译)",
+  vi: "Tiếng Việt (占位需翻译)",
+  tl: "Filipino (占位需翻译)",
+};
 
 export default function NoteImportPanel({ categories, currentCategorySlug, onApply, onDismiss }: Props) {
   const [expanded, setExpanded] = useState(true);
@@ -28,7 +35,7 @@ export default function NoteImportPanel({ categories, currentCategorySlug, onApp
   const [sourceAuthor, setSourceAuthor] = useState("");
 
   const [categorySlug, setCategorySlug] = useState(currentCategorySlug);
-  const [language, setLanguage] = useState<"zh" | "en" | "bilingual">("zh");
+  const [language, setLanguage] = useState<"zh" | "en" | "bilingual" | "th" | "vi" | "tl">("zh");
   const [tone, setTone] = useState<"editorial" | "insider" | "practical" | "narrative">("editorial");
   const [length, setLength] = useState<"brief" | "standard" | "deep">("standard");
   const [insertInsight, setInsertInsight] = useState(true);

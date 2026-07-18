@@ -8,6 +8,9 @@ import type { ConversionOutput } from "@/lib/content-tools/conversion-types";
 import NoteImportPanel from "@/components/admin/journal/NoteImportPanel";
 import JournalSerpPreview from "@/components/admin/journal/JournalSerpPreview";
 import JournalSeoChecklist from "@/components/admin/journal/JournalSeoChecklist";
+import JournalRelatedPostsSelector from "@/components/admin/journal/JournalRelatedPostsSelector";
+import JournalInternalLinksPanel from "@/components/admin/journal/JournalInternalLinksPanel";
+import JournalSchemaPreview from "@/components/admin/journal/JournalSchemaPreview";
 import { analyzeSeo } from "@/lib/journal/seo";
 
 interface Category { slug: string; title: string; titleZh: string }
@@ -61,6 +64,7 @@ export default function JournalEditor({ post, categories, isNew, showImportIniti
   const [primaryKeyword, setPrimaryKeyword] = useState(post?.seo?.primaryKeyword ?? "");
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>(post?.seo?.secondaryKeywords ?? []);
   const [longTailKeywords, setLongTailKeywords] = useState<string[]>(post?.seo?.longTailKeywords ?? []);
+  const [relatedSlugs, setRelatedSlugs] = useState<string[]>(post?.seo?.relatedSlugs ?? []);
   const [secondaryDraft, setSecondaryDraft] = useState("");
   const [longTailDraft, setLongTailDraft] = useState("");
 
@@ -190,6 +194,7 @@ export default function JournalEditor({ post, categories, isNew, showImportIniti
           primaryKeyword: primaryKeyword || undefined,
           secondaryKeywords: secondaryKeywords.length ? secondaryKeywords : undefined,
           longTailKeywords: longTailKeywords.length ? longTailKeywords : undefined,
+          relatedSlugs: relatedSlugs.length ? relatedSlugs : undefined,
         },
         status: (action === "publish" ? "published" : "draft") as CmsStatus,
       };
@@ -526,6 +531,53 @@ export default function JournalEditor({ post, categories, isNew, showImportIniti
           <div className="je-panel">
             <h4>SEO 检查清单</h4>
             <JournalSeoChecklist report={seoReport} />
+          </div>
+
+          {/* Related posts */}
+          <div className="je-panel">
+            <h4>相关文章推荐</h4>
+            <JournalRelatedPostsSelector
+              categorySlug={categorySlug}
+              tags={tagsRaw.split(",").map((s) => s.trim()).filter(Boolean)}
+              primaryKeyword={primaryKeyword || undefined}
+              secondaryKeywords={secondaryKeywords}
+              longTailKeywords={longTailKeywords}
+              currentSlug={post?.slug}
+              value={relatedSlugs}
+              onChange={setRelatedSlugs}
+            />
+          </div>
+
+          {/* Internal links */}
+          <div className="je-panel">
+            <h4>内链建议</h4>
+            <JournalInternalLinksPanel
+              blocks={blocks}
+              currentSlug={post?.slug}
+              onApply={(idx, text) => updateBlock(idx, { text })}
+            />
+          </div>
+
+          {/* Schema.org */}
+          <div className="je-panel">
+            <h4>结构化数据 · JSON-LD</h4>
+            <JournalSchemaPreview
+              slug={slug}
+              title={title}
+              description={seoReport.effectiveDescription}
+              categorySlug={categorySlug}
+              categories={categories}
+              language={language}
+              author={author}
+              publishedAt={post?.publishedAt}
+              coverImage={coverImage || undefined}
+              ogImage={seoOg || undefined}
+              primaryKeyword={primaryKeyword || undefined}
+              secondaryKeywords={secondaryKeywords}
+              longTailKeywords={longTailKeywords}
+              tags={tagsRaw.split(",").map((s) => s.trim()).filter(Boolean)}
+              readingTime={readingTime}
+            />
           </div>
         </div>
       </div>

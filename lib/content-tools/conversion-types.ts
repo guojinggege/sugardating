@@ -1,7 +1,7 @@
 // 内容智能工坊 · 类型 (client-safe · 与 Journal block 兼容)
 import type { CmsJournalBlock } from "@/lib/cms/types";
 
-export type ConversionLanguage = "zh" | "en" | "bilingual";
+export type ConversionLanguage = "zh" | "en" | "bilingual" | "th" | "vi" | "tl";
 export type ConversionTone = "editorial" | "insider" | "practical" | "narrative";
 export type ConversionLength = "brief" | "standard" | "deep";
 

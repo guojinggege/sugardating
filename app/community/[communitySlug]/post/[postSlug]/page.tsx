@@ -4,13 +4,15 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Img from "@/components/Img";
 import {
-  journalPosts, getCategory, getPost, relatedPosts,
+  journalPosts, getCategory, getPost, relatedPosts, getPostBySlug,
 } from "@/lib/journal-data";
 import JournalCategoryNav from "@/components/Journal/JournalCategoryNav";
 import JournalArticleBody from "@/components/Journal/JournalArticleBody";
 import JournalCTA from "@/components/Journal/JournalCTA";
 import JournalRelated from "@/components/Journal/JournalRelated";
 import JournalSidebar from "@/components/Journal/JournalSidebar";
+import { buildBlogPostingSchema, buildBreadcrumbSchema, stringifySchema } from "@/lib/journal/schema";
+import { cmsRepo } from "@/lib/cms/repository";
 
 export const dynamic = "force-dynamic";
 
@@ -24,14 +26,33 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { communitySlug: string; postSlug: string } }): Promise<Metadata> {
   const post = getPost(params.communitySlug, params.postSlug);
   if (!post) return { title: "Article · Sugardating Journal" };
+  const cms = cmsRepo.getJournalPost(post.slug);
+  const seo = cms?.seo;
+  const title = seo?.title || `${post.title} · Sugardating Journal`;
+  const description = seo?.description || post.excerpt;
+  const image = seo?.ogImage || post.coverImage;
+  const keywords = [
+    seo?.primaryKeyword,
+    ...(seo?.secondaryKeywords || []),
+    ...(seo?.longTailKeywords || []),
+    ...post.tags,
+  ].filter((s): s is string => Boolean(s && s.trim()));
   return {
-    title: `${post.title} · Sugardating Journal`,
-    description: post.excerpt,
+    title,
+    description,
+    keywords: keywords.length ? keywords.join(", ") : undefined,
+    robots: seo?.noindex ? { index: false, follow: false } : undefined,
     openGraph: {
       title: post.title,
-      description: post.excerpt,
-      images: [post.coverImage],
+      description,
+      images: [image],
       type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [image],
     },
   };
 }
@@ -46,10 +67,47 @@ export default function JournalArticlePage({ params }: { params: { communitySlug
   const post = getPost(params.communitySlug, params.postSlug);
   if (!post) notFound();
   const category = getCategory(post.categorySlug);
-  const related = relatedPosts(post, 3);
+
+  // Related · 先看运营锁定的 relatedSlugs (Admin SEO 面板持久化的),否则回退到自动
+  const cmsFull = cmsRepo.getJournalPost(post.slug);
+  const pinnedSlugs = cmsFull?.seo?.relatedSlugs ?? [];
+  const pinned = pinnedSlugs
+    .map((s: string) => getPostBySlug(s))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const related = pinned.length >= 3 ? pinned.slice(0, 3) : [...pinned, ...relatedPosts(post, 3 - pinned.length)].slice(0, 3);
+
+  // JSON-LD · BlogPosting + BreadcrumbList
+  const articleSchema = buildBlogPostingSchema({
+    slug: post.slug,
+    title: post.title,
+    description: cmsFull?.seo?.description || post.excerpt,
+    categorySlug: post.categorySlug,
+    language: post.language,
+    author: post.author,
+    publishedAt: post.publishedAt,
+    updatedAt: post.updatedAt,
+    coverImage: post.coverImage,
+    ogImage: cmsFull?.seo?.ogImage,
+    primaryKeyword: cmsFull?.seo?.primaryKeyword,
+    secondaryKeywords: cmsFull?.seo?.secondaryKeywords,
+    longTailKeywords: cmsFull?.seo?.longTailKeywords,
+    tags: post.tags,
+    readingTime: post.readingTime,
+  });
+  const breadcrumbSchema = buildBreadcrumbSchema({
+    categorySlug: post.categorySlug,
+    categoryTitle: category?.title || post.categorySlug,
+    postSlug: post.slug,
+    postTitle: post.title,
+  });
+  const jsonLd = stringifySchema([articleSchema, breadcrumbSchema]);
 
   return (
     <div className="jn-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
       <JournalCategoryNav activeSlug={post.categorySlug} />
 
       <div className="jn-shell">

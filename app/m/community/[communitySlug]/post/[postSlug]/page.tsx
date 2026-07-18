@@ -4,11 +4,13 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Img from "@/components/Img";
 import {
-  journalPosts, getCategory, getPost, relatedPosts,
+  journalPosts, getCategory, getPost, relatedPosts, getPostBySlug,
 } from "@/lib/journal-data";
 import JournalArticleBody from "@/components/Journal/JournalArticleBody";
 import JournalCTA from "@/components/Journal/JournalCTA";
 import JournalPostCard from "@/components/Journal/JournalPostCard";
+import { buildBlogPostingSchema, buildBreadcrumbSchema, stringifySchema } from "@/lib/journal/schema";
+import { cmsRepo } from "@/lib/cms/repository";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +24,23 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { communitySlug: string; postSlug: string } }): Promise<Metadata> {
   const post = getPost(params.communitySlug, params.postSlug);
   if (!post) return { title: "Article · Sugardating Journal" };
+  const seo = cmsRepo.getJournalPost(post.slug)?.seo;
+  const title = seo?.title || `${post.title} · Sugardating Journal`;
+  const description = seo?.description || post.excerpt;
+  const image = seo?.ogImage || post.coverImage;
+  const keywords = [
+    seo?.primaryKeyword,
+    ...(seo?.secondaryKeywords || []),
+    ...(seo?.longTailKeywords || []),
+    ...post.tags,
+  ].filter((s): s is string => Boolean(s && s.trim()));
   return {
-    title: `${post.title} · Sugardating Journal`,
-    description: post.excerpt,
-    openGraph: { title: post.title, description: post.excerpt, images: [post.coverImage], type: "article" },
+    title,
+    description,
+    keywords: keywords.length ? keywords.join(", ") : undefined,
+    robots: seo?.noindex ? { index: false, follow: false } : undefined,
+    openGraph: { title: post.title, description, images: [image], type: "article" },
+    twitter: { card: "summary_large_image", title: post.title, description, images: [image] },
   };
 }
 
@@ -39,10 +54,33 @@ export default function MobileJournalArticlePage({ params }: { params: { communi
   const post = getPost(params.communitySlug, params.postSlug);
   if (!post) notFound();
   const category = getCategory(post.categorySlug);
-  const related = relatedPosts(post, 2);
+  const cmsFull = cmsRepo.getJournalPost(post.slug);
+  const pinnedSlugs = cmsFull?.seo?.relatedSlugs ?? [];
+  const pinned = pinnedSlugs.map((s: string) => getPostBySlug(s)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const related = pinned.length >= 2 ? pinned.slice(0, 2) : [...pinned, ...relatedPosts(post, 2 - pinned.length)].slice(0, 2);
+
+  const jsonLd = stringifySchema([
+    buildBlogPostingSchema({
+      slug: post.slug, title: post.title,
+      description: cmsFull?.seo?.description || post.excerpt,
+      categorySlug: post.categorySlug, language: post.language,
+      author: post.author, publishedAt: post.publishedAt, updatedAt: post.updatedAt,
+      coverImage: post.coverImage, ogImage: cmsFull?.seo?.ogImage,
+      primaryKeyword: cmsFull?.seo?.primaryKeyword,
+      secondaryKeywords: cmsFull?.seo?.secondaryKeywords,
+      longTailKeywords: cmsFull?.seo?.longTailKeywords,
+      tags: post.tags, readingTime: post.readingTime,
+    }),
+    buildBreadcrumbSchema({
+      categorySlug: post.categorySlug,
+      categoryTitle: category?.title || post.categorySlug,
+      postSlug: post.slug, postTitle: post.title,
+    }),
+  ]);
 
   return (
     <div className="mj-art-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       {/* Cover */}
       <div className="mj-art-cover">
         <Img src={post.coverImage} alt={post.title} sizes="100vw" />

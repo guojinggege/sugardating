@@ -289,20 +289,20 @@ export function convertNoteToBlog(input: ConversionInput, actorEmail?: string): 
 
   // Language handling (heuristic:仅标记 · 不做真翻译)
   const primaryLang: "zh" | "en" = /[一-鿿]/.test(sanitized) ? "zh" : "en";
-  const finalLang: "zh" | "en" = settings.language === "en" ? "en" : primaryLang;
+  // storage-facing lang stays zh/en (CmsJournalPostFull.language 限制)
+  // th/vi/tl 均先按 en 存储 · 靠 placeholder block 提示需要翻译
+  const finalLang: "zh" | "en" = settings.language === "zh" ? "zh" : settings.language === "en" || settings.language === "bilingual" ? (primaryLang === "zh" && settings.language === "en" ? "en" : primaryLang) : "en";
 
-  // If bilingual, prepend a note block (no real translation available heuristically)
-  if (settings.language === "bilingual" && primaryLang === "zh") {
-    trimmed.unshift({
-      type: "paragraph",
-      text: "[双语版本 · English translation required · 请人工翻译或删除此提示]",
-    });
-  }
-  if (settings.language === "en" && primaryLang === "zh") {
-    trimmed.unshift({
-      type: "paragraph",
-      text: "[English draft · 原文中文,需人工翻译]",
-    });
+  const nonZhPlaceholders: Record<string, string> = {
+    en:        "[English draft · 原文中文,需人工翻译]",
+    bilingual: "[双语版本 · English translation required · 请人工翻译或删除此提示]",
+    th:        "[ภาษาไทย draft · ต้นฉบับภาษาจีน · โปรดแปลด้วยตนเอง]",
+    vi:        "[Bản nháp Tiếng Việt · Nội dung gốc bằng tiếng Trung · Vui lòng dịch thủ công]",
+    tl:        "[Filipino draft · Orihinal na nilalaman sa Intsik · Mangyaring i-translate nang manu-mano]",
+  };
+  const placeholder = nonZhPlaceholders[settings.language];
+  if (placeholder && primaryLang === "zh") {
+    trimmed.unshift({ type: "paragraph", text: placeholder });
   }
 
   const title = extractTitle(trimmed, "从小红书笔记生成的文章");

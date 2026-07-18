@@ -1,5 +1,6 @@
-// 渲染 JournalBlock[] → 高级排版
+// 渲染 JournalBlock[] → 高级排版 · 支持内联站内链接 [text](/path)
 import type { JournalBlock } from "@/lib/journal-data";
+import { renderInlineWithLinks } from "@/lib/journal/inline-links";
 
 interface Props {
   blocks: JournalBlock[];
@@ -11,27 +12,27 @@ export default function JournalArticleBody({ blocks }: Props) {
       {blocks.map((b, i) => {
         switch (b.type) {
           case "paragraph":
-            return <p key={i} className="jn-p">{b.text}</p>;
+            return <p key={i} className="jn-p">{renderInlineWithLinks(b.text)}</p>;
           case "heading":
-            return <h2 key={i} className="jn-h2">{b.text}</h2>;
+            return <h2 key={i} className="jn-h2">{renderInlineWithLinks(b.text)}</h2>;
           case "quote":
             return (
               <blockquote key={i} className="jn-quote">
-                <p>{b.text}</p>
+                <p>{renderInlineWithLinks(b.text)}</p>
                 {b.attribution && <cite>— {b.attribution}</cite>}
               </blockquote>
             );
           case "list":
             return (
               <ul key={i} className="jn-ul">
-                {b.items.map((it, j) => <li key={j}>{it}</li>)}
+                {b.items.map((it, j) => <li key={j}>{renderInlineWithLinks(it)}</li>)}
               </ul>
             );
           case "insight":
             return (
               <aside key={i} className="jn-insight" role="note">
                 <div className="jn-insight-h">{b.title}</div>
-                <p className="jn-insight-p">{b.text}</p>
+                <p className="jn-insight-p">{renderInlineWithLinks(b.text)}</p>
               </aside>
             );
           case "checklist":
@@ -42,7 +43,7 @@ export default function JournalArticleBody({ blocks }: Props) {
                   {b.items.map((it, j) => (
                     <li key={j}>
                       <span className="jn-check-ic" aria-hidden>✓</span>
-                      {it}
+                      {renderInlineWithLinks(it)}
                     </li>
                   ))}
                 </ul>
@@ -52,6 +53,8 @@ export default function JournalArticleBody({ blocks }: Props) {
       })}
       <style>{`
         .jn-article-body{font-size:17px;line-height:1.85;color:#3d3d42;max-width:68ch}
+        .jn-il{color:#161618;font-weight:600;text-decoration:none;background-image:linear-gradient(180deg,transparent 62%,#EEDDB8 62%,#EEDDB8 92%,transparent 92%);background-size:100% 100%;padding:0 2px;transition:background-color .12s}
+        .jn-il:hover{background-image:linear-gradient(180deg,transparent 0,#EEDDB8 0)}
         .jn-p{margin:0 0 22px}
         .jn-h2{font-size:24px;line-height:1.35;color:#161618;font-weight:700;margin:36px 0 16px;letter-spacing:-0.008em}
         .jn-ul{list-style:none;padding:0;margin:0 0 24px}

@@ -276,6 +276,7 @@ export interface CmsJournalPostFull {
     primaryKeyword?: string;
     secondaryKeywords?: string[];
     longTailKeywords?: string[];
+    relatedSlugs?: string[];      // 手工/推荐锁定的相关文章 slug (最多 5)
   };
   isNewPost?: boolean;        // true = created via admin (not in base seed)
 }

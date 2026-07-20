@@ -40,7 +40,8 @@ const NAV: NavGroup[] = [
     { label: "会员",             href: "/admin/membership", soon: true },
   ]},
   { label: "Safety", items: [
-    { label: "举报",             href: "/admin/chat/reports", soon: true },
+    { label: "用户举报",         href: "/admin/reports", badge: "NEW" },
+    { label: "聊天举报",         href: "/admin/chat/reports", soon: true },
     { label: "审核队列",         href: "/admin/moderation", soon: true },
   ]},
   { label: "System", items: [

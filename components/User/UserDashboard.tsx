@@ -108,6 +108,13 @@ export default function UserDashboard({ user, profile, counts, creatorApplicatio
             })}
           </nav>
 
+          <div className="me-side-external">
+            <Link href="/me/reports" className="me-nav-item me-nav-external">
+              <span className="me-nav-ic me-nav-ic--warn">⛨</span>
+              <span>我要举报</span>
+            </Link>
+          </div>
+
           <div className="me-side-foot">
             <button type="button" onClick={onLogout} className="me-logout">退出登录</button>
           </div>
@@ -154,6 +161,9 @@ export default function UserDashboard({ user, profile, counts, creatorApplicatio
         .me-nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; background: rgba(0,0,0,.08); color: var(--ink); padding: 2px 6px; border-radius: 999px; }
         .me-nav-item.on .me-nav-badge { background: rgba(255,255,255,.2); color: #fff; }
 
+        .me-side-external { padding-top: 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+        .me-nav-external { text-decoration: none; }
+        .me-nav-ic--warn { color: #B77945; opacity: 1; }
         .me-side-foot { padding-top: 12px; border-top: 1px solid var(--line); }
         .me-logout { width: 100%; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: color .15s, border-color .15s; }
         .me-logout:hover { color: var(--live); border-color: var(--live); }
@@ -198,6 +208,7 @@ function OverviewSection({ user, profile, counts, creatorApp, onNav }: {
           ? <QuickLink title={`创作者申请:${statusText(creatorApp.status)}`} desc={`预览 /creators/${creatorApp.slug}`} onClick={() => onNav("creator")} accent />
           : <QuickLink title="申请成为创作者" desc="创建你的公开主页 · 接收互动"          href="/apply" accent />
         }
+        <QuickLink title="安全举报与反馈" desc="举报线上沟通、预约或线下接触中遇到的问题" href="/me/reports/new" safety />
       </div>
       <style jsx>{`
         .me-h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 4px; letter-spacing: -.01em; }
@@ -461,16 +472,28 @@ function StatBox({ label, value, onClick }: { label: string; value: number; onCl
     </button>
   );
 }
-function QuickLink({ title, desc, href, onClick, accent }: { title: string; desc: string; href?: string; onClick?: () => void; accent?: boolean }) {
+function QuickLink({ title, desc, href, onClick, accent, safety }: { title: string; desc: string; href?: string; onClick?: () => void; accent?: boolean; safety?: boolean }) {
+  const background = safety
+    ? "linear-gradient(135deg, rgba(183,121,69,.10), rgba(197,165,106,.06))"
+    : accent
+    ? "linear-gradient(135deg, rgba(184,167,137,.14), rgba(184,167,137,.04))"
+    : "#fff";
+  const border = safety
+    ? "rgba(183,121,69,.28)"
+    : accent
+    ? "rgba(184,167,137,.35)"
+    : "var(--line)";
   const style: React.CSSProperties = {
-    background: accent ? "linear-gradient(135deg, rgba(184,167,137,.14), rgba(184,167,137,.04))" : "#fff",
-    border: `1px solid ${accent ? "rgba(184,167,137,.35)" : "var(--line)"}`,
+    background, border: `1px solid ${border}`,
     borderRadius: 16, padding: 18, textAlign: "left", cursor: "pointer",
     display: "flex", flexDirection: "column", gap: 4, transition: "transform .15s, box-shadow .15s",
   };
   const inner = (
     <>
-      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--ink)" }}>{title}</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--ink)", display: "flex", alignItems: "center", gap: 6 }}>
+        {safety && <span aria-hidden style={{ color: "#B77945", fontSize: 15 }}>⛨</span>}
+        {title}
+      </div>
       <div style={{ fontSize: 12, color: "var(--muted)" }}>{desc}</div>
     </>
   );

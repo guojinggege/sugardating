@@ -1,7 +1,7 @@
 "use client";
 // User Account Center — 左侧 sidebar + 右侧 section
 // 8 sections: Overview · Profile · Preferences · Following · Saved · Bookings · Gifts · Membership · Security · Creator Apply Status
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/Auth/AuthProvider";
@@ -41,6 +41,15 @@ export default function UserDashboard({ user, profile, counts, creatorApplicatio
   const { logout } = useAuth();
   const router = useRouter();
 
+  // /me?section=security 支持外链直达 (从 /membership 认证 CTA 跳转)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get("section") as SectionKey | null;
+    const valid: SectionKey[] = ["overview", "profile", "preferences", "following", "saved", "bookings", "gifts", "membership", "security", "creator"];
+    if (target && valid.includes(target)) setActive(target);
+  }, []);
+
   const patch = async (body: Record<string, unknown>): Promise<boolean> => {
     setSaving(true); setSavedMsg(null);
     try {
@@ -71,7 +80,13 @@ export default function UserDashboard({ user, profile, counts, creatorApplicatio
   };
 
   const role = (user.role as Role) || "user";
-  const tierLabel: Record<string, string> = { free: "普通用户", basic: "基础会员", premium: "高级会员", elite: "尊享会员" };
+  // 新体系:基础 / 付费 / 认证 · 兼容旧 vip/svip/premium/elite 展示为付费
+  const tierLabel: Record<string, string> = {
+    free: "基础会员", basic: "基础会员",
+    vip: "付费会员", svip: "付费会员",
+    paid: "付费会员", verified: "认证会员",
+    premium: "付费会员", elite: "付费会员",
+  };
 
   return (
     <div className="me-page">
@@ -84,7 +99,7 @@ export default function UserDashboard({ user, profile, counts, creatorApplicatio
               <div className="me-name">{prof.displayName || user.name}</div>
               <div className="me-email">{user.email}</div>
               <div className="me-role-chip">
-                {role === "creator" ? "✓ 创作者" : role === "admin" ? "管理员" : tierLabel[prof.membership.tier] || "普通用户"}
+                {role === "creator" ? "✓ 创作者" : role === "admin" ? "管理员" : tierLabel[prof.membership.tier] || "基础会员"}
               </div>
             </div>
           </div>
@@ -197,7 +212,7 @@ function OverviewSection({ user, profile, counts, creatorApp, onNav }: {
         <div className="me-meta">
           <span>注册于 {joined}</span>
           <span>·</span>
-          <span>{profile.membership.tier === "free" ? "普通用户" : "会员用户"}</span>
+          <span>{profile.membership.tier === "free" || profile.membership.tier === "basic" ? "基础会员" : "付费会员"}</span>
         </div>
       </Card>
       <div className="me-quick">
@@ -359,21 +374,23 @@ function GiftsSection() {
   return <EmptyState title="我的打赏" line="暂无打赏记录。在创作者主页点击「打赏」即可支持喜欢的 Sugargirl。" ctaText="看看推荐 Creator" ctaHref="/creators" />;
 }
 function MembershipSection({ profile }: { profile: UserProfile }) {
-  const isFree = profile.membership.tier === "free";
+  const isFree = profile.membership.tier === "free" || profile.membership.tier === "basic";
+  const tierName = isFree ? "基础会员 (免费)" : "付费会员";
   return (
     <Card>
       <h2 className="me-h2">会员中心</h2>
-      <p className="me-sub">当前会员等级:<b>{isFree ? "普通用户 (免费)" : profile.membership.tier}</b>{profile.membership.expiresAt ? ` · 到期 ${new Date(profile.membership.expiresAt).toLocaleDateString("zh-CN")}` : ""}</p>
+      <p className="me-sub">当前会员身份:<b>{tierName}</b>{profile.membership.expiresAt ? ` · 到期 ${new Date(profile.membership.expiresAt).toLocaleDateString("zh-CN")}` : ""}</p>
       <div className="me-mship-benefits">
-        <b>会员权益:</b>
+        <b>付费会员权益:</b>
         <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 20px", display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: "var(--ink2)" }}>
-          <li>✓ 查看更多 Sugargirl 完整资料</li>
-          <li>✓ 解锁高级筛选</li>
-          <li>✓ 提升私信优先级</li>
-          <li>✓ 优先推荐 · 免广告</li>
+          <li>✓ 解除聊天对象人数限制</li>
+          <li>✓ 解除消息次数限制</li>
+          <li>✓ 多语言自动翻译 · 已读状态 · 匿名浏览</li>
+          <li>✓ 高级筛选</li>
+          <li>✓ 完成身份认证后升级为认证会员</li>
         </ul>
       </div>
-      <Link href="/membership" className="btn btn-ink">{isFree ? "开通会员" : "管理会员"}</Link>
+      <Link href="/membership" className="btn btn-ink">{isFree ? "开通付费会员" : "管理会员"}</Link>
       <style jsx>{`
         .me-h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 4px; letter-spacing: -.01em; }
         .me-sub { font-size: 13.5px; color: var(--muted); margin: 0 0 16px; line-height: 1.6; }
@@ -382,25 +399,85 @@ function MembershipSection({ profile }: { profile: UserProfile }) {
   );
 }
 function SecuritySection({ email }: { email: string }) {
+  const [kycStatus, setKycStatus] = useState<"unverified" | "pending" | "verified">("unverified");
+  const [kycBusy, setKycBusy] = useState(false);
+  const [kycMsg, setKycMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/membership/verify", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { if (alive && d?.ok && d.verificationStatus) setKycStatus(d.verificationStatus); })
+      .catch(() => { /* silent */ });
+    return () => { alive = false; };
+  }, []);
+
+  async function demoVerify() {
+    if (kycBusy || kycStatus === "verified") return;
+    setKycBusy(true); setKycMsg(null);
+    try {
+      const r = await fetch("/api/membership/verify", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status: "verified" }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d?.ok) throw new Error(d?.message || "认证失败");
+      setKycStatus("verified");
+      setKycMsg("身份认证已完成 (Demo)");
+    } catch (e) {
+      setKycMsg(e instanceof Error ? e.message : "认证失败");
+    } finally {
+      setKycBusy(false);
+      setTimeout(() => setKycMsg(null), 3000);
+    }
+  }
+
+  const kycTag = kycStatus === "verified" ? { text: "已认证", cls: "ok" } :
+                 kycStatus === "pending"  ? { text: "审核中", cls: "" } :
+                                            { text: "未认证", cls: "" };
+
   return (
     <Card>
       <h2 className="me-h2">账号安全</h2>
-      <p className="me-sub">保护你的账号安全。密码修改与 KYC 认证功能开发中,暂请通过邮件联系客服。</p>
+      <p className="me-sub">保护你的账号安全。身份认证完成后 + 开通付费会员可升级为认证会员。</p>
       <div className="me-sec-row"><span>邮箱</span><b>{email}</b><span className="me-tag ok">已验证</span></div>
       <div className="me-sec-row"><span>手机</span><b>—</b><span className="me-tag">未绑定</span></div>
+      <div className="me-sec-row" id="verify">
+        <span>身份认证 (KYC)</span>
+        <b>{kycStatus === "verified" ? "已通过" : kycStatus === "pending" ? "审核中" : "未开始"}</b>
+        <span className={"me-tag " + kycTag.cls}>{kycTag.text}</span>
+      </div>
+      {kycStatus !== "verified" && (
+        <div className="me-sec-row">
+          <span></span>
+          <span className="me-sec-note">
+            Demo 环境提供一键认证 · 生产会跳转到 KYC 服务商
+          </span>
+          <button type="button" className="me-sec-btn me-sec-btn--active" onClick={demoVerify} disabled={kycBusy}>
+            {kycBusy ? "认证中…" : "完成身份认证 (Demo)"}
+          </button>
+        </div>
+      )}
+      {kycMsg && <div className="me-sec-msg">{kycMsg}</div>}
       <div className="me-sec-row"><span>登录密码</span><b>••••••••</b><button type="button" className="me-sec-btn" disabled>修改 (开发中)</button></div>
       <div className="me-sec-row"><span>登录设备</span><b>当前设备</b><button type="button" className="me-sec-btn" disabled>管理 (开发中)</button></div>
       <div className="me-sec-row"><span>隐私设置</span><b>—</b><button type="button" className="me-sec-btn" disabled>配置 (开发中)</button></div>
       <style jsx>{`
         .me-h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 4px; letter-spacing: -.01em; }
         .me-sub { font-size: 13.5px; color: var(--muted); margin: 0 0 20px; line-height: 1.6; }
-        .me-sec-row { display: grid; grid-template-columns: 100px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+        .me-sec-row { display: grid; grid-template-columns: 120px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
         .me-sec-row:last-child { border-bottom: none; }
         .me-sec-row span:first-child { color: var(--muted); }
         .me-sec-row b { color: var(--ink); font-weight: 600; }
+        .me-sec-note { font-size: 12px; color: var(--muted); }
         .me-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--page); color: var(--muted); border: 1px solid var(--line); }
         .me-tag.ok { background: rgba(34,197,94,.1); color: #16a34a; border-color: rgba(34,197,94,.3); }
         .me-sec-btn { font-size: 12px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; background: #fff; cursor: not-allowed; }
+        .me-sec-btn--active { color: #1a1409; background: linear-gradient(135deg,#EEDDB8,#B8A789); border-color: #B8A789; cursor: pointer; }
+        .me-sec-btn--active:disabled { opacity: .5; cursor: not-allowed; }
+        .me-sec-msg { margin-top: 8px; padding: 8px 12px; background: rgba(34,197,94,.1); color: #16a34a; border-radius: 8px; font-size: 12.5px; font-weight: 600; }
       `}</style>
     </Card>
   );

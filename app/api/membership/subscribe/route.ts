@@ -1,15 +1,11 @@
-// POST /api/membership/subscribe — mock subscribe · 不接真实支付
+// POST /api/membership/subscribe — mock subscribe · 按 planId · Demo 无真实支付
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import { subscribeMembership } from "@/lib/membership-store";
-import { getPlan } from "@/lib/membership-plans";
-import type { BillingPeriod } from "@/lib/membership-plans";
+import { subscribeByPlanId, canBuyIntro } from "@/lib/membership-store";
+import { getPlanById } from "@/lib/membership-plans";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-const OK_TIERS = ["vip", "svip"] as const;
-const OK_PERIODS: BillingPeriod[] = ["monthly", "quarterly", "yearly"];
 
 export async function POST(req: Request) {
   const s = getSession();
@@ -18,21 +14,30 @@ export async function POST(req: Request) {
   let body: any;
   try { body = await req.json(); } catch { return NextResponse.json({ ok: false, message: "INVALID_JSON" }, { status: 400 }); }
 
-  const tier = body?.tier;
-  const period = body?.period;
-  if (!OK_TIERS.includes(tier)) {
-    return NextResponse.json({ ok: false, message: "无效会员等级" }, { status: 400 });
-  }
-  if (!OK_PERIODS.includes(period)) {
-    return NextResponse.json({ ok: false, message: "无效周期" }, { status: 400 });
+  const planId = typeof body?.planId === "string" ? body.planId : "";
+  const plan = getPlanById(planId);
+  if (!plan) return NextResponse.json({ ok: false, message: "无效的会员套餐" }, { status: 400 });
+
+  // 首充体验二次拦截 · 前端已 gate · 后端兜底
+  if (plan.isIntro && !canBuyIntro(s.userId)) {
+    return NextResponse.json({ ok: false, message: "首充体验仅限每个账号购买一次" }, { status: 409 });
   }
 
-  const plan = getPlan(tier, period);
-  const membership = subscribeMembership(s.userId, tier, period);
+  const result = subscribeByPlanId(s.userId, planId);
+  if (!result.ok) return NextResponse.json({ ok: false, message: result.message }, { status: 400 });
+
   return NextResponse.json({
     ok: true,
-    membership,
-    plan: { id: plan.id, price: plan.price, currency: plan.currency, includedCredits: plan.includedCredits },
+    membership: result.record,
+    plan: {
+      id: plan.id,
+      displayName: plan.displayName,
+      price: plan.price,
+      currency: plan.currency,
+      period: plan.period,
+      isIntro: !!plan.isIntro,
+      autoRenew: plan.autoRenew,
+    },
     demo: true,
   });
 }

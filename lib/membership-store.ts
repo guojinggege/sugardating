@@ -66,6 +66,7 @@ function normalize(existing: LegacyMembershipRecord): MembershipRecord {
 
 export function getMembership(userId: string): MembershipRecord {
   const existing = store.get(userId);
+  let base: MembershipRecord;
   if (existing) {
     const norm = normalize(existing);
     // 到期自动降级 basic (verificationStatus 保留)
@@ -78,17 +79,29 @@ export function getMembership(userId: string): MembershipRecord {
         autoRenew: false,
       };
       store.set(userId, downgraded);
-      return downgraded;
+      base = downgraded;
+    } else {
+      base = norm;
     }
-    return norm;
+  } else {
+    base = {
+      userId,
+      tier: "basic",
+      startedAt: new Date().toISOString(),
+      autoRenew: false,
+      verificationStatus: "unverified",
+    };
   }
-  return {
-    userId,
-    tier: "basic",
-    startedAt: new Date().toISOString(),
-    autoRenew: false,
-    verificationStatus: "unverified",
-  };
+  // Trial active 期间 · 视为付费 (临时提权 · 不写回 store · 不影响 hasUsedIntro / 计费)
+  try {
+    // Lazy import 避免 circular
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { isTrialActive } = require("./trial-offer/entitlements") as typeof import("./trial-offer/entitlements");
+    if (base.tier === "basic" && isTrialActive(userId)) {
+      return { ...base, tier: "paid", currentPlanId: "trial_24h" as any };
+    }
+  } catch { /* silent · trial 模块未加载 */ }
+  return base;
 }
 
 /** 判断当前账户是否可购买首充体验 · 前后端共用规则 */

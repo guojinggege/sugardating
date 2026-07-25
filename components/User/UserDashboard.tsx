@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import type { UserProfile } from "@/lib/mock-db";
+import LinkedAccountsPanel from "@/components/Auth/LinkedAccountsPanel";
 
 type Role = "user" | "creator" | "admin";
 
@@ -464,6 +465,7 @@ function SecuritySection({ email }: { email: string }) {
       <div className="me-sec-row"><span>登录密码</span><b>••••••••</b><button type="button" className="me-sec-btn" disabled>修改 (开发中)</button></div>
       <div className="me-sec-row"><span>登录设备</span><b>当前设备</b><button type="button" className="me-sec-btn" disabled>管理 (开发中)</button></div>
       <div className="me-sec-row"><span>隐私设置</span><b>—</b><button type="button" className="me-sec-btn" disabled>配置 (开发中)</button></div>
+      <LinkedAccountsPanel />
       <style jsx>{`
         .me-h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 4px; letter-spacing: -.01em; }
         .me-sub { font-size: 13.5px; color: var(--muted); margin: 0 0 20px; line-height: 1.6; }

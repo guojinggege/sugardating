@@ -13,6 +13,7 @@ import {
   computeDisplayLevel,
 } from "@/lib/membership-plans";
 import PaymentMethodDisplayModal from "@/components/payments/PaymentMethodDisplayModal";
+import TrialBanner from "@/components/trial/TrialBanner";
 
 interface MembershipInfo {
   tier: "basic" | "paid";
@@ -163,6 +164,13 @@ export default function MembershipPage() {
           </div>
         </div>
       </section>
+
+      {/* ═══ 24h £0 Trial banner (登录用户 · 达到条件后自动出现领取按钮) ═══ */}
+      {user && (
+        <section style={{ maxWidth: 1180, margin: "0 auto", padding: "28px 24px 0" }}>
+          <TrialBanner />
+        </section>
+      )}
 
       {/* ═══ Tier cards (3 递进) ═══ */}
       <section id="plans" className="mp-plans">

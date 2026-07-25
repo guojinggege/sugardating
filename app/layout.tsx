@@ -11,6 +11,7 @@ import LoginModal from "@/components/Auth/LoginModal";
 import { ChatProvider } from "@/components/chat/ChatProvider";
 import ChatDrawer from "@/components/chat/ChatDrawer";
 import ShareProvider from "@/components/share/ShareProvider";
+import EngagementTracker from "@/components/engagement/EngagementTracker";
 
 // 子页面调 DB(如 listCreators, listSugarGirls 等),全应用走 SSR
 export const dynamic = "force-dynamic";
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <LoginModal />
                 <ChatDrawer />
                 {!isMobileRoute && <BottomNav />}
+                <EngagementTracker />
               </ShareProvider>
             </ChatProvider>
           </AuthProvider>

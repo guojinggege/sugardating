@@ -93,8 +93,11 @@ export default function Page() {
   return (
     <div className="container" style={{ paddingTop: 32, paddingBottom: 60 }}>
       <div className="authwrap" style={{ maxWidth: 640 }}>
-        <h1>创建账号</h1>
-        <p className="s">填写基础信息,快速加入 Sugardating。所有资料仅用于账号管理,<b>不会</b>公开到 Sugargirl 主页。</p>
+        <h1>使用邮箱注册</h1>
+        <p className="s">
+          邮箱是 Sugardating 账号的<b>唯一主身份</b>与恢复渠道 · 注册完成后可在「账号安全」中关联 Apple 或 X 作为登录快捷方式。
+          所有资料仅用于账号管理 · <b>不会</b>公开到 Sugargirl 主页。
+        </p>
         <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
           <Section title="账号">
             <Field label="昵称 *">

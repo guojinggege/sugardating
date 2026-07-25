@@ -363,7 +363,95 @@ function PreferencesSection({ profile, onSave, saving }: {
 }
 
 function FollowingSection() {
-  return <EmptyState title="我的关注" line="你还没有关注任何 Sugargirl。" ctaText="去发现" ctaHref="/creators" />;
+  const [rows, setRows] = useState<Array<{ creatorSlug: string; creatorType: string; createdAt: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [unfollowing, setUnfollowing] = useState<string | null>(null);
+
+  async function refresh() {
+    try {
+      const r = await fetch("/api/user/following", { credentials: "include" });
+      const d = await r.json();
+      if (d?.ok) setRows(d.rows ?? []);
+    } finally { setLoading(false); }
+  }
+  useEffect(() => { refresh(); }, []);
+
+  async function unfollow(slug: string) {
+    if (unfollowing) return;
+    if (!confirm("取消关注?")) return;
+    setUnfollowing(slug);
+    try {
+      await fetch(`/api/user/following/${encodeURIComponent(slug)}`, { method: "DELETE", credentials: "include" });
+      setRows((prev) => prev.filter((r) => r.creatorSlug !== slug));
+    } finally { setUnfollowing(null); }
+  }
+
+  function detailHref(slug: string, type: string): string {
+    if (type === "sugarboy") return `/sugarboy/${slug}`;
+    if (type === "massage") return `/massage/profile/${slug}`;
+    return `/creators/${slug}`;
+  }
+  function typeLabel(type: string): string {
+    return { sugargirl: "Sugargirl", sugarboy: "Sugarboy", massage: "情趣按摩" }[type] ?? type;
+  }
+
+  if (loading) {
+    return (
+      <Card>
+        <h2 className="me-h2">我的关注</h2>
+        <p className="me-sub">加载中…</p>
+        <style jsx>{`.me-h2{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px;letter-spacing:-.01em}.me-sub{font-size:13.5px;color:var(--muted);margin:0}`}</style>
+      </Card>
+    );
+  }
+
+  if (rows.length === 0) {
+    return <EmptyState title="我的关注" line="你还没有关注任何创作者。" ctaText="去发现" ctaHref="/creators" />;
+  }
+
+  return (
+    <Card>
+      <h2 className="me-h2">我的关注</h2>
+      <p className="me-sub">共 {rows.length} 位 · 关注新创作者可解锁 24h £0 体验(需 5 位)</p>
+      <ul className="me-follow-list">
+        {rows.map((r) => (
+          <li key={r.creatorSlug} className="me-follow-item">
+            <div className="me-follow-ava">{r.creatorSlug[0]?.toUpperCase() ?? "?"}</div>
+            <div className="me-follow-body">
+              <div className="me-follow-name">@{r.creatorSlug}</div>
+              <div className="me-follow-meta">
+                <span className="me-follow-tag">{typeLabel(r.creatorType)}</span>
+                <time>关注于 {new Date(r.createdAt).toLocaleDateString("zh-CN")}</time>
+              </div>
+            </div>
+            <div className="me-follow-actions">
+              <Link href={detailHref(r.creatorSlug, r.creatorType)} className="me-follow-view">查看主页</Link>
+              <button type="button" onClick={() => unfollow(r.creatorSlug)} disabled={unfollowing === r.creatorSlug} className="me-follow-un">
+                {unfollowing === r.creatorSlug ? "取消中…" : "取消关注"}
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <style jsx>{`
+        .me-h2{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px;letter-spacing:-.01em}
+        .me-sub{font-size:13px;color:var(--muted);margin:0 0 16px}
+        .me-follow-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+        .me-follow-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FAFAF8;border:1px solid var(--line);border-radius:12px}
+        .me-follow-ava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#DACFBE,#B8AA95);color:#171512;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0}
+        .me-follow-body{flex:1;min-width:0}
+        .me-follow-name{font-size:13.5px;color:var(--ink);font-weight:800;font-family:ui-monospace,monospace}
+        .me-follow-meta{display:flex;align-items:baseline;gap:8px;margin-top:2px;font-size:11.5px;color:var(--muted)}
+        .me-follow-tag{padding:1px 8px;background:#fff;border:1px solid var(--line);border-radius:99px;font-size:10.5px;font-weight:700;color:#77716A;letter-spacing:.04em;text-transform:uppercase}
+        .me-follow-actions{display:flex;gap:6px;flex-shrink:0}
+        .me-follow-view{padding:6px 12px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:99px;font-size:12px;font-weight:700;text-decoration:none}
+        .me-follow-view:hover{border-color:var(--ink)}
+        .me-follow-un{padding:6px 12px;background:#fff;color:#B91C1C;border:1px solid #FEE2E2;border-radius:99px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+        .me-follow-un:hover:not(:disabled){background:#FEE2E2}
+        .me-follow-un:disabled{opacity:.5;cursor:not-allowed}
+      `}</style>
+    </Card>
+  );
 }
 function SavedSection() {
   return <EmptyState title="我的收藏" line="暂无收藏内容。浏览动态或视频时可收藏喜欢的内容。" ctaText="浏览动态" ctaHref="/photography" />;

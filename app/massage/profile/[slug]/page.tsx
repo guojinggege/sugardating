@@ -80,6 +80,7 @@ export default async function MassageProfilePage({ params }: { params: { slug: s
         online={provider.availability.online}
         vip={!!provider.vip}
         videoSrc={HERO_VIDEO_SRC}
+        creatorType="massage"
       />
 
       <div className="cr-shell cr-body">

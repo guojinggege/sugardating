@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import {
   getUserProfile, createUserProfile, getApplicationByUser,
-  getFollowing, getBookings, getGifts, getSaved,
+  getBookings, getGifts, getSaved,
 } from "@/lib/mock-db";
+import { countEligibleFollowing } from "@/lib/follows/repository";
 import UserDashboard from "@/components/User/UserDashboard";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,9 @@ export default async function MePage() {
   }
 
   // 4. 其它数据全 fallback 空数组 · 拿不到不 crash
-  const following = safeCall(() => getFollowing(s!.userId), [] as string[]);
+  // Following 从 Prisma · 持久化 · 其它模块仍走 mock-db (未迁移)
+  let followingCount = 0;
+  try { followingCount = await countEligibleFollowing(s!.userId); } catch { followingCount = 0; }
   const saved     = safeCall(() => getSaved(s!.userId),     [] as ReturnType<typeof getSaved>);
   const bookings  = safeCall(() => getBookings(s!.userId),  [] as ReturnType<typeof getBookings>);
   const gifts     = safeCall(() => getGifts(s!.userId),     [] as ReturnType<typeof getGifts>);
@@ -60,7 +63,7 @@ export default async function MePage() {
       }}
       profile={profile}
       counts={{
-        following: following.length,
+        following: followingCount,
         saved:     saved.length,
         bookings:  bookings.length,
         gifts:     gifts.length,

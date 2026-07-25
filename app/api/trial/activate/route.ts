@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const descriptor = typeof body?.paymentMethodDescriptor === "string" ? body.paymentMethodDescriptor.slice(0, 80) : "";
   if (!descriptor) return NextResponse.json({ ok: false, message: "缺少支付方式描述" }, { status: 400 });
 
-  const snap = computeEligibility(s.userId, true);
+  const snap = await computeEligibility(s.userId, true);
   if (!snap.eligible) {
     return NextResponse.json({ ok: false, message: "尚未满足 24h £0 体验的资格" }, { status: 409 });
   }

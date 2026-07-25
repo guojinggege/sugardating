@@ -1,17 +1,54 @@
 "use client";
-// Hero Header 只保留 3 按钮 (spec Final):❤️ Follow · 🎁 Gift · 🔗 Share
-// 聊天/视频/私拍/预约伴游 已移到 Sidebar Service Actions widget
-import { useState } from "react";
+// Hero Header 只保留 3 按钮:❤️ Follow · 🎁 Gift · 🔗 Share
+// Follow · 真实持久化 · 挂载时拉取初始状态 · 点击调 API · 失败回滚
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 
-export default function CreatorFoldActions({ creatorName }: { creatorName: string }) {
+interface Props {
+  creatorName: string;
+  creatorSlug: string;
+  creatorType?: "sugargirl" | "sugarboy" | "massage";
+}
+
+export default function CreatorFoldActions({ creatorName, creatorSlug, creatorType = "sugargirl" }: Props) {
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
   const [following, setFollowing] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
+  // 初始拉取真实关注状态 (登录用户)
+  useEffect(() => {
+    let alive = true;
+    fetch(`/api/user/following/status?creatorSlug=${encodeURIComponent(creatorSlug)}`, { credentials: "include" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (alive && d?.ok) setFollowing(!!d.following); })
+      .catch(() => { /* silent */ });
+    return () => { alive = false; };
+  }, [creatorSlug]);
+
+  async function onFollowClick() {
+    if (!requireLogin()) return;
+    if (busy) return;
+    const wasFollowing = following;
+    setBusy(true);
+    setFollowing(!wasFollowing);  // optimistic
+    try {
+      const r = wasFollowing
+        ? await fetch(`/api/user/following/${encodeURIComponent(creatorSlug)}`, { method: "DELETE", credentials: "include" })
+        : await fetch("/api/user/following", {
+            method: "POST", credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ creatorSlug, creatorType }),
+          });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d?.ok) throw new Error(d?.message || "关注操作失败");
+      setFollowing(!!d.following);
+    } catch {
+      setFollowing(wasFollowing); // rollback
+    } finally { setBusy(false); }
+  }
 
   const onShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -26,10 +63,11 @@ export default function CreatorFoldActions({ creatorName }: { creatorName: strin
 
   return (
     <div className="flex items-center gap-2 relative">
-      {/* Follow */}
       <button
         type="button"
-        onClick={guard(() => setFollowing((v) => !v))}
+        onClick={onFollowClick}
+        disabled={busy}
+        aria-pressed={following}
         className={pill + " " + (following
           ? "bg-[#e11d48] text-white border border-[#e11d48] hover:bg-[#be123c]"
           : "bg-white text-[var(--ink)] border border-[var(--line2)] hover:border-[var(--ink)] hover:-translate-y-px")}
@@ -40,10 +78,9 @@ export default function CreatorFoldActions({ creatorName }: { creatorName: strin
         {following ? t("following") : t("follow")}
       </button>
 
-      {/* Gift (gradient primary) */}
       <button
         type="button"
-        onClick={guard(() => {})}
+        onClick={() => requireLogin() && undefined}
         className={pill + " text-[#1a1409] border-0 hover:-translate-y-px font-bold shadow-[0_4px_14px_-4px_rgba(184,167,137,0.55)]"}
         style={{ background: "linear-gradient(135deg,#d4bf95 0%,#b8a789 50%,#f0c9a3 100%)" }}
       >
@@ -51,7 +88,6 @@ export default function CreatorFoldActions({ creatorName }: { creatorName: strin
         {t("tipShort")}
       </button>
 
-      {/* Share (icon only) */}
       <button
         type="button"
         onClick={onShare}

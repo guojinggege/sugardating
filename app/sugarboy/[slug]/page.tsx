@@ -98,6 +98,7 @@ export default async function SugarboyDetailPage({ params }: { params: { slug: s
         online={sb.online}
         vip={sb.tags.includes("VIP")}
         videoSrc={HERO_VIDEO_SRC}
+        creatorType="sugarboy"
       />
 
       <div className="cr-shell cr-body">

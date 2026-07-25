@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 export async function GET() {
   const s = getSession();
   if (!s) return NextResponse.json({ ok: false, code: "NOT_AUTHENTICATED" }, { status: 401 });
-  const snapshot = computeEligibility(s.userId, true /* emailVerified · P0 假定 register 已验证 */);
+  const snapshot = await computeEligibility(s.userId, true /* emailVerified · P0 假定 register 已验证 */);
   const trial = getTrial(s.userId);
   const secondsLeft = trialSecondsLeft(s.userId);
   return NextResponse.json({

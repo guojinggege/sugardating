@@ -1,7 +1,7 @@
 "use client";
 // 移动端固定底部 CTA bar (仅 <640 显示,fixed bottom)
 // 布局:关注 icon / 收藏 icon / 预约 secondary / 立即聊天 primary
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
 import { useChat } from "@/components/chat/ChatProvider";
@@ -10,17 +10,48 @@ interface Props {
   creatorSlug: string;
   creatorName: string;
   creatorAvatar?: string;
+  creatorType?: "sugargirl" | "sugarboy" | "massage";
 }
 
-export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar }: Props) {
+export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar, creatorType = "sugargirl" }: Props) {
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
   const { openChatWith } = useChat();
   const [following, setFollowing] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  useEffect(() => {
+    let alive = true;
+    fetch(`/api/user/following/status?creatorSlug=${encodeURIComponent(creatorSlug)}`, { credentials: "include" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (alive && d?.ok) setFollowing(!!d.following); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [creatorSlug]);
+
+  async function onFollowClick() {
+    if (!requireLogin()) return;
+    if (busy) return;
+    const was = following;
+    setBusy(true);
+    setFollowing(!was);
+    try {
+      const r = was
+        ? await fetch(`/api/user/following/${encodeURIComponent(creatorSlug)}`, { method: "DELETE", credentials: "include" })
+        : await fetch("/api/user/following", {
+            method: "POST", credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ creatorSlug, creatorType }),
+          });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d?.ok) throw new Error(d?.message);
+      setFollowing(!!d.following);
+    } catch { setFollowing(was); }
+    finally { setBusy(false); }
+  }
+
   const guard = (fn: () => void) => () => { if (requireLogin()) fn(); };
-  // 聊天入口不走 requireLogin — ChatDrawer 未登录时显示内嵌登录提示
   const openChat = () => openChatWith({ slug: creatorSlug, name: creatorName, avatar: creatorAvatar, languages: ["zh", "en"] });
 
   return (
@@ -28,7 +59,9 @@ export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar }
       <button
         type="button"
         aria-label={t("follow")}
-        onClick={guard(() => setFollowing((v) => !v))}
+        onClick={onFollowClick}
+        disabled={busy}
+        aria-pressed={following}
         className={"cr-mcta-ic" + (following ? " on" : "")}
       >
         {following ? (

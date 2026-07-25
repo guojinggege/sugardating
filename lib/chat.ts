@@ -47,6 +47,39 @@ globalThis.__sgMessages = messages;
 
 const idxKey = (uid: string, slug: string) => `${uid}:${slug}`;
 
+// ══════════════════════════════════════
+// Seed · 让消息中心冷启动即可展示 · 归属 demo 用户 u_demo
+// ══════════════════════════════════════
+function seedIfEmpty() {
+  if (convos.size > 0) return;
+  const now = Date.now();
+  const ago = (h: number) => new Date(now - h * 3600_000).toISOString();
+  const seedConvo = (id: string, uid: string, slug: string, name: string, langs: SupportedLocale[], unread: number, lastText: string, lastAgo: number) => {
+    const conv: Conversation = {
+      id, userId: uid, creatorSlug: slug, creatorName: name,
+      creatorLanguages: langs,
+      lastMessage: lastText, lastMessageAt: ago(lastAgo),
+      unreadCount: unread,
+      createdAt: ago(lastAgo + 24), updatedAt: ago(lastAgo),
+    };
+    convos.set(id, conv);
+    convoIndex.set(`${uid}:${slug}`, id);
+  };
+  seedConvo("cv_seed_aria",   "u_demo", "aria",   "Aria M.",  ["zh", "en"], 3, "如果方便,我们视频再聊一下细节 :)", 0.4);
+  seedConvo("cv_seed_yuki",   "u_demo", "yuki",   "Yuki",     ["zh", "en"], 1, "刚看到你的消息 · 稍后回复", 2);
+  seedConvo("cv_seed_leon",   "u_demo", "leon",   "Leon.",    ["zh"],       0, "谢谢分享的 Mayfair 那家餐厅推荐", 26);
+  seedConvo("cv_seed_yumeko", "u_demo", "yumeko", "Yumeko",   ["zh", "en"], 0, "See you next week!", 96);
+
+  messages.set("cv_seed_aria", [
+    { id: "m_s1", conversationId: "cv_seed_aria", senderId: "u_demo",       senderType: "user",    text: "Hi Aria,下周一在 Mayfair 有个 dinner event · 有兴趣一起吗?", status: "read", createdAt: ago(3) },
+    { id: "m_s2", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "听起来不错 · 是几点开始?", originalLanguage: "zh", status: "read", createdAt: ago(2.5) },
+    { id: "m_s3", conversationId: "cv_seed_aria", senderId: "u_demo",       senderType: "user",    text: "晚上 7 点半 · 建议提前 30 分钟到,先在 bar 聊一下。", status: "read", createdAt: ago(1) },
+    { id: "m_s4", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "好的 · 我下午会到附近先看一下 · 见面前把这周的照片发给你参考。", originalLanguage: "zh", status: "delivered", createdAt: ago(0.6) },
+    { id: "m_s5", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "如果方便,我们视频再聊一下细节 :)", originalLanguage: "zh", status: "delivered", createdAt: ago(0.4) },
+  ]);
+}
+seedIfEmpty();
+
 export function getOrCreateConversation(
   userId: string,
   creatorSlug: string,
@@ -111,6 +144,24 @@ export function appendMessage(convoId: string, msg: Omit<ChatMessage, "id" | "co
     convos.set(convoId, c);
   }
   return full;
+}
+
+export function markConversationRead(userId: string, convoId: string): Conversation | null {
+  const c = convos.get(convoId);
+  if (!c || c.userId !== userId) return null;
+  c.unreadCount = 0;
+  convos.set(convoId, c);
+  const arr = messages.get(convoId) ?? [];
+  for (const m of arr) {
+    if (m.senderType === "creator" && m.status !== "read") m.status = "read";
+  }
+  return c;
+}
+
+export function countTotalUnread(userId: string): number {
+  return Array.from(convos.values())
+    .filter((c) => c.userId === userId)
+    .reduce((s, c) => s + (c.unreadCount ?? 0), 0);
 }
 
 // Mock creator auto-reply (delay simulation caller-side)

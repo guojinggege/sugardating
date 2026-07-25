@@ -31,21 +31,31 @@ export async function POST(req: Request) {
   if (!slug) return err("INVALID_SLUG", 400, "creatorSlug 必填");
   const creatorType: CreatorType = VALID_TYPES.includes(b.creatorType as CreatorType) ? (b.creatorType as CreatorType) : "sugargirl";
 
-  const added = await follow(uid, slug, creatorType);
-  const followingCount = await countEligibleFollowing(uid);
-  const snap = await computeEligibility(uid, true);
+  try {
+    const added = await follow(uid, slug, creatorType);
+    const followingCount = await countEligibleFollowing(uid);
+    const snap = await computeEligibility(uid, true);
 
-  return NextResponse.json({
-    ok: true,
-    following: true,
-    added,
-    followingCount,
-    trialEligibility: {
-      followedCount: snap.followCount,
-      followRequirementMet: snap.followCount >= snap.requiredFollows,
-      eligible: snap.eligible,
-    },
-  });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[follow.POST]", { uid, slug, creatorType, added, followingCount });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      following: true,
+      added,
+      followingCount,
+      trialEligibility: {
+        followedCount: snap.followCount,
+        followRequirementMet: snap.followCount >= snap.requiredFollows,
+        eligible: snap.eligible,
+      },
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "unknown";
+    console.error("[follow.POST] failed", { uid, slug, message: msg });
+    return NextResponse.json({ ok: false, code: "DB_ERROR", message: `写入失败:${msg}` }, { status: 500 });
+  }
 }
 
 function err(code: string, status: number, message?: string) {

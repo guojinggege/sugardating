@@ -17,22 +17,22 @@ export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar, 
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
   const { openChatWith } = useChat();
-  const [following, setFollowing] = useState(false);
+  const [following, setFollowing] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     let alive = true;
-    fetch(`/api/user/following/status?creatorSlug=${encodeURIComponent(creatorSlug)}`, { credentials: "include" })
+    fetch(`/api/user/following/status?creatorSlug=${encodeURIComponent(creatorSlug)}`, { credentials: "include", cache: "no-store" })
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (alive && d?.ok) setFollowing(!!d.following); })
-      .catch(() => {});
+      .then((d) => { if (alive) setFollowing(d?.ok ? !!d.following : false); })
+      .catch(() => { if (alive) setFollowing(false); });
     return () => { alive = false; };
   }, [creatorSlug]);
 
   async function onFollowClick() {
     if (!requireLogin()) return;
-    if (busy) return;
+    if (busy || following === null) return;
     const was = following;
     setBusy(true);
     setFollowing(!was);
@@ -60,11 +60,11 @@ export default function MobileCTABar({ creatorSlug, creatorName, creatorAvatar, 
         type="button"
         aria-label={t("follow")}
         onClick={onFollowClick}
-        disabled={busy}
-        aria-pressed={following}
-        className={"cr-mcta-ic" + (following ? " on" : "")}
+        disabled={busy || following === null}
+        aria-pressed={following === true}
+        className={"cr-mcta-ic" + (following === true ? " on" : "")}
       >
-        {following ? (
+        {following === true ? (
           <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10" /></svg>
         ) : (
           <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>

@@ -1,6 +1,6 @@
 "use client";
 // 动态推荐页 · 根据 ?panel= 切换主内容 · 保留 FeedShell 3 栏作为默认视图
-import { useSearchParams } from "next/navigation";
+// 客户端读 URL 避免 useSearchParams 引发 SSR bailout
 import { useEffect, useState } from "react";
 import type { FeedPost } from "./types";
 import FollowingPanel from "./FollowingPanel";
@@ -13,9 +13,16 @@ interface Props {
 }
 
 export default function PhotographyPanels({ posts, defaultView }: Props) {
-  const params = useSearchParams();
-  const panel = params?.get("panel") ?? null;
+  const [panel, setPanel] = useState<string | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const read = () => setPanel(new URLSearchParams(window.location.search).get("panel"));
+    read();
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })

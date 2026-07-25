@@ -1,8 +1,8 @@
 "use client";
 // 动态推荐左侧固定导航 · 4 项 · badges 显示未读
 // 顺序严格:关注 · 私信 · 通知 · VIP
+// 注意:不使用 useSearchParams · 避免 SSR bailout · 用 window.location 客户端读
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type PanelKey = "following" | "messages" | "notifications";
@@ -46,11 +46,21 @@ const NAV: NavItem[] = [
 ];
 
 export default function LeftNav() {
-  const params = useSearchParams();
-  const activePanel = params?.get("panel") ?? null;
-
+  const [activePanel, setActivePanel] = useState<string | null>(null);
   const [unreadMsg, setUnreadMsg] = useState(0);
   const [unreadNotif, setUnreadNotif] = useState(0);
+
+  // 客户端读 ?panel= · 不用 useSearchParams 以避免 SSR bailout
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const read = () => {
+      const p = new URLSearchParams(window.location.search).get("panel");
+      setActivePanel(p);
+    };
+    read();
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
+  }, []);
 
   useEffect(() => {
     let alive = true;

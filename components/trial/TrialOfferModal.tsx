@@ -8,6 +8,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onActivated: () => void;
+  demoMode?: boolean;
 }
 
 // 简洁支付方式列表 · 与 PaymentMethodDisplayModal 保持一致品牌 · 用户选一种作为绑定
@@ -20,11 +21,12 @@ const METHODS = [
   { id: "direct_debit", label: "Direct Debit (周期扣款)" },
 ];
 
-export default function TrialOfferModal({ open, onClose, onActivated }: Props) {
+export default function TrialOfferModal({ open, onClose, onActivated, demoMode = false }: Props) {
   const [method, setMethod] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [mandateNotice, setMandateNotice] = useState<string | null>(null);
 
   if (!open) return null;
 
@@ -34,7 +36,7 @@ export default function TrialOfferModal({ open, onClose, onActivated }: Props) {
     if (!canSubmit) return;
     const chosen = METHODS.find((m) => m.id === method);
     if (!chosen) return;
-    setBusy(true); setErr(null);
+    setBusy(true); setErr(null); setMandateNotice(null);
     try {
       const r = await fetch("/api/trial/activate", {
         method: "POST",
@@ -42,10 +44,15 @@ export default function TrialOfferModal({ open, onClose, onActivated }: Props) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           consent: true,
-          paymentMethodDescriptor: `${chosen.label} · Demo`,
+          paymentMethodDescriptor: `${chosen.label}${demoMode ? " · 测试" : ""}`,
         }),
       });
       const d = await r.json();
+      if (d?.code === "PAYMENT_MANDATE_REQUIRED") {
+        setMandateNotice("自动续费付款授权尚未开放,体验暂未开始。我们完成周期付款授权对接后会自动通知你。");
+        onActivated();       // 刷新父组件 · trial 状态已变为 mandate_required
+        return;
+      }
       if (!r.ok || !d?.ok) throw new Error(d?.message || "领取失败");
       onActivated();
     } catch (e) {
@@ -66,10 +73,28 @@ export default function TrialOfferModal({ open, onClose, onActivated }: Props) {
         </div>
 
         <div className="tom-body">
+          {demoMode && (
+            <div className="tom-demo">
+              <b>测试模式 · 不会扣款</b>
+              <span>本次体验用于验证 · 不会创建订单 · 不会调用支付接口 · 24 小时后自动结束</span>
+            </div>
+          )}
+          {!demoMode && (
+            <div className="tom-mandate-notice">
+              <b>自动续费付款授权尚未开放</b>
+              <span>周期付款授权对接完成后 · 你的 24 小时体验会自动开始 · 无需重复领取。当前提交仅记录你的意愿。</span>
+            </div>
+          )}
+          {mandateNotice && (
+            <div className="tom-mandate-notice">
+              <b>体验暂未开始</b>
+              <span>{mandateNotice}</span>
+            </div>
+          )}
           <div className="tom-facts">
             <div><b>体验时长</b><span>24 小时</span></div>
             <div><b>费用</b><span>£0</span></div>
-            <div><b>到期后</b><span>£29.99 / 月</span></div>
+            <div><b>到期后</b><span>{demoMode ? "自动恢复基础会员" : "£29.99 / 月"}</span></div>
             <div><b>取消</b><span>到期前随时可取消 · 不扣款</span></div>
           </div>
 
@@ -120,7 +145,7 @@ export default function TrialOfferModal({ open, onClose, onActivated }: Props) {
         <div className="tom-foot">
           <button type="button" onClick={onClose} className="tom-btn tom-btn--ghost">稍后再说</button>
           <button type="button" onClick={submit} disabled={!canSubmit} className="tom-btn tom-btn--gold">
-            {busy ? "开通中…" : "确认领取 · 24 小时 £0"}
+            {busy ? "提交中…" : demoMode ? "确认领取 · 测试模式" : "记录我的意愿"}
           </button>
         </div>
 
@@ -139,6 +164,12 @@ const modalStyles = `
   .tom-x{background:rgba(238,221,184,.08);color:#EEDDB8;border:0;width:32px;height:32px;border-radius:50%;font-size:20px;cursor:pointer;line-height:1}
 
   .tom-body{flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:14px}
+  .tom-demo{padding:10px 14px;background:linear-gradient(135deg,rgba(238,221,184,.24),rgba(184,167,137,.1));border:1px solid rgba(238,221,184,.4);border-radius:10px;display:flex;flex-direction:column;gap:2px}
+  .tom-demo b{color:#EEDDB8;font-weight:800;font-size:12.5px;letter-spacing:.02em}
+  .tom-demo span{color:rgba(238,221,184,.85);font-size:11.5px;line-height:1.55}
+  .tom-mandate-notice{padding:10px 14px;background:rgba(183,121,69,.16);border:1px dashed rgba(183,121,69,.5);border-radius:10px;display:flex;flex-direction:column;gap:2px}
+  .tom-mandate-notice b{color:#F5C89A;font-weight:800;font-size:12.5px}
+  .tom-mandate-notice span{color:rgba(245,200,154,.85);font-size:11.5px;line-height:1.55}
   .tom-facts{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:12px 14px;background:rgba(238,221,184,.06);border:1px dashed rgba(238,221,184,.2);border-radius:12px;font-size:12.5px}
   .tom-facts > div{display:flex;justify-content:space-between}
   .tom-facts b{color:rgba(238,221,184,.6);font-weight:700}

@@ -1,12 +1,13 @@
 // 高意向用户 24h £0 付费会员体验
 export type TrialStatus =
   | "ineligible"
-  | "eligible"          // 已达到解锁条件
-  | "consent_pending"   // 已进入 offer modal · 尚未同意订阅授权
-  | "active"            // 24h 体验中
-  | "converted"         // 体验结束 · 已转 £29.99/月
-  | "cancelled"         // 用户在体验期内取消
-  | "expired";          // 体验到期 · 未绑定卡 · 恢复 basic
+  | "eligible"                  // 已达到解锁条件
+  | "consent_pending"           // 已进入 offer modal · 尚未同意订阅授权
+  | "payment_mandate_required"  // Production 无真实周期扣款授权 · 卡在此状态 · 不激活权益
+  | "active"                    // 24h 体验中 (dev / preview 才可能)
+  | "converted"                 // 体验结束 · 已转 £29.99/月
+  | "cancelled"                 // 用户在体验期内取消
+  | "expired";                  // 体验到期 · 未绑定卡 · 恢复 basic
 
 export interface TrialRecord {
   userId: string;

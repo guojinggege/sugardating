@@ -33,6 +33,27 @@ export function initConsent(userId: string): TrialRecord {
   return record;
 }
 
+/**
+ * Production 无真实周期扣款授权 · 卡在 payment_mandate_required
+ * 不激活权益 · 不倒计时 · 后续可反复调 · 不计入 hasUsedTrial24h
+ */
+export function markMandateRequired(userId: string): TrialRecord {
+  const cur = store.get(userId);
+  // 已经进入终态或 active · 不覆盖
+  if (cur && (cur.status === "converted" || cur.status === "cancelled" || cur.status === "expired" || cur.status === "active")) {
+    return cur;
+  }
+  const now = new Date().toISOString();
+  const record: TrialRecord = {
+    userId,
+    status: "payment_mandate_required",
+    createdAt: cur?.createdAt ?? now,
+    scheduledPlanId: "paid_monthly",
+  };
+  store.set(userId, record);
+  return record;
+}
+
 /** 用户完成支付授权后 · 激活 24h 体验 */
 export function activate(userId: string, consent: { paymentMethodDescriptor: string }): TrialRecord {
   const now = Date.now();

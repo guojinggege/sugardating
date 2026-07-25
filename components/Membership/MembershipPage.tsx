@@ -1,6 +1,6 @@
 "use client";
 // Sugardating 会员页 · 3 级递进 · Basic / Paid (4 计划) / Verified
-// 保留 Hero · Credits 模块 · FAQ · Safety · 只重做套餐区、对比表、购买弹窗
+// 购买 / 充值 → 弹出「选择付款方式」纯展示弹窗 · 不创建订单 · 不调支付 API
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -12,10 +12,7 @@ import {
   type MembershipPlan, type CreditPackage, type DisplayMembershipLevel,
   computeDisplayLevel,
 } from "@/lib/membership-plans";
-
-type Confirm =
-  | { kind: "plan"; plan: MembershipPlan }
-  | { kind: "credits"; pkg: CreditPackage };
+import PaymentMethodDisplayModal from "@/components/payments/PaymentMethodDisplayModal";
 
 interface MembershipInfo {
   tier: "basic" | "paid";
@@ -29,7 +26,6 @@ export default function MembershipPage() {
   const router = useRouter();
   const { user, hydrated } = useAuth();
   const [selectedPlanId, setSelectedPlanId] = useState<string>(DEFAULT_PLAN_ID);
-  const [confirm, setConfirm] = useState<Confirm | null>(null);
   const [processing, setProcessing] = useState(false);
   const [toast, setToast] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [membership, setMembership] = useState<MembershipInfo | null>(null);
@@ -69,6 +65,9 @@ export default function MembershipPage() {
     }
   }, [canBuyIntro, selectedPlanId]);
 
+  // 「选择付款方式」纯展示弹窗 · 不创建订单
+  const [payDisplay, setPayDisplay] = useState<{ open: boolean; productLine?: string; amountLine?: string }>({ open: false });
+
   function subscribe(plan: MembershipPlan) {
     if (!user) { router.push("/login?next=/membership"); return; }
     if (plan.isIntro && !canBuyIntro) {
@@ -76,12 +75,20 @@ export default function MembershipPage() {
       setTimeout(() => setToast(null), 2600);
       return;
     }
-    setConfirm({ kind: "plan", plan });
+    setPayDisplay({
+      open: true,
+      productLine: plan.displayName,
+      amountLine: `${plan.currency}${plan.price.toFixed(2)} ${PERIOD_SUFFIX[plan.period]}`,
+    });
   }
 
   function topup(pkg: CreditPackage) {
     if (!user) { router.push("/login?next=/membership"); return; }
-    setConfirm({ kind: "credits", pkg });
+    setPayDisplay({
+      open: true,
+      productLine: `${pkg.credits.toLocaleString("en-US")} Credits`,
+      amountLine: `${pkg.currency} ${pkg.price}`,
+    });
   }
 
   function handleVerifyClick() {
@@ -119,32 +126,6 @@ export default function MembershipPage() {
     } finally {
       setProcessing(false);
       setTimeout(() => setToast(null), 2600);
-    }
-  }
-
-  // 统一 Checkout · 创建 order 后跳转 /checkout/[orderId]
-  async function doConfirm() {
-    if (!confirm) return;
-    setProcessing(true);
-    try {
-      const payload = confirm.kind === "plan"
-        ? { type: "membership" as const, productId: confirm.plan.id }
-        : { type: "credits"    as const, productId: confirm.pkg.id };
-      const r = await fetch("/api/checkout/orders", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok || !d?.ok) throw new Error(d?.message || "创建订单失败");
-      // 跳转到统一 Checkout · setConfirm 保留 · 用户返回后 Modal 已关闭无影响
-      router.push(`/checkout/${d.order.id}`);
-      setConfirm(null);
-    } catch (e) {
-      setToast({ tone: "err", text: e instanceof Error ? e.message : "创建订单失败" });
-      setProcessing(false);
-      setTimeout(() => setToast(null), 3200);
     }
   }
 
@@ -359,15 +340,13 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* Confirm modal */}
-      {confirm && (
-        <ConfirmModal
-          confirm={confirm}
-          processing={processing}
-          onConfirm={doConfirm}
-          onClose={() => setConfirm(null)}
-        />
-      )}
+      {/* 「选择付款方式」纯展示弹窗 · 无 API 调用 */}
+      <PaymentMethodDisplayModal
+        open={payDisplay.open}
+        onClose={() => setPayDisplay({ open: false })}
+        productLine={payDisplay.productLine}
+        amountLine={payDisplay.amountLine}
+      />
 
       {/* Toast */}
       {toast && <div className={"mp-toast " + toast.tone}>{toast.text}</div>}
@@ -593,84 +572,6 @@ function cellRender(v: string | boolean): React.ReactNode {
   if (v === true) return <span className="mp-tick">✓</span>;
   if (v === false) return <span className="mp-cross">—</span>;
   return v;
-}
-
-// ══════════════════════════════════════
-// Confirm Modal (购买弹窗)
-// ══════════════════════════════════════
-
-function ConfirmModal({ confirm, processing, onConfirm, onClose }: {
-  confirm: Confirm;
-  processing: boolean;
-  onConfirm: () => void;
-  onClose: () => void;
-}) {
-  const isPlan = confirm.kind === "plan";
-  const now = new Date();
-  const plan = isPlan ? confirm.plan : null;
-  const days = plan
-    ? plan.period === "intro7d" ? 7 : plan.period === "monthly" ? 30 : plan.period === "quarterly" ? 90 : 365
-    : 0;
-  const expiry = plan ? new Date(now.getTime() + days * 86400_000) : null;
-
-  const fmtDate = (d: Date) => d.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
-
-  return (
-    <div className="cm-bd" onClick={onClose}>
-      <div className="cm" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="cm-x" onClick={onClose} aria-label="关闭">×</button>
-        <div className="cm-eyebrow">{isPlan ? "会员开通确认" : "充值确认"}</div>
-        <h3>{isPlan ? plan!.displayName : `${confirm.pkg.credits} Credits · ${confirm.pkg.currency} ${confirm.pkg.price}`}</h3>
-
-        {isPlan && plan ? (
-          <>
-            <div className="cm-price">
-              <span>{plan.currency}</span>
-              <b>{plan.price.toFixed(2)}</b>
-              <span>{PERIOD_SUFFIX[plan.period]}</span>
-            </div>
-            <div className="cm-facts">
-              <div><b>会员名称</b><span>付费会员</span></div>
-              <div><b>周期</b><span>{plan.period === "intro7d" ? "7 天" : plan.period === "monthly" ? "月度" : plan.period === "quarterly" ? "3 个月" : "年度"}</span></div>
-              <div><b>生效日期</b><span>{fmtDate(now)}</span></div>
-              <div><b>到期日期</b><span>{expiry ? fmtDate(expiry) : "-"}</span></div>
-              <div><b>自动续费</b><span>{plan.autoRenew ? "开启" : "不自动续费"}</span></div>
-            </div>
-            <div className="cm-benefits">
-              <b>权益摘要</b>
-              <ul>
-                {plan.features.slice(0, 4).map((f, i) => <li key={i}>· {f}</li>)}
-              </ul>
-            </div>
-            {plan.isIntro && (
-              <div className="cm-note">首充体验 · 到期后恢复基础会员 · 除非你主动购买正式套餐</div>
-            )}
-          </>
-        ) : confirm.kind === "credits" ? (
-          <>
-            <div className="cm-price">
-              <span>{confirm.pkg.currency}</span>
-              <b>{confirm.pkg.price}</b>
-              <span>· ≈ {confirm.pkg.currency} {confirm.pkg.pricePerCredit.toFixed(2)} / credit</span>
-            </div>
-            <p className="cm-desc">{confirm.pkg.suitFor}</p>
-            <div className="cm-note">付费会员 +{PAID_CREDIT_BONUS_PCT}% · 到账立即生效</div>
-          </>
-        ) : null}
-
-        <div className="cm-fine">
-          当前为 Demo 模式 · 不会真实扣款 · 未来接入 Stripe 支付
-        </div>
-        <div className="cm-actions">
-          <button type="button" onClick={onClose} disabled={processing} className="cm-btn cm-btn--ghost">取消</button>
-          <button type="button" onClick={onConfirm} disabled={processing} className="cm-btn cm-btn--gold">
-            {processing ? "处理中…" : isPlan ? "确认开通" : "确认充值"}
-          </button>
-        </div>
-      </div>
-      <style>{modalStyles}</style>
-    </div>
-  );
 }
 
 // ══════════════════════════════════════
@@ -903,30 +804,4 @@ const creditStyles = `
   .cc-cta{padding:10px;border-radius:10px;border:0;background:#111;color:#fff;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .12s}
   .cc-cta:hover{opacity:.9}
   .cc--best .cc-cta{background:linear-gradient(135deg,#EEDDB8,#B8A789);color:#1a1409}
-`;
-
-const modalStyles = `
-  .cm-bd{position:fixed;inset:0;background:rgba(10,10,12,.72);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
-  .cm{position:relative;width:100%;max-width:480px;background:#fff;border-radius:20px;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
-  .cm-x{position:absolute;top:14px;right:18px;background:none;border:0;font-size:26px;color:#6B7280;cursor:pointer;line-height:1;padding:0 6px}
-  .cm-eyebrow{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#B8A789;font-weight:700;margin-bottom:8px}
-  .cm h3{font-family:'Cormorant Garamond',ui-serif;font-size:26px;font-style:italic;font-weight:600;color:#111;margin:0 0 14px;letter-spacing:-0.008em}
-  .cm-price{display:flex;align-items:baseline;gap:4px;padding:14px 16px;background:#FBFAF7;border-radius:12px;font-size:14px;color:#6B7280;margin-bottom:14px}
-  .cm-price span{font-size:14px;color:#6B7280}
-  .cm-price b{font-family:'Cormorant Garamond',ui-serif;font-style:italic;font-size:32px;color:#B8A789;font-weight:600;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;margin:0 4px}
-  .cm-facts{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:12px 14px;background:#FBFAF7;border-radius:10px;margin-bottom:12px}
-  .cm-facts > div{display:flex;justify-content:space-between;font-size:12px;color:#6B7280}
-  .cm-facts b{color:#111;font-weight:600}
-  .cm-facts span{color:#374151;font-weight:600;font-variant-numeric:tabular-nums}
-  .cm-benefits{padding:10px 14px;background:#F7F5F0;border:1px dashed #EEE9DC;border-radius:10px;margin-bottom:12px}
-  .cm-benefits b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#B8A789;font-weight:700;margin-bottom:6px}
-  .cm-benefits ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:#374151}
-  .cm-desc{font-size:13.5px;color:#3d3d42;margin:0 0 14px;line-height:1.7}
-  .cm-note{padding:10px 14px;background:#FEF3C7;color:#7C5A05;border-radius:8px;font-size:12px;margin-bottom:8px}
-  .cm-fine{font-size:11px;color:#9CA3AF;font-style:italic;margin:0 0 18px}
-  .cm-actions{display:flex;gap:10px}
-  .cm-btn{flex:1;padding:12px;border-radius:12px;border:0;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:opacity .12s}
-  .cm-btn:disabled{opacity:.5;cursor:not-allowed}
-  .cm-btn--ghost{background:#F3F4F6;color:#111}
-  .cm-btn--gold{background:linear-gradient(135deg,#EEDDB8,#B8A789);color:#1a1409}
 `;

@@ -24,11 +24,12 @@ interface Props {
   online?: boolean;
   vip?: boolean;
   videoSrc?: string;
+  creatorType?: "sugargirl" | "sugarboy" | "massage";
 }
 
 export default async function CreatorFold({
   creator, cover, avatar, age, languages, profession, joinedAt, intro,
-  online = true, vip = true, videoSrc,
+  online = true, vip = true, videoSrc, creatorType = "sugargirl",
 }: Props) {
   const t  = await getTranslations("creatorProfile.hero");
   const tS = await getTranslations("creatorProfile.stats");
@@ -99,7 +100,7 @@ export default async function CreatorFold({
 
             {/* Actions — 3 button (Follow / Gift / Share) */}
             <div className="cr-fold-actions">
-              <CreatorFoldActions creatorName={creator.name} />
+              <CreatorFoldActions creatorName={creator.name} creatorSlug={creator.slug} creatorType={creatorType} />
             </div>
           </div>
         </div>

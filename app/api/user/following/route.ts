@@ -1,16 +1,24 @@
-// GET  /api/user/following            — 当前用户关注列表 (creator slugs)
-// POST /api/user/following            — body { creatorSlug } 关注
+// GET  /api/user/following            — 当前用户关注列表 (creator slugs · 持久化)
+// POST /api/user/following            — body { creatorSlug, creatorType? } 关注 (幂等)
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/session";
-import { addFollowing, getFollowing } from "@/lib/mock-db";
+import { follow, getFollowingRows, countEligibleFollowing, type CreatorType } from "@/lib/follows/repository";
+import { computeEligibility } from "@/lib/trial-offer/eligibility";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const VALID_TYPES: CreatorType[] = ["sugargirl", "sugarboy", "massage"];
+
 export async function GET() {
   const uid = getSessionUserId();
   if (!uid) return err("NOT_AUTHENTICATED", 401);
-  return NextResponse.json({ ok: true, following: getFollowing(uid) });
+  const rows = await getFollowingRows(uid);
+  return NextResponse.json({
+    ok: true,
+    following: rows.map((r) => r.creatorSlug),
+    rows,
+  });
 }
 
 export async function POST(req: Request) {
@@ -18,10 +26,26 @@ export async function POST(req: Request) {
   if (!uid) return err("NOT_AUTHENTICATED", 401);
   let body: unknown;
   try { body = await req.json(); } catch { return err("INVALID_JSON", 400); }
-  const slug = (body as any)?.creatorSlug;
-  if (typeof slug !== "string" || !slug.trim()) return err("INVALID_SLUG", 400);
-  const added = addFollowing(uid, slug.trim());
-  return NextResponse.json({ ok: true, added, following: getFollowing(uid) });
+  const b = (body ?? {}) as Record<string, unknown>;
+  const slug = typeof b.creatorSlug === "string" ? b.creatorSlug.trim() : "";
+  if (!slug) return err("INVALID_SLUG", 400, "creatorSlug 必填");
+  const creatorType: CreatorType = VALID_TYPES.includes(b.creatorType as CreatorType) ? (b.creatorType as CreatorType) : "sugargirl";
+
+  const added = await follow(uid, slug, creatorType);
+  const followingCount = await countEligibleFollowing(uid);
+  const snap = await computeEligibility(uid, true);
+
+  return NextResponse.json({
+    ok: true,
+    following: true,
+    added,
+    followingCount,
+    trialEligibility: {
+      followedCount: snap.followCount,
+      followRequirementMet: snap.followCount >= snap.requiredFollows,
+      eligible: snap.eligible,
+    },
+  });
 }
 
 function err(code: string, status: number, message?: string) {

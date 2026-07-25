@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/session";
 import {
   findUserById, getUserProfile, updateUserProfile, createUserProfile,
-  getApplicationByUser, getFollowing, getBookings, getGifts, getSaved,
+  getApplicationByUser, getBookings, getGifts, getSaved,
   toPublicUser,
 } from "@/lib/mock-db";
+import { countEligibleFollowing } from "@/lib/follows/repository";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,7 +28,7 @@ export async function GET() {
     user: toPublicUser(user),
     profile,
     counts: {
-      following: getFollowing(uid).length,
+      following: await countEligibleFollowing(uid).catch(() => 0),
       saved:     getSaved(uid).length,
       bookings:  getBookings(uid).length,
       gifts:     getGifts(uid).length,

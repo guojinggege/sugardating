@@ -27,6 +27,24 @@ model User {
   passwordUpdatedAt  DateTime?
   creator            Creator?
   memberships        Membership[]
+  follows            Follow[]
+}
+
+// 关注关系 · 唯一权威数据源
+// creatorSlug 是稳定标识 · Prisma Creator + mock sugarboy/massage 都用 slug 定位
+// creatorType 用于区分类型 (只做 informational · 不影响关系键)
+model Follow {
+  id           String   @id @default(cuid())
+  userId       String
+  creatorSlug  String
+  creatorType  String   @default("sugargirl") // sugargirl | sugarboy | massage
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creatorSlug])
+  @@index([userId, createdAt])
+  @@index([creatorSlug])
 }
 
 model Category {

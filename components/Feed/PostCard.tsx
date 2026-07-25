@@ -1,6 +1,8 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import MediaGrid from "./MediaGrid";
+import { useShare } from "@/components/share/ShareProvider";
 import type { FeedPost } from "./types";
 
 function timeAgo(iso: string): string {
@@ -21,6 +23,14 @@ function fmtCount(n: number): string {
 export default function PostCard({ post }: { post: FeedPost }) {
   const hasMedia = post.media.length > 0;
   const creatorHref = post.authorSlug ? `/creators/${post.authorSlug}` : "#";
+  const { openShare } = useShare();
+  const onShare = () => openShare({
+    title: `${post.author.name} · Sugardating`,
+    text: post.text?.slice(0, 120),
+    canonicalUrl: creatorHref,
+    contentType: "post",
+    contentId: post.id,
+  });
   return (
     <article className="group relative rounded-card border border-feed-line bg-feed-surface p-5 transition duration-300 ease-out hover:bg-feed-elevated hover:border-feed-line2 hover:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]">
       {/* Header (avatar + name + time,均可点跳 creator 主页) */}
@@ -103,7 +113,7 @@ export default function PostCard({ post }: { post: FeedPost }) {
         <Action label="Gift" count={null} icon={
           <span className="text-[15px] leading-none" aria-hidden>🎁</span>
         } hoverColor="hover:text-gold" />
-        <Action label="Share" count={post.stats.shares} icon={
+        <Action label="Share" count={post.stats.shares} onClick={onShare} icon={
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current stroke-[1.8]"><path strokeLinecap="round" strokeLinejoin="round" d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></svg>
         } hoverColor="hover:text-gold" />
         {/* Book — 预约 */}
@@ -116,12 +126,13 @@ export default function PostCard({ post }: { post: FeedPost }) {
 }
 
 function Action({
-  icon, count, label, hoverColor,
-}: { icon: React.ReactNode; count: number | null; label: string; hoverColor: string }) {
+  icon, count, label, hoverColor, onClick,
+}: { icon: React.ReactNode; count: number | null; label: string; hoverColor: string; onClick?: () => void }) {
   return (
     <button
       type="button"
       aria-label={label}
+      onClick={onClick}
       className={`group/btn inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[13px] font-medium transition ${hoverColor}`}
     >
       <span className="transition-transform duration-200 ease-out group-hover/btn:scale-110">{icon}</span>

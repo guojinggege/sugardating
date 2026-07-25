@@ -122,38 +122,27 @@ export default function MembershipPage() {
     }
   }
 
+  // 统一 Checkout · 创建 order 后跳转 /checkout/[orderId]
   async function doConfirm() {
     if (!confirm) return;
     setProcessing(true);
     try {
-      if (confirm.kind === "plan") {
-        const r = await fetch("/api/membership/subscribe", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ planId: confirm.plan.id }),
-        });
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok || !d?.ok) throw new Error(d?.message || "开通失败");
-        setToast({ tone: "ok", text: `${confirm.plan.displayName} 开通成功 (Demo)` });
-        setMembership((prev) => prev
-          ? { ...prev, tier: "paid", currentPlanId: confirm.plan.id, hasUsedIntro: prev.hasUsedIntro || !!confirm.plan.isIntro }
-          : { tier: "paid", verificationStatus: "unverified", currentPlanId: confirm.plan.id, hasUsedIntro: !!confirm.plan.isIntro });
-      } else {
-        const r = await fetch("/api/wallet/top-up", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ coins: confirm.pkg.credits }),
-        });
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok || !d?.ok) throw new Error(d?.message || "充值失败");
-        setToast({ tone: "ok", text: `充值成功 · +${confirm.pkg.credits} Credits (Demo)` });
-      }
+      const payload = confirm.kind === "plan"
+        ? { type: "membership" as const, productId: confirm.plan.id }
+        : { type: "credits"    as const, productId: confirm.pkg.id };
+      const r = await fetch("/api/checkout/orders", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d?.ok) throw new Error(d?.message || "创建订单失败");
+      // 跳转到统一 Checkout · setConfirm 保留 · 用户返回后 Modal 已关闭无影响
+      router.push(`/checkout/${d.order.id}`);
       setConfirm(null);
     } catch (e) {
-      setToast({ tone: "err", text: e instanceof Error ? e.message : "操作失败" });
-    } finally {
+      setToast({ tone: "err", text: e instanceof Error ? e.message : "创建订单失败" });
       setProcessing(false);
       setTimeout(() => setToast(null), 3200);
     }

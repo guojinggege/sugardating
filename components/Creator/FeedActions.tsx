@@ -1,9 +1,10 @@
 "use client";
 // 单个 post 底部的 4 个操作: 点赞 / 收藏 / 分享 / 评论
-// 点赞 / 收藏 / 评论 走 requireLogin gate;分享只复制链接,不需要登录
+// 点赞 / 收藏 / 评论 走 requireLogin gate;分享统一走 ShareDialog · 不需要登录
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequireLogin } from "@/components/Auth/AuthProvider";
+import { useShare } from "@/components/share/ShareProvider";
 
 interface Props {
   postId: string;
@@ -14,10 +15,10 @@ interface Props {
 export default function FeedActions({ postId, likes: initialLikes, comments }: Props) {
   const t = useTranslations("creatorProfile.feed");
   const requireLogin = useRequireLogin();
+  const { openShare } = useShare();
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
-  const [copied, setCopied] = useState(false);
 
   const onLike = () => {
     if (!requireLogin()) return;
@@ -34,13 +35,14 @@ export default function FeedActions({ postId, likes: initialLikes, comments }: P
     if (!requireLogin()) return;
     // TODO: 跳转 / 弹评论框
   };
-  const onShare = async () => {
-    const url = typeof window !== "undefined" ? `${window.location.href}#${postId}` : "";
-    if (navigator.share) {
-      try { await navigator.share({ url }); } catch {}
-    } else {
-      try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
-    }
+  const onShare = () => {
+    const url = typeof window !== "undefined" ? `${window.location.pathname}#${postId}` : "";
+    openShare({
+      title: "Sugardating · Post",
+      canonicalUrl: url,
+      contentType: "post",
+      contentId: postId,
+    });
   };
 
   return (
@@ -68,7 +70,7 @@ export default function FeedActions({ postId, likes: initialLikes, comments }: P
           <circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" />
           <path d="M8.2 13.3l7.6 4.4M15.8 6.3l-7.6 4.4" />
         </svg>
-        <span>{copied ? t("copied") : t("share")}</span>
+        <span>{t("share")}</span>
       </button>
     </footer>
   );

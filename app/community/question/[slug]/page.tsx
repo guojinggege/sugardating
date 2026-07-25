@@ -9,6 +9,7 @@ import {
   CommunityTrendingPanel, CommunityUnansweredPanel, CommunityJournalPanel, CommunitySafetyCard,
 } from "@/components/community/CommunitySidebarPanels";
 import { getPostBySlug, scrubAuthor, listTrending, listUnanswered, listQuestions } from "@/lib/community/store";
+import ShareButton from "@/components/share/ShareButton";
 import { postMetadata, buildQaSchema, stringifyJson } from "@/lib/community/seo";
 import { featuredPosts } from "@/lib/journal-data";
 
@@ -77,6 +78,16 @@ export default function QuestionDetailPage({ params }: { params: { slug: string 
               <span>{fmtDate(post.createdAt)} · {post.viewCount.toLocaleString()} 次浏览 · {post.followerCount ?? 0} 关注</span>
             </div>
             <div className="q-actions">
+              <ShareButton
+                variant="chip"
+                payload={{
+                  title: post.title,
+                  text: post.body.slice(0, 120),
+                  canonicalUrl: `/community/question/${post.slug}`,
+                  contentType: "question",
+                  contentId: post.slug,
+                }}
+              />
               <Link href="/login?return_to=/community/question" className="q-btn q-btn--ghost">关注问题</Link>
               <Link href="/login?return_to=/community/question" className="q-btn q-btn--dark">回答问题</Link>
             </div>

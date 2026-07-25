@@ -9,6 +9,7 @@ import {
   CommunityTrendingPanel, CommunityUnansweredPanel, CommunityJournalPanel, CommunitySafetyCard,
 } from "@/components/community/CommunitySidebarPanels";
 import { getPostBySlug, scrubAuthor, listTrending, listUnanswered, listStories } from "@/lib/community/store";
+import ShareButton from "@/components/share/ShareButton";
 import { postMetadata, buildStorySchema, stringifyJson } from "@/lib/community/seo";
 import { featuredPosts } from "@/lib/journal-data";
 
@@ -99,7 +100,19 @@ export default function StoryDetailPage({ params }: { params: { slug: string } }
 
           <div className="d-actions">
             <span className="d-fine">评论、收藏、举报 · 登录后可用</span>
-            <Link href="/login?return_to=/community/story/{slug}" className="d-cta">登录以互动</Link>
+            <div style={{ display: "inline-flex", gap: 8, alignItems: "center", marginLeft: "auto" }}>
+              <ShareButton
+                variant="chip"
+                payload={{
+                  title: post.title,
+                  text: post.excerpt || post.body.slice(0, 120),
+                  canonicalUrl: `/community/story/${post.slug}`,
+                  contentType: "story",
+                  contentId: post.slug,
+                }}
+              />
+              <Link href={`/login?return_to=/community/story/${post.slug}`} className="d-cta">登录以互动</Link>
+            </div>
           </div>
         </article>
 

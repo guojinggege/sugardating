@@ -10,6 +10,7 @@ import { AuthProvider } from "@/components/Auth/AuthProvider";
 import LoginModal from "@/components/Auth/LoginModal";
 import { ChatProvider } from "@/components/chat/ChatProvider";
 import ChatDrawer from "@/components/chat/ChatDrawer";
+import ShareProvider from "@/components/share/ShareProvider";
 
 // 子页面调 DB(如 listCreators, listSugarGirls 等),全应用走 SSR
 export const dynamic = "force-dynamic";
@@ -56,12 +57,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
             <ChatProvider>
-              {!isMobileRoute && <Nav />}
-              <main>{children}</main>
-              {!isMobileRoute && <Footer />}
-              <LoginModal />
-              <ChatDrawer />
-              {!isMobileRoute && <BottomNav />}
+              <ShareProvider>
+                {!isMobileRoute && <Nav />}
+                <main>{children}</main>
+                {!isMobileRoute && <Footer />}
+                <LoginModal />
+                <ChatDrawer />
+                {!isMobileRoute && <BottomNav />}
+              </ShareProvider>
             </ChatProvider>
           </AuthProvider>
         </NextIntlClientProvider>

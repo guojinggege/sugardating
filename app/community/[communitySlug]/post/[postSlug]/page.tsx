@@ -13,6 +13,7 @@ import JournalRelated from "@/components/Journal/JournalRelated";
 import JournalSidebar from "@/components/Journal/JournalSidebar";
 import { buildBlogPostingSchema, buildBreadcrumbSchema, stringifySchema } from "@/lib/journal/schema";
 import { cmsRepo } from "@/lib/cms/repository";
+import ShareButton from "@/components/share/ShareButton";
 
 export const dynamic = "force-dynamic";
 
@@ -132,6 +133,19 @@ export default function JournalArticlePage({ params }: { params: { communitySlug
                   <time>{fmtDate(post.publishedAt, post.language)}</time>
                   <span className="jn-art-dot" />
                   <span>{post.readingTime}</span>
+                  <span style={{ marginLeft: "auto" }}>
+                    <ShareButton
+                      variant="chip"
+                      payload={{
+                        title: post.title,
+                        text: post.excerpt,
+                        canonicalUrl: `/community/${post.categorySlug}/post/${post.slug}`,
+                        image: post.coverImage,
+                        contentType: "journal",
+                        contentId: post.slug,
+                      }}
+                    />
+                  </span>
                 </div>
               </header>
 

@@ -14,23 +14,30 @@ interface Props {
 export default function CreatorFoldActions({ creatorName, creatorSlug, creatorType = "sugargirl" }: Props) {
   const t = useTranslations("creatorProfile.actions");
   const requireLogin = useRequireLogin();
-  const [following, setFollowing] = useState(false);
+  // null = 尚未从服务端确认 · 禁止显示 Follow / Following · 只显示 loading
+  const [following, setFollowing] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // 初始拉取真实关注状态 (登录用户)
   useEffect(() => {
     let alive = true;
-    fetch(`/api/user/following/status?creatorSlug=${encodeURIComponent(creatorSlug)}`, { credentials: "include" })
+    fetch(`/api/user/following/status?creatorSlug=${encodeURIComponent(creatorSlug)}`, { credentials: "include", cache: "no-store" })
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (alive && d?.ok) setFollowing(!!d.following); })
-      .catch(() => { /* silent */ });
+      .then((d) => {
+        if (!alive) return;
+        setFollowing(d?.ok ? !!d.following : false);
+      })
+      .catch((e) => {
+        if (!alive) return;
+        setFollowing(false);
+        if (process.env.NODE_ENV !== "production") console.warn("[follow.status]", e);
+      });
     return () => { alive = false; };
   }, [creatorSlug]);
 
   async function onFollowClick() {
     if (!requireLogin()) return;
-    if (busy) return;
+    if (busy || following === null) return;
     const wasFollowing = following;
     setBusy(true);
     setFollowing(!wasFollowing);  // optimistic
@@ -43,10 +50,14 @@ export default function CreatorFoldActions({ creatorName, creatorSlug, creatorTy
             body: JSON.stringify({ creatorSlug, creatorType }),
           });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok || !d?.ok) throw new Error(d?.message || "关注操作失败");
+      if (!r.ok || !d?.ok) {
+        if (process.env.NODE_ENV !== "production") console.warn("[follow.click]", r.status, d);
+        throw new Error(d?.message || `HTTP ${r.status}`);
+      }
       setFollowing(!!d.following);
-    } catch {
-      setFollowing(wasFollowing); // rollback
+    } catch (e) {
+      setFollowing(wasFollowing);
+      if (process.env.NODE_ENV !== "production") console.warn("[follow.rollback]", e);
     } finally { setBusy(false); }
   }
 
@@ -66,16 +77,18 @@ export default function CreatorFoldActions({ creatorName, creatorSlug, creatorTy
       <button
         type="button"
         onClick={onFollowClick}
-        disabled={busy}
-        aria-pressed={following}
-        className={pill + " " + (following
+        disabled={busy || following === null}
+        aria-pressed={following === true}
+        className={pill + " " + (following === null
+          ? "bg-white text-[var(--muted)] border border-[var(--line2)] opacity-70 cursor-wait"
+          : following
           ? "bg-[#e11d48] text-white border border-[#e11d48] hover:bg-[#be123c]"
           : "bg-white text-[var(--ink)] border border-[var(--line2)] hover:border-[var(--ink)] hover:-translate-y-px")}
       >
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill={following ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.9}>
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill={following === true ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.9}>
           <path d="M12 21s-7-5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 16 12 21 12 21z" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        {following ? t("following") : t("follow")}
+        {following === null ? "…" : following ? t("following") : t("follow")}
       </button>
 
       <button

@@ -1,9 +1,11 @@
 "use client";
 // 私信页 · 双栏收件箱布局
-// 左侧:会话列表 + 未读/信息 tabs · 右侧:欢迎空态或聊天区
+// 左侧:关注/通知/VIP 快捷入口 + 会话列表 + 未读/信息 tabs · 右侧:欢迎空态或精简聊天区
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Conversation, ChatMessage } from "@/lib/chat";
+import QuickActionsBar from "./QuickActionsBar";
+import ChatComposer from "./ChatComposer";
 
 type Tab = "unread" | "all";
 
@@ -31,8 +33,7 @@ export default function MessagesInbox({ loggedIn }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [msgLoading, setMsgLoading] = useState(false);
-  const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
+  // Composer 内部管理 text/busy · 只需暴露 sendText 回调
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,27 +81,22 @@ export default function MessagesInbox({ loggedIn }: Props) {
   const list = tab === "unread" ? unreadList : allList;
   const active = convos.find((c) => c.id === activeId) ?? null;
 
-  async function send() {
-    if (!activeId || !draft.trim() || sending) return;
-    const text = draft.trim();
-    setSending(true);
-    try {
-      const r = await fetch(`/api/chat/conversations/${activeId}/messages`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text }),
+  async function sendText(text: string) {
+    if (!activeId || !text.trim()) return;
+    const r = await fetch(`/api/chat/conversations/${activeId}/messages`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: text.trim() }),
+    });
+    const d = await r.json();
+    if (d?.ok) {
+      setMessages((prev) => {
+        const next = [...prev, d.message];
+        if (d.reply) next.push(d.reply);
+        return next;
       });
-      const d = await r.json();
-      if (d?.ok) {
-        setMessages((prev) => {
-          const next = [...prev, d.message];
-          if (d.reply) next.push(d.reply);
-          return next;
-        });
-        setDraft("");
-      }
-    } finally { setSending(false); }
+    }
   }
 
   if (!loggedIn) {
@@ -136,6 +132,7 @@ export default function MessagesInbox({ loggedIn }: Props) {
           </div>
           <button type="button" className="ix-compose" aria-label="发起新会话" title="发起新会话 (即将开放)">✎</button>
         </div>
+        <QuickActionsBar />
         <div className="ix-tabs" role="tablist">
           <button role="tab" type="button" aria-selected={tab === "all"} onClick={() => setTab("all")}
             className={"ix-tab" + (tab === "all" ? " is-active" : "")}>信息<span className="ix-tab-n">{allList.length}</span></button>
@@ -217,13 +214,7 @@ export default function MessagesInbox({ loggedIn }: Props) {
                 </div>
               ))}
             </div>
-            <form className="ix-chat-input" onSubmit={(e) => { e.preventDefault(); send(); }}>
-              <input type="text" value={draft} onChange={(e) => setDraft(e.target.value.slice(0, 500))}
-                placeholder="输入消息…" maxLength={500} disabled={sending} />
-              <button type="submit" disabled={!draft.trim() || sending}>
-                {sending ? "…" : "发送"}
-              </button>
-            </form>
+            <ChatComposer onSend={sendText} />
           </div>
         )}
       </main>
@@ -296,11 +287,7 @@ const inboxStyles = `
   .ix-msg--creator .ix-bubble,.ix-msg--system .ix-bubble{background:#fff;border:1px solid #E9E3DA;border-bottom-left-radius:6px}
   .ix-msg time{font-size:10.5px;color:#a19a91;padding:0 6px}
 
-  .ix-chat-input{display:flex;gap:8px;padding:14px 18px;border-top:1px solid #F0EAE1;background:#fff}
-  .ix-chat-input input{flex:1;padding:11px 16px;border:1px solid #E9E3DA;border-radius:99px;font:inherit;font-size:14px;color:#171512;background:#FBFAF7;outline:none}
-  .ix-chat-input input:focus{border-color:#171512;background:#fff}
-  .ix-chat-input button{padding:11px 22px;background:#171512;color:#fff;border:0;border-radius:99px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-  .ix-chat-input button:disabled{opacity:.4;cursor:not-allowed}
+  /* .ix-chat-input 已由 ChatComposer 组件接管 */
 
   @media(max-width:900px){
     .inbox{grid-template-columns:1fr;height:auto}

@@ -1,9 +1,12 @@
 "use client";
-// 私信页 · 双栏收件箱布局
-// 左侧:会话列表 + 未读/信息 tabs · 右侧:欢迎空态或聊天区
+// 私信页 · 三栏布局:竖排导航 (88px) + 会话列表 (320px) + 聊天区
+// 竖排 4 项:私信 / 关注 / 通知 / VIP · 私信为默认高亮
+// 真实感 Demo:发送后 1-2s 显示"对方正在输入" · 3-5s 追加自动回复
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Conversation, ChatMessage } from "@/lib/chat";
+import MessagesVerticalNav from "./MessagesVerticalNav";
+import ChatComposer from "./ChatComposer";
 
 type Tab = "unread" | "all";
 
@@ -31,9 +34,10 @@ export default function MessagesInbox({ loggedIn }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [msgLoading, setMsgLoading] = useState(false);
-  const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
+  const [typing, setTyping] = useState(false);       // "对方正在输入..."
+  // Composer 内部管理 text/busy · 只需暴露 sendText 回调
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingTimersRef = useRef<{ start?: any; end?: any }>({});
 
   useEffect(() => {
     if (!loggedIn) { setLoading(false); return; }
@@ -69,7 +73,14 @@ export default function MessagesInbox({ loggedIn }: Props) {
   useEffect(() => {
     if (!scrollRef.current) return;
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages.length]);
+  }, [messages.length, typing]);
+
+  // 切换会话时清理 typing 状态与定时器
+  useEffect(() => {
+    setTyping(false);
+    clearTimeout(typingTimersRef.current.start);
+    clearTimeout(typingTimersRef.current.end);
+  }, [activeId]);
 
   const { unreadList, allList } = useMemo(() => {
     return {
@@ -80,28 +91,51 @@ export default function MessagesInbox({ loggedIn }: Props) {
   const list = tab === "unread" ? unreadList : allList;
   const active = convos.find((c) => c.id === activeId) ?? null;
 
-  async function send() {
-    if (!activeId || !draft.trim() || sending) return;
-    const text = draft.trim();
-    setSending(true);
-    try {
-      const r = await fetch(`/api/chat/conversations/${activeId}/messages`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      const d = await r.json();
-      if (d?.ok) {
-        setMessages((prev) => {
-          const next = [...prev, d.message];
-          if (d.reply) next.push(d.reply);
-          return next;
-        });
-        setDraft("");
-      }
-    } finally { setSending(false); }
+  async function sendText(text: string) {
+    if (!activeId || !text.trim()) return;
+    const currentActiveId = activeId;
+    const r = await fetch(`/api/chat/conversations/${currentActiveId}/messages`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: text.trim() }),
+    });
+    const d = await r.json();
+    if (!d?.ok) return;
+
+    // 1. 用户消息立即追加
+    setMessages((prev) => [...prev, d.message]);
+    // 同步更新左侧会话摘要
+    setConvos((prev) => prev.map((c) => c.id === currentActiveId
+      ? { ...c, lastMessage: text.trim().slice(0, 60), lastMessageAt: d.message.createdAt }
+      : c));
+
+    if (!d.reply) return;
+
+    // 2. 1-2s 后显示 "对方正在输入..."
+    clearTimeout(typingTimersRef.current.start);
+    clearTimeout(typingTimersRef.current.end);
+    typingTimersRef.current.start = setTimeout(() => {
+      // 会话切换后不显示
+      if (currentActiveId === activeIdRef.current) setTyping(true);
+    }, 800 + Math.random() * 800);
+
+    // 3. 3-5s 后追加回复 + 清 typing + 更新左侧摘要
+    typingTimersRef.current.end = setTimeout(() => {
+      if (currentActiveId !== activeIdRef.current) return;
+      setTyping(false);
+      // 重新时间戳到"现在"以显得更真实
+      const patched = { ...d.reply, createdAt: new Date().toISOString() };
+      setMessages((prev) => [...prev, patched]);
+      setConvos((prev) => prev.map((c) => c.id === currentActiveId
+        ? { ...c, lastMessage: patched.text.slice(0, 60), lastMessageAt: patched.createdAt }
+        : c));
+    }, 2600 + Math.random() * 2400);
   }
+
+  // 用 ref 记录当前 activeId · 避免 setTimeout 内闭包过期
+  const activeIdRef = useRef<string | null>(null);
+  useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
 
   if (!loggedIn) {
     return (
@@ -127,7 +161,10 @@ export default function MessagesInbox({ loggedIn }: Props) {
 
   return (
     <div className="inbox">
-      {/* Left · conversation list */}
+      {/* Column 1 · vertical nav rail · 私信 / 关注 / 通知 / VIP */}
+      <MessagesVerticalNav activeKey="messages" />
+
+      {/* Column 2 · conversation list */}
       <aside className="ix-list">
         <div className="ix-list-h">
           <div>
@@ -216,14 +253,15 @@ export default function MessagesInbox({ loggedIn }: Props) {
                   <time>{fmtAgo(m.createdAt)}</time>
                 </div>
               ))}
+              {typing && (
+                <div className="ix-msg ix-msg--creator">
+                  <div className="ix-typing" aria-label="对方正在输入">
+                    <span /><span /><span />
+                  </div>
+                </div>
+              )}
             </div>
-            <form className="ix-chat-input" onSubmit={(e) => { e.preventDefault(); send(); }}>
-              <input type="text" value={draft} onChange={(e) => setDraft(e.target.value.slice(0, 500))}
-                placeholder="输入消息…" maxLength={500} disabled={sending} />
-              <button type="submit" disabled={!draft.trim() || sending}>
-                {sending ? "…" : "发送"}
-              </button>
-            </form>
+            <ChatComposer onSend={sendText} />
           </div>
         )}
       </main>
@@ -234,7 +272,7 @@ export default function MessagesInbox({ loggedIn }: Props) {
 }
 
 const inboxStyles = `
-  .inbox{background:#F7F4EF;display:grid;grid-template-columns:360px minmax(0,1fr);height:calc(100vh - 120px);min-height:560px;color:#171512;font-family:'Plus Jakarta Sans',ui-sans-serif}
+  .inbox{background:#F7F4EF;display:grid;grid-template-columns:88px 340px minmax(0,1fr);height:calc(100vh - 120px);min-height:560px;color:#171512;font-family:'Plus Jakarta Sans',ui-sans-serif}
 
   .ix-list{background:#fff;border-right:1px solid #E9E3DA;display:flex;flex-direction:column;overflow:hidden}
   .ix-list-h{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px 12px}
@@ -296,14 +334,16 @@ const inboxStyles = `
   .ix-msg--creator .ix-bubble,.ix-msg--system .ix-bubble{background:#fff;border:1px solid #E9E3DA;border-bottom-left-radius:6px}
   .ix-msg time{font-size:10.5px;color:#a19a91;padding:0 6px}
 
-  .ix-chat-input{display:flex;gap:8px;padding:14px 18px;border-top:1px solid #F0EAE1;background:#fff}
-  .ix-chat-input input{flex:1;padding:11px 16px;border:1px solid #E9E3DA;border-radius:99px;font:inherit;font-size:14px;color:#171512;background:#FBFAF7;outline:none}
-  .ix-chat-input input:focus{border-color:#171512;background:#fff}
-  .ix-chat-input button{padding:11px 22px;background:#171512;color:#fff;border:0;border-radius:99px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-  .ix-chat-input button:disabled{opacity:.4;cursor:not-allowed}
+  /* .ix-chat-input 已由 ChatComposer 组件接管 */
+
+  .ix-typing{display:inline-flex;align-items:center;gap:4px;padding:12px 16px;background:#fff;border:1px solid #E9E3DA;border-bottom-left-radius:6px;border-radius:18px}
+  .ix-typing span{width:6px;height:6px;background:#B8A789;border-radius:50%;opacity:.5;animation:ix-blink 1.4s infinite ease-in-out}
+  .ix-typing span:nth-child(2){animation-delay:.2s}
+  .ix-typing span:nth-child(3){animation-delay:.4s}
+  @keyframes ix-blink{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
 
   @media(max-width:900px){
-    .inbox{grid-template-columns:1fr;height:auto}
+    .inbox{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;height:auto}
     .ix-list{max-height:320px;border-right:0;border-bottom:1px solid #E9E3DA}
     .ix-main{min-height:520px}
   }

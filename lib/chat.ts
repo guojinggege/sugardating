@@ -65,17 +65,59 @@ function seedIfEmpty() {
     convos.set(id, conv);
     convoIndex.set(`${uid}:${slug}`, id);
   };
-  seedConvo("cv_seed_aria",   "u_demo", "aria",   "Aria M.",  ["zh", "en"], 3, "如果方便,我们视频再聊一下细节 :)", 0.4);
-  seedConvo("cv_seed_yuki",   "u_demo", "yuki",   "Yuki",     ["zh", "en"], 1, "刚看到你的消息 · 稍后回复", 2);
-  seedConvo("cv_seed_leon",   "u_demo", "leon",   "Leon.",    ["zh"],       0, "谢谢分享的 Mayfair 那家餐厅推荐", 26);
-  seedConvo("cv_seed_yumeko", "u_demo", "yumeko", "Yumeko",   ["zh", "en"], 0, "See you next week!", 96);
+  seedConvo("cv_seed_aria",   "u_demo", "aria",    "Aria M.",  ["zh", "en"],       3, "如果方便,我们视频再聊一下细节 :)", 0.4);
+  seedConvo("cv_seed_yuki",   "u_demo", "yuki",    "Yuki",     ["zh", "en", "th"], 1, "刚看到你的消息 · 稍后回复", 2);
+  seedConvo("cv_seed_saoirse","u_demo", "saoirse", "Saoirse",  ["en"],             2, "See you tomorrow at 8pm 🌹", 4);
+  seedConvo("cv_seed_leon",   "u_demo", "leon",    "Leon.",    ["zh"],             0, "谢谢分享的 Mayfair 那家餐厅推荐", 26);
+  seedConvo("cv_seed_yumeko", "u_demo", "yumeko",  "Yumeko",   ["ja", "en", "zh"] as any, 0, "See you next week!", 96);
+  seedConvo("cv_seed_mira",   "u_demo", "mira-mayfair", "Mira · Mayfair", ["en"],  1, "本周日下午的按摩预约已确认", 8);
+  seedConvo("cv_seed_kenji",  "u_demo", "kenji",   "Kenji",    ["ja", "en"] as any,0, "很高兴认识你 · 有空一起看画展", 168);
+  seedConvo("cv_seed_amelia", "u_demo", "amelia-kensington", "Amelia · Kensington", ["en"], 0, "Thanks for the tip 💐", 320);
 
   messages.set("cv_seed_aria", [
-    { id: "m_s1", conversationId: "cv_seed_aria", senderId: "u_demo",       senderType: "user",    text: "Hi Aria,下周一在 Mayfair 有个 dinner event · 有兴趣一起吗?", status: "read", createdAt: ago(3) },
-    { id: "m_s2", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "听起来不错 · 是几点开始?", originalLanguage: "zh", status: "read", createdAt: ago(2.5) },
-    { id: "m_s3", conversationId: "cv_seed_aria", senderId: "u_demo",       senderType: "user",    text: "晚上 7 点半 · 建议提前 30 分钟到,先在 bar 聊一下。", status: "read", createdAt: ago(1) },
-    { id: "m_s4", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "好的 · 我下午会到附近先看一下 · 见面前把这周的照片发给你参考。", originalLanguage: "zh", status: "delivered", createdAt: ago(0.6) },
-    { id: "m_s5", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "如果方便,我们视频再聊一下细节 :)", originalLanguage: "zh", status: "delivered", createdAt: ago(0.4) },
+    { id: "m_a1", conversationId: "cv_seed_aria", senderId: "u_demo",       senderType: "user",    text: "Hi Aria,下周一在 Mayfair 有个 dinner event · 有兴趣一起吗?", status: "read", createdAt: ago(3) },
+    { id: "m_a2", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "听起来不错 · 是几点开始?", originalLanguage: "zh", status: "read", createdAt: ago(2.5) },
+    { id: "m_a3", conversationId: "cv_seed_aria", senderId: "u_demo",       senderType: "user",    text: "晚上 7 点半 · 建议提前 30 分钟到,先在 bar 聊一下。", status: "read", createdAt: ago(1) },
+    { id: "m_a4", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "好的 · 我下午会到附近先看一下 · 见面前把这周的照片发给你参考。", originalLanguage: "zh", status: "delivered", createdAt: ago(0.6) },
+    { id: "m_a5", conversationId: "cv_seed_aria", senderId: "creator:aria", senderType: "creator", text: "如果方便,我们视频再聊一下细节 :)", originalLanguage: "zh", status: "delivered", createdAt: ago(0.4) },
+  ]);
+
+  messages.set("cv_seed_yuki", [
+    { id: "m_y1", conversationId: "cv_seed_yuki", senderId: "u_demo",       senderType: "user",    text: "Yuki,上次的视频通话很开心 😊", status: "read", createdAt: ago(5) },
+    { id: "m_y2", conversationId: "cv_seed_yuki", senderId: "creator:yuki", senderType: "creator", text: "我也是 · 下次可以约在东京 shibuya 附近吗", originalLanguage: "zh", status: "read", createdAt: ago(4) },
+    { id: "m_y3", conversationId: "cv_seed_yuki", senderId: "u_demo",       senderType: "user",    text: "好啊 · 我 8 月会去", status: "read", createdAt: ago(3) },
+    { id: "m_y4", conversationId: "cv_seed_yuki", senderId: "creator:yuki", senderType: "creator", text: "刚看到你的消息 · 稍后回复", originalLanguage: "zh", status: "delivered", createdAt: ago(2) },
+  ]);
+
+  messages.set("cv_seed_saoirse", [
+    { id: "m_s1", conversationId: "cv_seed_saoirse", senderId: "creator:saoirse", senderType: "creator", text: "Hey · thanks for reaching out ✨", originalLanguage: "en", status: "read", createdAt: ago(8) },
+    { id: "m_s2", conversationId: "cv_seed_saoirse", senderId: "u_demo",           senderType: "user",    text: "Would you be free for coffee tomorrow?", status: "read", createdAt: ago(7) },
+    { id: "m_s3", conversationId: "cv_seed_saoirse", senderId: "creator:saoirse", senderType: "creator", text: "Yes · afternoon works best for me", originalLanguage: "en", status: "delivered", createdAt: ago(5) },
+    { id: "m_s4", conversationId: "cv_seed_saoirse", senderId: "creator:saoirse", senderType: "creator", text: "See you tomorrow at 8pm 🌹", originalLanguage: "en", status: "delivered", createdAt: ago(4) },
+  ]);
+
+  messages.set("cv_seed_leon", [
+    { id: "m_l1", conversationId: "cv_seed_leon", senderId: "u_demo",       senderType: "user",    text: "推荐你一家 Mount Street 的私厨 · sitting 只接受预约", status: "read", createdAt: ago(30) },
+    { id: "m_l2", conversationId: "cv_seed_leon", senderId: "creator:leon", senderType: "creator", text: "谢谢分享的 Mayfair 那家餐厅推荐", originalLanguage: "zh", status: "read", createdAt: ago(26) },
+  ]);
+
+  messages.set("cv_seed_yumeko", [
+    { id: "m_ym1", conversationId: "cv_seed_yumeko", senderId: "u_demo",         senderType: "user",    text: "Have a lovely trip · let me know when you're back in London", status: "read", createdAt: ago(120) },
+    { id: "m_ym2", conversationId: "cv_seed_yumeko", senderId: "creator:yumeko", senderType: "creator", text: "See you next week!", originalLanguage: "en", status: "read", createdAt: ago(96) },
+  ]);
+
+  messages.set("cv_seed_mira", [
+    { id: "m_m1", conversationId: "cv_seed_mira", senderId: "u_demo",              senderType: "user",    text: "想预约本周日下午的深度放松 · 90 分钟可以吗", status: "read", createdAt: ago(12) },
+    { id: "m_m2", conversationId: "cv_seed_mira", senderId: "creator:mira-mayfair", senderType: "creator", text: "本周日下午的按摩预约已确认", originalLanguage: "zh", status: "delivered", createdAt: ago(8) },
+  ]);
+
+  messages.set("cv_seed_kenji", [
+    { id: "m_k1", conversationId: "cv_seed_kenji", senderId: "creator:kenji", senderType: "creator", text: "很高兴认识你 · 有空一起看画展", originalLanguage: "zh", status: "read", createdAt: ago(168) },
+  ]);
+
+  messages.set("cv_seed_amelia", [
+    { id: "m_am1", conversationId: "cv_seed_amelia", senderId: "u_demo",                    senderType: "user",    text: "Kensington 那家 tea house 试过吗?下次带你去", status: "read", createdAt: ago(340) },
+    { id: "m_am2", conversationId: "cv_seed_amelia", senderId: "creator:amelia-kensington", senderType: "creator", text: "Thanks for the tip 💐", originalLanguage: "en", status: "read", createdAt: ago(320) },
   ]);
 }
 seedIfEmpty();

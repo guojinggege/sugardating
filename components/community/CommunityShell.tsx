@@ -11,11 +11,9 @@ interface Props {
 interface NavItem { href: string; label: string; }
 
 const NAV: NavItem[] = [
-  { href: "/community",             label: "为你推荐" },
-  { href: "/community/stories",     label: "情感私话" },
-  { href: "/community/questions",   label: "问答专区" },
-  { href: "/community/latest",      label: "最新" },
-  { href: "/community/unanswered",  label: "等待回答" },
+  { href: "/community/journal",     label: "博客" },
+  { href: "/community/stories",     label: "帖子" },
+  { href: "/community/feed",        label: "动态" },
 ];
 
 const NAV_ME: NavItem[] = [

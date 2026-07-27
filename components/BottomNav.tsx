@@ -33,7 +33,7 @@ export default function BottomNav() {
 
   const items: Item[] = [
     { href: "/",             labelKey: "home",       fallback: "首页",       icon: Ic.home, match: (p) => p === "/" },
-    { href: "/photography",  labelKey: "discover",   fallback: "发现",       icon: Ic.feed, match: (p) => p.startsWith("/photography") },
+    { href: "/messages",     labelKey: "messages",   fallback: "私信",       icon: Ic.feed, match: (p) => p === "/messages" || p.startsWith("/messages") || p.startsWith("/photography") },
     { href: "/creators",     labelKey: "sugargirl",  fallback: "Sugargirl", icon: Ic.sg,   match: (p) => p.startsWith("/creators") },
     { href: "/community",    labelKey: "community",  fallback: "社区",       icon: Ic.com,  match: (p) => p.startsWith("/community") },
     { href: user ? "/me" : "/login", labelKey: "me", fallback: "我的",       icon: Ic.me,   match: (p) => p === "/me" || p === "/login", requireAuth: !user },

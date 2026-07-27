@@ -9,7 +9,8 @@
       }
     },
     "channels": {
-      "photography": "动态推荐",
+      "messages": "私信",
+      "photography": "私信",
       "male-artists": "Sugargirl",
       "sugarboy": "Sugarboy",
       "massage": "情趣按摩",
@@ -37,6 +38,7 @@
     "bottom": {
       "home": "首页",
       "discover": "发现",
+      "messages": "私信",
       "sugargirl": "Sugargirl",
       "community": "社区",
       "me": "我的"

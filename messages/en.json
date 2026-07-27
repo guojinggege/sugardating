@@ -9,7 +9,8 @@
       }
     },
     "channels": {
-      "photography": "Feed",
+      "messages": "Messages",
+      "photography": "Messages",
       "male-artists": "Sugargirls",
       "sugarboy": "Sugarboy",
       "massage": "Massage",
@@ -37,6 +38,7 @@
     "bottom": {
       "home": "Home",
       "discover": "Discover",
+      "messages": "Messages",
       "sugargirl": "Sugargirl",
       "community": "Community",
       "me": "Me"

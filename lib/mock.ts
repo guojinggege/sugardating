@@ -1,10 +1,10 @@
 import { Channel, Creator, Work, LiveItem, Post } from "./types";
 
 // 所有频道入口（导航 + 路由）
-// 顺序: 动态推荐 → SugarGirl → 情趣按摩 → 定制服务 → 视频专区 → 互动社区
-// URL slug 保留旧值,label 走 i18n,这里 label 仅作 fallback
+// 顺序: 私信 → SugarGirl → 情趣按摩 → 定制服务 → 视频专区 → 互动社区
+// URL slug 保留旧值 (photography 现指向 /messages 重定向) · label 走 i18n · fallback
 export const channels: Channel[] = [
-  { slug: "photography",  label: "动态推荐" },
+  { slug: "messages",     label: "私信" },
   { slug: "male-artists", label: "SugarGirl" },
   { slug: "sugarboy",     label: "Sugarboy" },
   { slug: "massage",      label: "情趣按摩" },

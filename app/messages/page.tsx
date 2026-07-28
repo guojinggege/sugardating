@@ -1,7 +1,7 @@
 // /messages · 私信收件箱 · 双栏布局
 import type { Metadata } from "next";
 import { getSession } from "@/lib/session";
-import MessagesInbox from "@/components/messages/MessagesInbox";
+import MessagesWorkspace from "@/components/messages/MessagesWorkspace";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -14,5 +14,5 @@ export const metadata: Metadata = {
 
 export default function MessagesPage() {
   const s = getSession();
-  return <MessagesInbox loggedIn={!!s} />;
+  return <MessagesWorkspace loggedIn={!!s} />;
 }

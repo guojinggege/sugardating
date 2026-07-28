@@ -8,9 +8,9 @@ import { useAuth, useRequireLogin } from "@/components/Auth/AuthProvider";
 // sg / me 用 fill silhouette 避免 outline head 圈在小尺寸下呈"漂浮黑点"
 const Ic = {
   home: <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2z" />,
-  feed: <><rect x="3" y="4" width="18" height="4" rx="1" /><rect x="3" y="10" width="18" height="4" rx="1" /><rect x="3" y="16" width="18" height="4" rx="1" /></>,
+  msg:  <path d="M21 12a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 12z" />,
   sg:   <path fill="currentColor" stroke="none" d="M12 3a4 4 0 1 1-4 4 4 4 0 0 1 4-4zm0 10c4.4 0 8 2.3 8 5v3H4v-3c0-2.7 3.6-5 8-5z" />,
-  com:  <path d="M21 12a8 8 0 0 1-12 6.9L4 20l1.1-5A8 8 0 1 1 21 12z" />,
+  com:  <><circle cx="9" cy="8" r="3.2" /><circle cx="17" cy="9" r="2.7" /><path d="M3 20v-1.5a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4V20M15 15h2a4 4 0 0 1 4 4v1" /></>,
   me:   <path fill="currentColor" stroke="none" d="M12 3a4 4 0 1 1-4 4 4 4 0 0 1 4-4zm0 10c4.4 0 8 2.3 8 5v3H4v-3c0-2.7 3.6-5 8-5z" />,
 };
 
@@ -20,9 +20,11 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const requireLogin = useRequireLogin();
 
+  // 私信 · 无 /m/messages 独立路由 · 直接跳 /messages
+  // /messages 页面内置未登录 gate 提示登录 · 不在 nav 层做 auth
   const items = [
     { href: "/m",              labelKey: "home",       fallback: "首页",       icon: Ic.home, match: (p: string) => p === "/m" },
-    { href: "/m/photography",  labelKey: "discover",   fallback: "发现",       icon: Ic.feed, match: (p: string) => p.startsWith("/m/photography") },
+    { href: "/messages",       labelKey: "messages",   fallback: "私信",       icon: Ic.msg,  match: (p: string) => p === "/messages" || p.startsWith("/messages") },
     { href: "/m/creators",     labelKey: "sugargirl",  fallback: "Sugargirl", icon: Ic.sg,   match: (p: string) => p.startsWith("/m/creators") },
     { href: "/m/community",    labelKey: "community",  fallback: "社区",       icon: Ic.com,  match: (p: string) => p.startsWith("/m/community") },
     { href: user ? "/m/me" : "/m/login", labelKey: "me", fallback: "我的",   icon: Ic.me,   match: (p: string) => p === "/m/me" || p === "/m/login", requireAuth: !user },

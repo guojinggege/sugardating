@@ -227,10 +227,14 @@ export const workspaceStyles = `
     .ws{grid-template-columns:88px 320px minmax(0,1fr)}
   }
 
-  /* 移动端 · 会话列表 / 聊天区互斥切换 · 与 MessagesVerticalNav 900px 断点对齐
-     竖排 nav 自动变成横排顶部条 · 占第一行 · 下面是 list 或 chat */
-  @media(max-width:900px){
-    .ws{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 64px)}
+  /* 平板 · 双栏 · BottomNav 已 md:hidden · 只需减去 Nav */
+  @media(max-width:1080px) and (min-width:901px){
+    .ws{height:calc(100dvh - 100px)}
+  }
+  /* 小平板 / 大手机 (768-900px) · 单列切换 · BottomNav 仍 md:hidden · 只减 Nav */
+  @media(max-width:900px) and (min-width:768px){
+    .ws{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);
+        height:calc(100dvh - 80px);min-height:420px}
     .ws--list .cl{display:flex}
     .ws--list .ws-main{display:none}
     .ws--chat .cl{display:none}
@@ -239,5 +243,31 @@ export const workspaceStyles = `
     .mb{max-width:80%}
     .mc-emoji-wrap{left:8px;right:8px}
     .ep{width:auto;grid-template-columns:repeat(8,1fr)}
+  }
+  /* 手机 (<768px) · BottomNav 显示 · 需减 Nav + BottomNav + safe-area · 输入框固定底 */
+  @media(max-width:767px){
+    .ws{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);
+        height:calc(100dvh - 80px - 64px - env(safe-area-inset-bottom, 0px));
+        min-height:420px}
+    .ws--list .cl{display:flex}
+    .ws--list .ws-main{display:none}
+    .ws--chat .cl{display:none}
+    .ws--chat .ws-main{display:flex}
+    .ch-back{display:grid;place-items:center}
+    .mb{max-width:80%}
+    .mc-emoji-wrap{left:8px;right:8px}
+    .ep{width:auto;grid-template-columns:repeat(8,1fr)}
+  }
+  /* 极窄屏 · 320px · 消息气泡放大到 88% · 图标操作栏更紧凑 */
+  @media(max-width:360px){
+    .ch-h{padding:10px 12px;gap:8px;min-height:56px}
+    .ch-actions{gap:0}
+    .ch-btn{width:32px;height:32px}
+    .cl-head{padding:14px 12px 10px}
+    .ct-scroll{padding:14px 12px 10px}
+    .mc{padding:8px 10px 10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+    .mc-tool{width:32px;height:32px}
+    .mb{max-width:88%}
+    .mb-bubble--img img{max-width:200px}
   }
 `;

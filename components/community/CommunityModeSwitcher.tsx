@@ -1,28 +1,28 @@
 "use client";
-// 互动社区顶部三段式导航 · 博客 / 帖子 / 动态
-// 博客 → /community/journal (长文章 · Journal)
-// 帖子 → /community/stories (留学生吃瓜 · 短内容 · 匿名分享)
-// 动态 → /community/feed (话题 · 问答 · Creator Post)
+// 互动社区顶部三段式导航 · 博客 / 瓜田 / 问答
+// 博客 → /community/journal   (长文章 · Journal)
+// 瓜田 → /community/stories   (短内容 · 匿名吃瓜)
+// 问答 → /community/questions (问答专区 · Q&A)
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/community/journal", label: "博客", hint: "长文章 · Journal" },
-  { href: "/community/stories", label: "帖子", hint: "短内容 · 留学生吃瓜" },
-  { href: "/community/feed",    label: "动态", hint: "话题 · 问答 · Post" },
+  { href: "/community/journal",   label: "博客", hint: "长文章 · Journal" },
+  { href: "/community/stories",   label: "瓜田", hint: "短内容 · 吃瓜分享" },
+  { href: "/community/questions", label: "问答", hint: "问答专区 · Q&A" },
 ];
 
 export default function CommunityModeSwitcher() {
   const pathname = usePathname() || "";
   const activeIdx = (() => {
     if (pathname.startsWith("/community/journal")) return 0;
-    if (pathname.startsWith("/community/stories") || pathname.startsWith("/community/story"))     return 1;
-    if (pathname.startsWith("/community/feed") ||
-        pathname.startsWith("/community/questions") ||
+    if (pathname.startsWith("/community/stories") || pathname.startsWith("/community/story")) return 1;
+    if (pathname.startsWith("/community/questions") ||
         pathname.startsWith("/community/question") ||
+        pathname.startsWith("/community/feed") ||
         pathname.startsWith("/community/latest") ||
         pathname.startsWith("/community/unanswered")) return 2;
-    if (pathname === "/community") return 2;   // 默认落到动态
+    if (pathname === "/community") return 2;
     return -1;
   })();
 

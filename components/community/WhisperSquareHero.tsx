@@ -1,25 +1,21 @@
-// 互动社区顶部导航条 · 精简版 · 3 段式 · 博客 / 帖子 / 动态
-// 原 hero (私语广场大标题) 已下线 · 按新 spec 只保留清晰入口
+// 互动社区顶部导航 · 已下线大图 hero · 只保留 博客/瓜田/问答 3-tab 切换
+// 命名保留 "WhisperSquareHero" 供多处 import 兼容
 import CommunityModeSwitcher from "./CommunityModeSwitcher";
 
 export default function WhisperSquareHero() {
   return (
-    <section className="cnav" aria-label="互动社区导航">
-      <div className="cnav-shell">
-        <div className="cnav-eye">Community</div>
-        <div className="cnav-switch">
-          <CommunityModeSwitcher />
-        </div>
+    <nav className="csw" aria-label="互动社区导航">
+      <div className="csw-in">
+        <CommunityModeSwitcher />
       </div>
       <style>{`
-        .cnav{background:linear-gradient(180deg,#F7F4EF,#FBF7EF);border-bottom:1px solid #E9E3DA}
-        .cnav-shell{max-width:1380px;margin:0 auto;padding:20px 32px;display:flex;flex-direction:column;align-items:center;gap:10px}
-        .cnav-eye{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#B8A789;font-weight:800}
-        .cnav-switch{display:flex;justify-content:center}
+        .csw{background:#fff;border-bottom:1px solid #E9E3DA}
+        .csw-in{max-width:1380px;margin:0 auto;padding:14px 24px;display:flex;justify-content:center}
         @media(max-width:640px){
-          .cnav-shell{padding:16px 16px}
+          .csw-in{padding:12px 12px;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+          .csw-in::-webkit-scrollbar{display:none}
         }
       `}</style>
-    </section>
+    </nav>
   );
 }

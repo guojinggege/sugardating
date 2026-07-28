@@ -1697,6 +1697,21 @@ body.home-immersive:not(.nav-scrolled) .nav .user-avatar{background:#fff;color:v
 .cmm-scope li{list-style:none;padding-left:0}
 
 /* ============================================================
+   PRIVATE MESSAGES (/messages) 移动端 · 沉浸式全屏聊天壳
+   - 隐藏营销型 Footer 和全局 BottomNav (避免遮挡输入框)
+   - 保留全局 sticky Nav (Logo · 返回首页)
+   - body 不再纵向滚动 · workspace 内部各区独立滚动
+   - 需与 workspaceStyles.ts 的 @media(max-width:767px) 断点配合
+   ============================================================ */
+body.page-messages{overflow-x:clip}
+@media(max-width:900px){
+  body.page-messages .foot,
+  body.page-messages [aria-label="Bottom Navigation"]{display:none !important}
+  body.page-messages{overflow:hidden}
+  body.page-messages main{padding-bottom:0 !important}
+}
+
+/* ============================================================
    APPLY LANDING — 创作者招募高端落地页
    ============================================================ */
 .ap-hero{position:relative;height:760px;overflow:hidden;background:#0a0a0c;color:#fff}

@@ -1,5 +1,4 @@
-// /community · 默认落到 动态 tab (广义 feed)
-// 三个模块入口:博客 /community/journal · 帖子 /community/stories · 动态 /community/feed
+// /community · 默认落到 博客 tab (顶部 switcher 新顺序:博客 / 瓜田 / 问答)
 import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
-export default function CommunityRootRedirect() { redirect("/community/feed"); }
+export default function CommunityRootRedirect() { redirect("/community/journal"); }

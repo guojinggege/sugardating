@@ -12,8 +12,8 @@ interface NavItem { href: string; label: string; }
 
 const NAV: NavItem[] = [
   { href: "/community/journal",     label: "博客" },
-  { href: "/community/stories",     label: "帖子" },
-  { href: "/community/feed",        label: "动态" },
+  { href: "/community/stories",     label: "瓜田" },
+  { href: "/community/questions",   label: "问答" },
 ];
 
 const NAV_ME: NavItem[] = [

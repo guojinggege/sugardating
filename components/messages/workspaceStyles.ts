@@ -244,11 +244,11 @@ export const workspaceStyles = `
     .mc-emoji-wrap{left:8px;right:8px}
     .ep{width:auto;grid-template-columns:repeat(8,1fr)}
   }
-  /* 手机 (<768px) · BottomNav 显示 · 需减 Nav + BottomNav + safe-area · 输入框固定底 */
+  /* 手机 (<768px) · body.page-messages 已隐藏 BottomNav + Footer · 只减 sticky Nav
+     workspace 铺满 100dvh - Nav · sticky Nav 不会遮住 workspace 顶部条 */
   @media(max-width:767px){
     .ws{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);
-        height:calc(100dvh - 80px - 64px - env(safe-area-inset-bottom, 0px));
-        min-height:420px}
+        height:calc(100dvh - 80px);min-height:420px}
     .ws--list .cl{display:flex}
     .ws--list .ws-main{display:none}
     .ws--chat .cl{display:none}

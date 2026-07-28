@@ -32,6 +32,12 @@ export default function MessagesWorkspace({ loggedIn }: Props) {
       setMobileView("list");
     }
   }, []);
+  // 私信页移动端 · 给 body 挂 class · CSS 侧隐藏 Footer + BottomNav · 页面自身不再滚动
+  // 保留全局 sticky Nav (含 Logo · 返回首页) · 只让 workspace 独立占满剩余视口
+  useEffect(() => {
+    document.body.classList.add("page-messages");
+    return () => document.body.classList.remove("page-messages");
+  }, []);
   const [voiceCall, setVoiceCall] = useState(false);
   const [videoCall, setVideoCall] = useState(false);
   const [newConv, setNewConv] = useState(false);

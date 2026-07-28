@@ -65,11 +65,13 @@ export default async function Page() {
           <p className="text-[14.5px] text-white/85 leading-[1.55] mb-6 max-w-[320px]">
             {t("hero.slide1.subtitle")}
           </p>
-          <div className="flex gap-2">
-            <Link href="/m/creators" className="flex-1 h-12 rounded-full bg-white text-[var(--ink)] text-[14px] font-bold grid place-items-center hover:opacity-95 transition">
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <Link href="/m/creators"
+              className="min-w-0 h-12 rounded-full bg-white text-[var(--ink)] text-[14px] font-bold flex items-center justify-center text-center whitespace-nowrap px-3 leading-none hover:opacity-95 transition">
               {t("hero.slide1.cta")}
             </Link>
-            <Link href="/m/login" className="flex-1 h-12 rounded-full bg-white/15 backdrop-blur-md text-white text-[14px] font-semibold grid place-items-center border border-white/25 hover:bg-white/25 transition">
+            <Link href="/m/login"
+              className="min-w-0 h-12 rounded-full bg-white/15 backdrop-blur-md text-white text-[14px] font-semibold flex items-center justify-center text-center whitespace-nowrap px-3 leading-none border border-white/25 hover:bg-white/25 transition">
               登录
             </Link>
           </div>
@@ -93,26 +95,45 @@ export default async function Page() {
       </section>
 
       {/* ═══ 3. How It Works ═══ */}
-      <section className="mt-12 px-5">
+      <section className="mt-12 px-4">
         <SectionHeader title={t("howItWorks.title")} subtitle={t("howItWorks.subtitle")} />
-        <ol className="list-none m-0 p-0 flex flex-col gap-4 mt-5">
+        {/* 时间线 · 圆圈 56px · 序号完全居中 · 连接线从圆下边到下一个圆上边 · 首末不外突 */}
+        <ol className="mhw list-none m-0 p-0 mt-5">
           {HOW.map((k, i) => (
-            <li key={k} className="relative flex gap-4 items-start">
-              <div className="flex flex-col items-center flex-shrink-0">
-                <span className="grid place-items-center w-10 h-10 rounded-full bg-[var(--ink)] text-white text-[13px] font-black">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                {i < HOW.length - 1 && (
-                  <span className="w-px h-8 bg-[var(--line)] my-1" />
-                )}
+            <li key={k} className="mhw-item">
+              <div className="mhw-col">
+                <span className="mhw-num">{String(i + 1).padStart(2, "0")}</span>
+                {i < HOW.length - 1 && <span className="mhw-line" aria-hidden />}
               </div>
-              <div className="pb-4 flex-1 min-w-0">
-                <h3 className="text-[15px] font-bold text-[var(--ink)] m-0 leading-tight">{t(`howItWorks.steps.${k}.title`)}</h3>
-                <p className="text-[13px] text-[var(--muted)] leading-[1.6] mt-1.5 m-0">{t(`howItWorks.steps.${k}.desc`)}</p>
+              <div className="mhw-body">
+                <h3>{t(`howItWorks.steps.${k}.title`)}</h3>
+                <p>{t(`howItWorks.steps.${k}.desc`)}</p>
               </div>
             </li>
           ))}
         </ol>
+        <style>{`
+          .mhw{display:flex;flex-direction:column;gap:0}
+          .mhw-item{display:grid;grid-template-columns:60px minmax(0,1fr);gap:18px;align-items:stretch}
+          .mhw-col{display:flex;flex-direction:column;align-items:center;min-height:60px}
+          .mhw-num{display:grid;place-items:center;
+                   width:56px;height:56px;flex:0 0 56px;
+                   border-radius:50%;
+                   background:var(--ink);color:#fff;
+                   font-family:'Cormorant Garamond',ui-serif;
+                   font-style:italic;font-weight:700;font-size:22px;line-height:1;
+                   font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+          .mhw-line{width:2px;flex:1;background:linear-gradient(180deg,var(--line),var(--line) 50%,transparent);min-height:20px}
+          .mhw-item:last-child .mhw-line{display:none}
+          .mhw-body{padding-top:6px;padding-bottom:28px;min-width:0}
+          .mhw-item:last-child .mhw-body{padding-bottom:0}
+          .mhw-body h3{font-size:15px;font-weight:700;color:var(--ink);margin:0;line-height:1.35;letter-spacing:-0.005em}
+          .mhw-body p{font-size:13px;color:var(--muted);line-height:1.6;margin:4px 0 0}
+          @media(max-width:360px){
+            .mhw-item{grid-template-columns:52px minmax(0,1fr);gap:14px}
+            .mhw-num{width:48px;height:48px;flex:0 0 48px;font-size:18px}
+          }
+        `}</style>
       </section>
 
       {/* ═══ 4. Popular Experiences — horizontal scroll ═══ */}

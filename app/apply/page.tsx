@@ -2,11 +2,12 @@
 // 高端招募落地页 · 12 sections · 面向 18+ 成年女性创作者
 // 允许未登录访问 (读故事);表单本身要求登录
 import type { Metadata } from "next";
-import Link from "next/link";
 import Img from "@/components/Img";
 import { pick } from "@/lib/images";
-import ApplyGate from "@/components/ApplyWizard/ApplyGate";
-import ApplyStickyCTA from "@/components/Apply/ApplyStickyCTA";
+import InterestDialogProvider from "@/components/Apply/InterestDialogProvider";
+import InterestTrigger from "@/components/Apply/InterestTrigger";
+import CreatorInterestSection from "@/components/Apply/CreatorInterestSection";
+import ApplyFloatingCTAs from "@/components/Apply/ApplyFloatingCTAs";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +94,7 @@ export default function ApplyPage() {
   const previewCover = pick(0, 3) ?? "/images/placeholder.png";
 
   return (
-    <>
+    <InterestDialogProvider>
       {/* ═══ 1. Hero ═══ */}
       <section className="ap-hero">
         <div className="ap-hero-media"><Img src={heroBg} alt="" sizes="100vw" priority /></div>
@@ -111,11 +112,14 @@ export default function ApplyPage() {
             平台提供曝光、认证、安全体系,以及免费的写真与视频内容支持。
           </p>
           <div className="ap-hero-cta">
-            <Link href="/apply/start" className="ap-btn-primary">申请入驻</Link>
+            <InterestTrigger source="hero" className="ap-btn-primary">提交入驻意向</InterestTrigger>
             <a href="#benefits" className="ap-btn-ghost">了解平台优势</a>
           </div>
         </div>
       </section>
+
+      {/* ═══ 1.5 意向资料收集 ═══ Hero 下方 · 页面主转化模块 */}
+      <CreatorInterestSection />
 
       {/* ═══ 2. Narrative ═══ */}
       <section className="ap-sec">
@@ -248,10 +252,15 @@ export default function ApplyPage() {
         </div>
       </section>
 
-      {/* ═══ 9. Apply Gate ═══ 登录状态感知 · 引导进入 /apply/start 分步向导 */}
+      {/* ═══ 9. 页面底部 CTA ═══ 主转化 = 意向表单弹窗 · 不再直跳分步向导 */}
       <section id="apply-form" className="ap-gate-wrap">
-        <div className="ap-form-inner">
-          <ApplyGate />
+        <div className="ap-form-inner" style={{ textAlign: "center", padding: "48px 20px" }}>
+          <div className="ap-eye" style={{ marginBottom: 10 }}>准备好开始</div>
+          <h2 className="ap-h2" style={{ marginBottom: 12 }}>留下意向 · 平台联系你</h2>
+          <p className="ap-lead" style={{ marginBottom: 24 }}>
+            填写基础信息后 · Sugardating 团队会通过你选择的联系方式与你沟通后续入驻安排。
+          </p>
+          <InterestTrigger source="final" className="ap-btn-primary">提交入驻意向</InterestTrigger>
         </div>
       </section>
 
@@ -272,8 +281,8 @@ export default function ApplyPage() {
         </p>
       </section>
 
-      {/* ═══ 11. Sticky CTA ═══ */}
-      <ApplyStickyCTA />
-    </>
+      {/* ═══ 11. 悬浮双 CTA ═══ 全部由 InterestDialogProvider 承载 · 见页面外层 wrapper */}
+      <ApplyFloatingCTAs />
+    </InterestDialogProvider>
   );
 }

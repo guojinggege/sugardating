@@ -1924,3 +1924,107 @@ body.page-messages{overflow-x:clip}
 /* 页面级 body bg 覆盖(避免全局 --page #F4F4F5 露出) */
 body:has(.cm-scope){ background: var(--cm-bg); }
 
+
+/* ============================================================
+   CREATOR INTEREST FORM (/apply)  ·  意向收集表 + 弹窗 + 悬浮按钮
+   桌面双栏 · 移动单列 · 输入 16px 避免 iOS 聚焦缩放
+   ============================================================ */
+.cif-section{background:linear-gradient(180deg,#FBFAF7,#F4EFE5);padding:56px 0;border-top:1px solid #EFE7D8;border-bottom:1px solid #EFE7D8}
+.cif-sec-in{max-width:1180px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:minmax(0,0.8fr) minmax(420px,1.2fr);gap:48px;align-items:start}
+.cif-sec-copy{display:flex;flex-direction:column;gap:16px}
+.cif-eye{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#B8A789;font-weight:800}
+.cif-sec-copy h2{font-family:'Cormorant Garamond',ui-serif;font-size:34px;font-weight:500;font-style:italic;line-height:1.15;color:#171512;margin:0;letter-spacing:-0.01em}
+.cif-sec-copy > p{font-size:14.5px;line-height:1.7;color:#4a4640;margin:0;max-width:52ch}
+.cif-privacy-box{padding:14px 16px;background:rgba(255,255,255,.6);border:1px solid #E9E3DA;border-radius:12px;display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.cif-privacy-box b{font-size:12px;font-weight:800;color:#171512;letter-spacing:.02em}
+.cif-privacy-box span{font-size:12.5px;color:#77716A;line-height:1.55}
+
+/* Form base — 表单卡片 */
+.cif{background:#fff;border:1px solid #E9E3DA;border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 4px 20px -8px rgba(23,21,18,.06)}
+.cif--compact{padding:22px;border-radius:14px;box-shadow:none;border:0}
+.cif-row{display:flex;flex-direction:column;gap:6px;min-width:0}
+.cif-label{font-size:12.5px;font-weight:700;color:#171512;letter-spacing:.01em}
+.cif-label em{color:#c8332f;font-style:normal;margin-left:2px}
+.cif-input{width:100%;min-width:0;box-sizing:border-box;
+  border:1px solid #E0D9CE;background:#FBFAF7;border-radius:10px;
+  padding:12px 14px;
+  font:inherit;font-size:16px;line-height:1.4;color:#171512;
+  outline:none;transition:border-color .15s,background .15s}
+.cif-input:focus{border-color:#171512;background:#fff}
+.cif-input::placeholder{color:#a19a91}
+.cif-input.is-err{border-color:#c8332f;background:#fff}
+.cif-err{font-size:11.5px;color:#c8332f;font-weight:600;line-height:1.4}
+.cif-contact-hint{margin-top:6px;font-size:12px;color:#77716A;font-weight:600;padding-top:14px;border-top:1px dashed #E9E3DA}
+.cif-privacy{margin:4px 0 0;font-size:11.5px;color:#77716A;line-height:1.55}
+.cif-submit{margin-top:6px;min-height:52px;background:#171512;color:#F5EEDD;font-size:15px;font-weight:800;border:0;border-radius:12px;cursor:pointer;transition:background .15s,transform .1s}
+.cif-submit:hover:not(:disabled){background:#2b2822}
+.cif-submit:active:not(:disabled){transform:translateY(1px)}
+.cif-submit:disabled{opacity:.7;cursor:not-allowed}
+
+/* Radio 组 · 3 选项 · 大点击区 */
+.cif-radios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:2px}
+.cif-radio{position:relative;min-height:52px;padding:10px 12px;display:flex;align-items:center;justify-content:center;text-align:center;
+  background:#FBFAF7;border:1px solid #E0D9CE;border-radius:10px;cursor:pointer;transition:all .12s;
+  font-size:13px;font-weight:600;color:#4a4640}
+.cif-radio input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.cif-radio:hover{border-color:#B8A789}
+.cif-radio.on{background:#171512;color:#F5EEDD;border-color:#171512;font-weight:800}
+.cif-radio b{font-weight:inherit;font-size:inherit}
+
+/* 提交成功态 */
+.cif--done{align-items:center;text-align:center;padding:36px 24px;gap:8px}
+.cif-done-emoji{width:60px;height:60px;background:linear-gradient(135deg,#EEDDB8,#B8A789);color:#1a1409;border-radius:50%;display:grid;place-items:center;font-size:28px;font-weight:900;margin-bottom:8px}
+.cif--done h3{font-family:'Cormorant Garamond',ui-serif;font-style:italic;font-size:24px;color:#171512;margin:0}
+.cif--done p{margin:0;font-size:13.5px;color:#4a4640;line-height:1.6;max-width:36ch}
+
+/* Dialog · 弹窗 · 移动端全屏 */
+.cif-scrim{position:fixed;inset:0;background:rgba(23,21,18,.55);backdrop-filter:blur(8px);
+  z-index:100;display:grid;place-items:center;padding:20px;overflow-y:auto}
+.cif-card{position:relative;background:#fff;border-radius:20px;max-width:520px;width:100%;
+  padding:28px 24px 24px;box-shadow:0 40px 100px -30px rgba(0,0,0,.5);max-height:calc(100dvh - 40px);overflow-y:auto}
+.cif-close{position:absolute;top:14px;right:14px;width:36px;height:36px;background:#F7F4EF;border:0;border-radius:50%;color:#171512;cursor:pointer;display:grid;place-items:center}
+.cif-close:hover{background:#E9E3DA}
+.cif-dlg-head{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;padding-right:36px}
+.cif-dlg-head h2{margin:0;font-family:'Cormorant Garamond',ui-serif;font-style:italic;font-size:26px;color:#171512;line-height:1.2}
+.cif-dlg-head p{margin:0;font-size:13px;line-height:1.55;color:#4a4640}
+
+/* Floating action buttons · 2 悬浮 */
+.cif-fabs{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index:80;display:none;gap:10px;pointer-events:none;justify-content:center;flex-wrap:wrap;
+  max-width:520px;margin:0 auto}
+.cif-fabs.on{display:flex}
+.cif-fab{pointer-events:auto;flex:1 1 160px;max-width:260px;min-height:52px;padding:0 22px;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;
+  font-family:inherit;font-size:14.5px;font-weight:700;border-radius:99px;text-decoration:none;
+  border:0;cursor:pointer;box-shadow:0 12px 28px -12px rgba(0,0,0,.35);white-space:nowrap;line-height:1;
+  transition:transform .12s,background .15s}
+.cif-fab--primary{background:linear-gradient(135deg,#171512,#332e26);color:#F5EEDD}
+.cif-fab--primary:hover{background:#000}
+.cif-fab--ghost{background:rgba(255,255,255,.92);color:#171512;border:1px solid #E9E3DA;backdrop-filter:blur(10px)}
+.cif-fab--ghost:hover{background:#fff}
+.cif-fab:active{transform:translateY(1px)}
+
+/* 平板 & 移动端 · 单列 / 单栏 */
+@media(max-width:900px){
+  .cif-sec-in{grid-template-columns:1fr;gap:24px}
+  .cif-sec-copy h2{font-size:26px}
+}
+@media(max-width:640px){
+  .cif-section{padding:32px 0}
+  .cif-sec-in{padding:0 16px}
+  .cif{padding:20px 18px;border-radius:14px}
+  .cif--compact{padding:18px 4px 8px}
+  .cif-radios{grid-template-columns:1fr;gap:6px}
+  .cif-radio{min-height:52px;justify-content:flex-start;padding:12px 16px;text-align:left}
+  .cif-card{padding:24px 18px 20px;border-radius:16px;max-height:100dvh;height:100%;width:100%;max-width:100%}
+  .cif-scrim{padding:0;place-items:stretch}
+  .cif-dlg-head h2{font-size:22px}
+  .cif-fabs{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px))}
+  .cif-fab{flex:1 1 auto;font-size:13.5px;padding:0 16px}
+}
+@media(max-width:360px){
+  .cif-sec-in{padding:0 12px}
+  .cif{padding:16px 14px}
+  .cif-fabs{left:8px;right:8px;gap:6px}
+  .cif-fab{padding:0 12px;font-size:13px}
+}

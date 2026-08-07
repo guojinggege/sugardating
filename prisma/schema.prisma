@@ -148,6 +148,26 @@ model MembershipPlan {
   @@unique([tier, period])
 }
 
+// Sugargirl 入驻意向 · /apply 页面提交的公开信息收集表 · 无需登录
+// 只存基础联系信息 · 平台后续人工联系 · 不公开展示
+model CreatorInterest {
+  id         String   @id @default(cuid())
+  nickname   String
+  city       String
+  status     String   // student | employed | freelancer
+  telephone  String?
+  email      String?
+  mobile     String?
+  locale     String?  // zh | en · 提交时页面 locale
+  source     String?  // hero | sticky | inline | final · CTA 来源
+  ipHash     String?  // 反滥用 · SHA-256 前 12 位 · 不存原 IP
+  userAgent  String?  // 截断到 200 字符 · 反滥用调查用
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+}
+
 // 用户开通的会员 — userId 暂时可空,待 auth 接入后回填
 model Membership {
   id        String   @id @default(cuid())

@@ -2075,7 +2075,8 @@ body:has(.cm-scope){ background: var(--cm-bg); }
   .ap-hero-inner{padding:0 20px 28px}
   .ap-hero .ap-hero-eye{margin-bottom:10px}
   .ap-hero .ap-hero-sub{margin-bottom:14px;font-size:14.5px;line-height:1.6}
-  .ap-hero-cta{gap:10px}
+  /* CTA 组水平居中(整体作为一组) · 不改标题/描述的对齐 */
+  .ap-hero-cta{gap:10px;justify-content:center;width:100%}
   .ap-btn-primary,.ap-btn-ghost{height:48px;padding:0 22px;font-size:14px}
 }
 

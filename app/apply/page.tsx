@@ -127,7 +127,6 @@ export default function ApplyPage() {
       <section className="ap-sec">
         <div className="ap-narrative">
           <div>
-            <div className="ap-eye">你的故事</div>
             <h2 className="ap-h2">你不缺被看见,<br />缺的是被更好地看见</h2>
             <p className="ap-lead">
               很多平台只让人停留在照片表面。Sugardating 更关注完整的你 —— 气质 · 生活方式 · 语言 · 城市 ·

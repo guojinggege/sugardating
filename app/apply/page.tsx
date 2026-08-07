@@ -1,7 +1,6 @@
 // /apply — Sugargirl 全球招募计划 · 意向信息收集页
 // 允许未登录访问 · 数据落 CreatorInterest 表 · 后台只读展示
 import type { Metadata } from "next";
-import Image from "next/image";
 import Img from "@/components/Img";
 import { pick } from "@/lib/images";
 import InterestDialogProvider from "@/components/Apply/InterestDialogProvider";
@@ -101,34 +100,32 @@ export default function ApplyPage() {
 
   return (
     <InterestDialogProvider>
-      {/* ═══ 1. Hero · 全球招募 · 桌面覆盖图 · 移动上下结构 ═══ */}
-      <section className="grhero">
-        {/* 桌面 · 全宽图 + 左侧文字遮罩 */}
-        <div className="grhero-media" aria-hidden>
-          <Image
-            src="/images/apply/sugargirl-global-recruitment-hero.jpg"
-            alt=""
-            fill
-            priority
-            quality={88}
-            sizes="100vw"
-            style={{ objectFit: "cover", objectPosition: "50% 48%" }}
-          />
-          <div className="grhero-veil" />
+      {/* ═══ 1. Hero · 恢复原 .ap-hero 结构 · 桌面用旧图 · 移动用竖版新图 · <picture> 分发 ═══ */}
+      <section className="ap-hero">
+        <div className="ap-hero-media">
+          <picture>
+            <source media="(max-width: 767px)" srcSet="/images/apply/sugargirl-recruitment-mobile.png" />
+            <img src={heroBg} alt="" loading="eager" fetchPriority="high" decoding="async" />
+          </picture>
         </div>
-        <div className="grhero-inner">
-          <div className="grhero-eye">SUGARDATING GLOBAL RECRUITMENT</div>
-          <h1 className="grhero-title">Sugargirl全球招募计划</h1>
-          <p className="grhero-sub">
-            加入 Sugargirl 全球招募计划 · 留下昵称、所在城市和你常用的社交联系方式,Sugardating
-            团队会与你沟通后续入驻安排。
+        <div className="ap-hero-veil" />
+        <div className="ap-hero-inner">
+          <div className="ap-hero-badges">
+            <span className="ap-hero-badge">18+ sugargirl 入驻申请</span>
+            <span className="ap-hero-badge">高端认证社区</span>
+            <span className="ap-hero-badge">隐私优先</span>
+          </div>
+          <div className="ap-hero-eye">SUGARDATING GLOBAL RECRUITMENT</div>
+          <h1 className="ap-hero-title">Sugargirl全球招募计划</h1>
+          <p className="ap-hero-sub">
+            加入 Sugargirl 全球招募计划 · 留下昵称、所在城市和你常用的社交联系方式,
+            Sugardating 团队会与你沟通后续入驻安排。
           </p>
-          <div className="grhero-cta">
+          <div className="ap-hero-cta">
             <InterestTrigger source="hero_apply" className="ap-btn-primary">提交入驻意向</InterestTrigger>
             <a href="#benefits" className="ap-btn-ghost">了解平台优势</a>
           </div>
         </div>
-        {/* 移动 · 图片区(image-only) · Hero 内容在 grhero-inner (会用 CSS 单列排布) */}
       </section>
 
       {/* ═══ 1.5 意向资料收集 ═══ Hero 下方 · 页面主转化模块 */}

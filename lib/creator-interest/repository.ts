@@ -103,9 +103,26 @@ export async function createInterest(input: CreatorInterestInput): Promise<Creat
   }
 }
 
+/** 后台只列出符合"当前有效性"的记录:
+ *  - 已确认 18+ (ageConfirmed = true)
+ *  - 已同意联系与隐私 (contactConsent = true)
+ *  - WhatsApp / Ins / X / 其他 至少一项非空
+ *  历史数据(旧 API 遗留 · age/consent 默认 false · 无社交联系方式)不再展示。
+ *  数据不删 · 只是不显示 · 需要审计时可通过 SQL 直连 Neon。
+ */
 export async function listInterests(): Promise<CreatorInterestRecord[]> {
   try {
     const rows = await (prisma as any).creatorInterest.findMany({
+      where: {
+        ageConfirmed: true,
+        contactConsent: true,
+        OR: [
+          { whatsapp:     { not: null } },
+          { instagram:    { not: null } },
+          { xHandle:      { not: null } },
+          { otherContact: { not: null } },
+        ],
+      },
       orderBy: { createdAt: "desc" },
     });
     return rows as CreatorInterestRecord[];
@@ -118,7 +135,13 @@ export async function listInterests(): Promise<CreatorInterestRecord[]> {
       );
     }
     console.warn("[creator-interest] Prisma list failed, using in-memory (dev only):", e?.code || e?.name || "unknown");
-    return memStore.slice().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return memStore
+      .filter((r) =>
+        r.ageConfirmed && r.contactConsent &&
+        (r.whatsapp || r.instagram || r.xHandle || r.otherContact),
+      )
+      .slice()
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }
 

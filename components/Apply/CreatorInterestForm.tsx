@@ -68,7 +68,7 @@ export default function CreatorInterestForm({ source = "inline", onSuccess, comp
         }),
       });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok || !d?.ok) {
+      if (!r.ok || !d?.ok || !d?.id) {
         // 后端 code → 字段级错误 · 敏感字段值本身不落客户端日志
         const errsSrv: Record<string, string> = {};
         const code = d?.code || "UNKNOWN";
@@ -79,11 +79,15 @@ export default function CreatorInterestForm({ source = "inline", onSuccess, comp
           case "CONTACT_REQUIRED": errsSrv.contact = t("errContact"); break;
           case "INVALID_EMAIL":    errsSrv.email = t("errEmail"); break;
           case "TOO_MANY_SUBMISSIONS": errsSrv.contact = t("errTooMany"); break;
+          case "TABLE_MISSING":
+          case "DB_ERROR":
+          case "PERSIST_FAILED":   errsSrv.contact = t("errPersist"); break;
           default:                 errsSrv.contact = t("errNetwork");
         }
         setErrors(errsSrv);
         return;
       }
+      // 只有拿到真实 DB id 才展示成功
       setDone(true);
       onSuccess?.();
     } catch {

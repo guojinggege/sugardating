@@ -4,7 +4,7 @@
 // - 24h 内同 IP 最多 6 次 · 反滥用
 // - 不写敏感字段到日志 / URL / analytics
 import { NextResponse } from "next/server";
-import { createInterest, hashIp, recentSubmitCountByIpHash, type InterestStatus } from "@/lib/creator-interest/repository";
+import { createInterest, hashIp, recentSubmitCountByIpHash, InterestPersistError, type InterestStatus } from "@/lib/creator-interest/repository";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -74,9 +74,10 @@ export async function POST(req: Request) {
 
   const ua = trim(req.headers.get("user-agent") || "", 200);
 
-  // 持久化 · Prisma 优先 · 失败 fallback 到内存 (见 repository)
+  // 持久化 · 生产严格 Prisma · 失败即错(不能让用户看到假成功)
+  let savedId: string;
   try {
-    await createInterest({
+    const rec = await createInterest({
       nickname,
       city,
       status: statusRaw as InterestStatus,
@@ -88,11 +89,18 @@ export async function POST(req: Request) {
       ipHash,
       userAgent: ua,
     });
+    savedId = rec.id;
   } catch (e: any) {
     // 不写 body / contact / IP 到日志
+    if (e instanceof InterestPersistError) {
+      console.error("[apply-intent] persist failed:", e.code);
+      const status = e.code === "TABLE_MISSING" ? 503 : 500;
+      return json(status, false, { code: e.code });
+    }
     console.error("[apply-intent] persist failed:", e?.code || e?.name || "unknown");
     return json(500, false, { code: "PERSIST_FAILED" });
   }
 
-  return json(200, true, {});
+  // 只有拿到真实数据库 ID 才回 ok · 前端才能显示成功
+  return json(200, true, { id: savedId });
 }

@@ -659,7 +659,13 @@ function computeAge(iso: string): number | undefined {
   return age;
 }
 
+/** CMS Demo Mode 判断
+ *  真:非 Applications 相关模块(home/settings/media 等)仍是内存 mock
+ *  假:CreatorInterest → Applications 已接真实 Prisma · 但整个 CMS 还没全部走 DB
+ *
+ *  当 DATABASE_URL 存在 → 视为已接 DB · 不显示 Demo Mode
+ *  当无 DATABASE_URL(本地无 .env) → 保留 Demo Mode 提示
+ */
 export function isDemoMode(): boolean {
-  // 无真实 DB · 全部 in-memory
-  return true;
+  return !process.env.DATABASE_URL;
 }

@@ -831,7 +831,8 @@
       "errContact": "Please provide at least one contact method",
       "errEmail": "Please enter a valid email address",
       "errTooMany": "Too many recent submissions from this network. Please try again later.",
-      "errNetwork": "Submission failed. Please try again."
+      "errNetwork": "Submission failed. Please try again.",
+      "errPersist": "Submission failed to save. Please contact support if this keeps happening."
     }
   }
 }

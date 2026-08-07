@@ -4,6 +4,7 @@ import { AdminPageHeader, AdminTable, AdminBadge } from "@/components/admin/Admi
 import { cmsRepo } from "@/lib/cms/repository";
 import ApplicationActions from "@/components/admin/ApplicationActions";
 import ApplicationDetailButton from "@/components/admin/ApplicationDetailButton";
+import { healthCheck } from "@/lib/creator-interest/repository";
 import type { ApplicationStatus } from "@/lib/cms/types";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +23,11 @@ const STATUS_LABELS: Record<ApplicationStatus, string> = {
 
 export default async function AdminApplicationsPage({ searchParams }: Props) {
   const status = searchParams.status as ApplicationStatus | undefined;
-  const [rows, all] = await Promise.all([
-    cmsRepo.listApplications(status),
-    cmsRepo.listApplications(),
-  ]);
+  // 先探测 DB 可用性 · 避免读失败页面直接崩
+  const health = await healthCheck();
+  const [rows, all] = health.ok
+    ? await Promise.all([cmsRepo.listApplications(status), cmsRepo.listApplications()])
+    : [[], []];
   const counts: Record<string, number> = { all: all.length };
   for (const a of all) counts[a.status] = (counts[a.status] || 0) + 1;
 
@@ -37,9 +39,25 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
       <AdminPageHeader
         eyebrow="Creators"
         title="入驻申请"
-        description="审核 Sugargirl / Sugarboy / Massage 入驻资料 · 通过后自动生成 Creator Profile"
+        description="审核 /apply 页面提交的入驻意向 · 数据源:CreatorInterest (Neon)"
         breadcrumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Applications" }]}
       />
+
+      {!health.ok && (
+        <div style={{
+          marginBottom: 16, padding: "12px 16px", borderRadius: 12,
+          background: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B",
+          fontSize: 13, lineHeight: 1.55,
+        }}>
+          <b>⚠ 数据库不可用 · {health.code}</b>
+          <div style={{ marginTop: 4, fontSize: 12.5 }}>
+            {health.message}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, color: "#7F1D1D" }}>
+            修复步骤:在有 Neon DIRECT_URL 的环境执行 <code style={{background:"#fff",padding:"1px 6px",borderRadius:4}}>npm run db:deploy</code>,然后重启 / 重新部署。
+          </div>
+        </div>
+      )}
 
       {/* Status tabs */}
       <div className="ap-tabs">

@@ -2032,6 +2032,8 @@ body:has(.cm-scope){ background: var(--cm-bg); }
 /* ============================================================
    Hero 标题(旧 .ap-hero-title)· 新 H1 "Sugargirl全球招募计划"
    保守下调字号 · 强制单行(桌面)· 避免被裁到 "Sugargirl全 / 球招募计划"
+   移动:图片焦点右移,文字/CTA 落在底部半透明区,避开人物面部
+   CTA 紧跟描述 · 无独立黑色背景块
    ============================================================ */
 .ap-hero .ap-hero-eye{
   font-family:inherit;font-style:normal;font-weight:700;
@@ -2049,6 +2051,32 @@ body:has(.cm-scope){ background: var(--cm-bg); }
 }
 @media(max-width:360px){
   .ap-hero .ap-hero-title{font-size:26px}
+}
+/* 描述与 CTA 间距压紧 · CTA 直接贴在描述下面 · 无独立黑色背景块 */
+.ap-hero .ap-hero-sub{margin-bottom:16px}
+.ap-hero .ap-hero-cta{margin-top:0}
+
+/* 移动 · 竖版人物图 · 焦点右移 · 遮罩改成上透下深 · 保面部 · 文字压底 */
+@media(max-width:767px){
+  /* 图片焦点上移 · 展示上半身 + 面部 · 面部落在容器上 40% */
+  .ap-hero-media img{object-position:50% 20% !important}
+  /* 遮罩:上部近透明保留人像光影 · 下部深化保证文字可读 · 无中央过渡带 */
+  .ap-hero-veil{background:
+    linear-gradient(180deg,
+      rgba(0,0,0,0)    0%,
+      rgba(0,0,0,0)    46%,
+      rgba(0,0,0,.40) 62%,
+      rgba(0,0,0,.72) 82%,
+      rgba(0,0,0,.86) 100%) !important;
+  }
+  .ap-hero-inner{padding-bottom:32px}
+}
+@media(max-width:640px){
+  .ap-hero-inner{padding:0 20px 28px}
+  .ap-hero .ap-hero-eye{margin-bottom:10px}
+  .ap-hero .ap-hero-sub{margin-bottom:14px;font-size:14.5px;line-height:1.6}
+  .ap-hero-cta{gap:10px}
+  .ap-btn-primary,.ap-btn-ghost{height:48px;padding:0 22px;font-size:14px}
 }
 
 /* ============================================================

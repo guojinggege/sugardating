@@ -110,11 +110,6 @@ export default function ApplyPage() {
         </div>
         <div className="ap-hero-veil" />
         <div className="ap-hero-inner">
-          <div className="ap-hero-badges">
-            <span className="ap-hero-badge">18+ sugargirl 入驻申请</span>
-            <span className="ap-hero-badge">高端认证社区</span>
-            <span className="ap-hero-badge">隐私优先</span>
-          </div>
           <div className="ap-hero-eye">SUGARDATING GLOBAL RECRUITMENT</div>
           <h1 className="ap-hero-title">Sugargirl全球招募计划</h1>
           <p className="ap-hero-sub">
@@ -128,10 +123,7 @@ export default function ApplyPage() {
         </div>
       </section>
 
-      {/* ═══ 1.5 意向资料收集 ═══ Hero 下方 · 页面主转化模块 */}
-      <CreatorInterestSection />
-
-      {/* ═══ 2. Narrative ═══ */}
+      {/* ═══ 2. Narrative ═══ 上移至表单前 · 承接 Hero 情绪 */}
       <section className="ap-sec">
         <div className="ap-narrative">
           <div>
@@ -146,6 +138,9 @@ export default function ApplyPage() {
           <div className="ap-narrative-img"><Img src={narrativeImg} alt="" sizes="(max-width:900px) 100vw, 560px" /></div>
         </div>
       </section>
+
+      {/* ═══ 3. 意向资料收集 ═══ 页面主转化模块 · 紧接 Narrative */}
+      <CreatorInterestSection />
 
       {/* ═══ 3. Benefits ═══ */}
       <section id="benefits" className="ap-sec" style={{ paddingTop: 48 }}>

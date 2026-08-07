@@ -5,7 +5,6 @@
 // ══════════════════════════════════════
 
 export type CmsStatus = "draft" | "published" | "archived" | "scheduled";
-export type ApplicationStatus = "draft" | "submitted" | "reviewing" | "needs_changes" | "approved" | "rejected";
 export type MediaStatus = "pending" | "approved" | "rejected" | "hidden";
 export type ProfileType = "sugargirl" | "sugarboy" | "massage";
 
@@ -100,25 +99,8 @@ export interface CmsCreatorRow {
   createdAt: string;
 }
 
-// ══════════════════════════════════════
-// Applications (creator onboarding)
-// ══════════════════════════════════════
-
-export interface CmsApplicationRow {
-  id: string;
-  userId?: string;
-  applicantName: string;
-  applicantEmail: string;
-  type: ProfileType;
-  city?: string;
-  country?: string;
-  languages: string[];
-  completion: number;      // 0–100
-  status: ApplicationStatus;
-  mediaCount: number;
-  submittedAt?: string;
-  reviewNotes?: string;
-}
+// Applications 类型已下线 · 后台 Applications 页面改为直接读 CreatorInterest
+// 见 lib/creator-interest/repository.ts · CreatorInterestRecord
 
 // ══════════════════════════════════════
 // Journal

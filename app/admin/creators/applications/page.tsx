@@ -1,139 +1,150 @@
-// Admin · 入驻申请审核 · list + approve/reject 快捷操作
-import Link from "next/link";
-import { AdminPageHeader, AdminTable, AdminBadge } from "@/components/admin/AdminPrimitives";
-import { cmsRepo } from "@/lib/cms/repository";
-import ApplicationActions from "@/components/admin/ApplicationActions";
-import ApplicationDetailButton from "@/components/admin/ApplicationDetailButton";
-import { healthCheck } from "@/lib/creator-interest/repository";
-import type { ApplicationStatus } from "@/lib/cms/types";
+// Admin · 入驻意向资料查看 · 只读 · 直接展开所有字段 · 不带审核流程
+// 数据源:CreatorInterest (Neon) · 与 /apply 页面提交同一条记录
+import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
+import { listInterests, healthCheck } from "@/lib/creator-interest/repository";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Applications · Sugardating Admin" };
 
-interface Props { searchParams: { status?: string } }
-
-const STATUS_TONES: Record<ApplicationStatus, "default" | "info" | "warning" | "success" | "danger" | "muted"> = {
-  draft: "muted", submitted: "info", reviewing: "warning",
-  needs_changes: "warning", approved: "success", rejected: "danger",
-};
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  draft: "草稿", submitted: "已提交", reviewing: "审核中",
-  needs_changes: "需补充", approved: "已通过", rejected: "已拒绝",
+const CUR_LABEL: Record<string, string> = {
+  student: "留学生",
+  employed: "工作者",
+  freelancer: "自由职业",
 };
 
-export default async function AdminApplicationsPage({ searchParams }: Props) {
-  const status = searchParams.status as ApplicationStatus | undefined;
-  // 先探测 DB 可用性 · 避免读失败页面直接崩
+function fmtWhen(d: Date): string {
+  return new Date(d).toLocaleString("zh-CN", {
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
+}
+
+export default async function AdminApplicationsPage() {
   const health = await healthCheck();
-  const [rows, all] = health.ok
-    ? await Promise.all([cmsRepo.listApplications(status), cmsRepo.listApplications()])
-    : [[], []];
-  const counts: Record<string, number> = { all: all.length };
-  for (const a of all) counts[a.status] = (counts[a.status] || 0) + 1;
-
-  // draft 意向不产生 · 意向阶段只有 submitted 起步
-  const statusTabs: (ApplicationStatus | "all")[] = ["all", "submitted", "reviewing", "needs_changes", "approved", "rejected"];
+  const rows = health.ok ? await listInterests() : [];
 
   return (
     <>
       <AdminPageHeader
         eyebrow="Creators"
         title="入驻申请"
-        description="审核 /apply 页面提交的入驻意向 · 数据源:CreatorInterest (Neon)"
+        description="查看通过 /apply 页面提交的全部入驻意向资料 · 数据源:CreatorInterest (Neon)"
         breadcrumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Applications" }]}
       />
 
       {!health.ok && (
-        <div style={{
-          marginBottom: 16, padding: "12px 16px", borderRadius: 12,
-          background: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B",
-          fontSize: 13, lineHeight: 1.55,
-        }}>
+        <div className="ai-warn">
           <b>⚠ 数据库不可用 · {health.code}</b>
-          <div style={{ marginTop: 4, fontSize: 12.5 }}>
-            {health.message}
-          </div>
-          <div style={{ marginTop: 6, fontSize: 12, color: "#7F1D1D" }}>
-            修复步骤:在有 Neon DIRECT_URL 的环境执行 <code style={{background:"#fff",padding:"1px 6px",borderRadius:4}}>npm run db:deploy</code>,然后重启 / 重新部署。
+          <div className="ai-warn-msg">{health.message}</div>
+          <div className="ai-warn-hint">
+            在有 Neon <code>DIRECT_URL</code> 的环境执行 <code>npm run db:deploy</code>,然后重新部署。
           </div>
         </div>
       )}
 
-      {/* Status tabs */}
-      <div className="ap-tabs">
-        {statusTabs.map((s) => {
-          const active = (status ?? "all") === s;
-          const label = s === "all" ? "全部" : STATUS_LABELS[s];
-          const count = s === "all" ? counts.all : (counts[s] || 0);
-          const href = s === "all" ? "/admin/creators/applications" : `/admin/creators/applications?status=${s}`;
-          return (
-            <Link key={s} href={href} className={"ap-tab" + (active ? " is-active" : "")}>
-              {label} <span>{count}</span>
-            </Link>
-          );
-        })}
+      <div className="ai-count">
+        全部记录 <b>{rows.length}</b>
       </div>
 
-      <div style={{ marginTop: 16 }}>
-        <AdminTable
-          rows={rows}
-          emptyLabel="没有匹配的申请"
-          columns={[
-            {
-              key: "applicant", label: "申请人", render: (r) => (
+      {health.ok && rows.length === 0 && (
+        <div className="ai-empty">
+          还没有 /apply 提交记录 · 前台意向表单成功提交后会在这里出现。
+        </div>
+      )}
+
+      <div className="ai-list">
+        {rows.map((r) => (
+          <article key={r.id} className="ai-card">
+            <header className="ai-card-h">
+              <div className="ai-card-title">
+                <span className="ai-avatar" aria-hidden>{(r.nickname[0] || "?").toUpperCase()}</span>
                 <div>
-                  <div style={{ fontWeight: 700, color: "#111", fontSize: 13.5 }}>{r.applicantName}</div>
-                  <div style={{ fontSize: 11.5, color: "#9CA3AF" }}>{r.applicantEmail}</div>
+                  <div className="ai-name">{r.nickname}</div>
+                  <div className="ai-id">ID {r.id}</div>
                 </div>
-              ),
-            },
-            {
-              key: "type", label: "Type", render: (r) => (
-                <AdminBadge tone={r.type === "sugargirl" ? "info" : r.type === "sugarboy" ? "gold" : "default"}>
-                  {r.type === "sugargirl" ? "Sugargirl" : r.type === "sugarboy" ? "Sugarboy" : "Massage"}
-                </AdminBadge>
-              ),
-            },
-            { key: "loc", label: "地区", render: (r) => <span>{[r.city, r.country].filter(Boolean).join(" · ") || "—"}</span> },
-            { key: "lang", label: "语言", render: (r) => <span style={{ fontSize: 12, color: "#6B7280" }}>{r.languages.slice(0, 2).join(" · ")}</span> },
-            {
-              key: "prog", label: "完成度", render: (r) => (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 100 }}>
-                  <div style={{ flex: 1, height: 5, background: "#F3F4F6", borderRadius: 99, overflow: "hidden", minWidth: 60 }}>
-                    <div style={{ height: "100%", width: `${r.completion}%`, background: r.completion >= 90 ? "#16A34A" : r.completion >= 60 ? "#D6B980" : "#9CA3AF" }} />
-                  </div>
-                  <b style={{ fontSize: 12, fontVariantNumeric: "tabular-nums", color: "#374151", minWidth: 32, textAlign: "right" }}>{r.completion}%</b>
-                </div>
-              ),
-            },
-            { key: "media", label: "媒体", align: "right", render: (r) => <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{r.mediaCount}</span> },
-            { key: "status", label: "状态", render: (r) => <AdminBadge tone={STATUS_TONES[r.status]}>{STATUS_LABELS[r.status]}</AdminBadge> },
-            {
-              key: "when", label: "提交时间", render: (r) => (
-                <span style={{ fontSize: 11.5, color: "#6B7280", fontVariantNumeric: "tabular-nums" }}>
-                  {r.submittedAt ? new Date(r.submittedAt).toLocaleString("zh-CN", { hour12: false, month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
-                </span>
-              ),
-            },
-            { key: "ops", label: "操作", align: "right", render: (r) => (
-              <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
-                <ApplicationDetailButton id={r.id} />
-                <ApplicationActions id={r.id} status={r.status} />
               </div>
-            ) },
-          ]}
-        />
+              <time className="ai-when">{fmtWhen(r.createdAt)}</time>
+            </header>
+
+            <div className="ai-grid">
+              <Field label="所在城市" value={r.city} />
+              <Field label="当前状态" value={CUR_LABEL[r.status] || r.status} />
+              <Field label="邮箱" value={r.email || "—"} mono selectable />
+              <Field label="手机号" value={r.mobile || "—"} mono selectable />
+              <Field label="联系电话" value={r.telephone || "—"} mono selectable />
+              <Field label="页面语言" value={r.locale ? r.locale.toUpperCase() : "—"} />
+              <Field label="提交来源" value={r.source || "—"} />
+              <Field label="IP hash" value={r.ipHash || "—"} mono muted />
+            </div>
+
+            {r.userAgent && (
+              <div className="ai-ua" title={r.userAgent}>
+                <span className="ai-ua-k">User-Agent</span>
+                <span className="ai-ua-v">{r.userAgent}</span>
+              </div>
+            )}
+          </article>
+        ))}
       </div>
 
       <style>{`
-        .ap-tabs{display:flex;gap:4px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:3px;overflow-x:auto;scrollbar-width:none}
-        .ap-tabs::-webkit-scrollbar{display:none}
-        .ap-tab{padding:8px 14px;font-size:12.5px;color:#374151;text-decoration:none;border-radius:8px;font-weight:600;transition:background .12s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
-        .ap-tab:hover{background:#F7F5F0}
-        .ap-tab.is-active{background:#111;color:#EEDDB8}
-        .ap-tab span{font-size:10.5px;padding:2px 6px;background:rgba(255,255,255,.15);border-radius:99px;font-variant-numeric:tabular-nums}
-        .ap-tab:not(.is-active) span{background:#F3F4F6;color:#6B7280}
+        .ai-count{margin:16px 0 12px;font-size:12.5px;color:#6B7280;font-weight:600}
+        .ai-count b{font-size:14px;color:#111;font-variant-numeric:tabular-nums;margin-left:4px}
+
+        .ai-warn{margin-bottom:16px;padding:12px 16px;border-radius:12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;font-size:13px;line-height:1.55}
+        .ai-warn-msg{margin-top:4px;font-size:12.5px}
+        .ai-warn-hint{margin-top:6px;font-size:12px;color:#7F1D1D}
+        .ai-warn code{background:#fff;padding:1px 6px;border-radius:4px;font-size:11.5px}
+
+        .ai-empty{padding:32px 20px;text-align:center;background:#fff;border:1px dashed #E5E7EB;border-radius:12px;color:#6B7280;font-size:13px}
+
+        .ai-list{display:flex;flex-direction:column;gap:12px}
+        .ai-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.03)}
+        .ai-card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #F3F4F6}
+        .ai-card-title{display:flex;align-items:center;gap:12px;min-width:0}
+        .ai-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#EEDDB8,#B8A789);color:#1a1409;font-weight:800;font-size:14px;display:grid;place-items:center;flex-shrink:0}
+        .ai-name{font-size:14.5px;font-weight:800;color:#111;letter-spacing:-0.005em}
+        .ai-id{font-size:11px;color:#9CA3AF;font-family:ui-monospace,SFMono-Regular,monospace;margin-top:1px}
+        .ai-when{font-size:12px;color:#6B7280;font-variant-numeric:tabular-nums;flex-shrink:0;white-space:nowrap}
+
+        .ai-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px}
+        .ai-fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+        .ai-fld-k{font-size:11px;color:#9CA3AF;font-weight:600;letter-spacing:.02em}
+        .ai-fld-v{font-size:13px;color:#111;font-weight:600;word-break:break-all;line-height:1.4}
+        .ai-fld-v.mono{font-family:ui-monospace,SFMono-Regular,monospace;font-size:12.5px}
+        .ai-fld-v.muted{color:#6B7280;font-weight:500}
+        .ai-fld-v.selectable{user-select:all}
+
+        .ai-ua{margin-top:12px;padding-top:10px;border-top:1px dashed #F3F4F6;display:flex;align-items:baseline;gap:10px;font-size:11px;color:#9CA3AF}
+        .ai-ua-k{font-weight:700;letter-spacing:.02em;flex-shrink:0}
+        .ai-ua-v{font-family:ui-monospace,SFMono-Regular,monospace;font-size:10.5px;line-height:1.5;color:#6B7280;
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+
+        /* 平板 · 2 列 */
+        @media(max-width:1024px){
+          .ai-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+        }
+        /* 移动 · 1 列 · 头部竖排 */
+        @media(max-width:640px){
+          .ai-card{padding:14px 14px}
+          .ai-card-h{flex-direction:column;align-items:flex-start;gap:6px}
+          .ai-when{align-self:flex-start}
+          .ai-grid{grid-template-columns:1fr;gap:10px 0}
+          .ai-ua{flex-direction:column;gap:2px}
+          .ai-ua-v{white-space:normal;word-break:break-all}
+        }
       `}</style>
     </>
+  );
+}
+
+interface FieldProps { label: string; value: string; mono?: boolean; muted?: boolean; selectable?: boolean; }
+function Field({ label, value, mono, muted, selectable }: FieldProps) {
+  const cls = ["ai-fld-v", mono ? "mono" : "", muted ? "muted" : "", selectable ? "selectable" : ""].filter(Boolean).join(" ");
+  return (
+    <div className="ai-fld">
+      <span className="ai-fld-k">{label}</span>
+      <span className={cls}>{value}</span>
+    </div>
   );
 }

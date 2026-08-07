@@ -10,7 +10,7 @@ import { providers as massageProviders } from "@/lib/massage-data";
 import { journalPosts, journalCategories, type JournalPost } from "@/lib/journal-data";
 import { pick } from "@/lib/images";
 import type {
-  CmsDashboardMetrics, CmsCreatorRow, CmsApplicationRow,
+  CmsDashboardMetrics, CmsCreatorRow,
   CmsJournalPostRow, CmsJournalPostFull, CmsJournalCreateInput,
   CmsMediaItem, CmsCustomRequestRow,
   CmsHomeContent, CmsSettings, CmsStatus,
@@ -136,49 +136,10 @@ const mediaStore = globalThis.__sgCmsMedia ?? seedMedia();
 globalThis.__sgCmsMedia = mediaStore;
 
 // ══════════════════════════════════════
-// Applications · 唯一数据源 = CreatorInterest 表 (Prisma / Neon)
-// 旧 sample seed 已彻底移除 · 后台读到的都是 /apply 页面真实提交
+// Applications 相关方法已下线
+// 后台页面 (app/admin/creators/applications) 直接从 CreatorInterest 读取
+// 不再走 cmsRepo · 不再有审核状态映射 · 不再有完成度 / 媒体数虚拟字段
 // ══════════════════════════════════════
-import {
-  listInterests, getInterest, updateInterestReview,
-  type CreatorInterestRecord, type ReviewStatus,
-} from "@/lib/creator-interest/repository";
-
-/** CreatorInterest 行 → 后台 Applications table row (兼容原字段) */
-function interestToAppRow(r: CreatorInterestRecord): CmsApplicationRow {
-  const langs: string[] = [];
-  if (r.locale === "zh") langs.push("中文"); else if (r.locale === "en") langs.push("English");
-  // 邮箱优先展示;否则脱敏 mobile/telephone
-  const applicantEmail = r.email
-    ? r.email
-    : r.mobile
-      ? `📱 ${maskPhone(r.mobile)}`
-      : r.telephone ? `☎️ ${maskPhone(r.telephone)}` : "—";
-  return {
-    id: r.id,
-    applicantName: r.nickname,
-    applicantEmail,
-    type: "sugargirl",                        // /apply 目前只面向 sugargirl 招募
-    city: r.city,
-    country: undefined,
-    languages: langs,
-    completion: 20,                           // 意向阶段 · 固定 20%
-    status: r.reviewStatus as CmsApplicationRow["status"],
-    mediaCount: 0,
-    submittedAt: r.createdAt.toISOString(),
-    reviewNotes: r.reviewNotes ?? undefined,
-  };
-}
-
-/** 只显示末 4 位 · 用于列表页兼容 email 列 · 详情弹窗展示原值 */
-function maskPhone(p: string): string {
-  const digits = p.replace(/[^0-9]/g, "");
-  if (digits.length <= 4) return "•".repeat(digits.length);
-  return "•".repeat(Math.max(0, digits.length - 4)) + digits.slice(-4);
-}
-
-/** 意向记录 status 映射到后台四态 · 意向没有 "draft" · 但类型兼容 */
-const _ = null as unknown as ReviewStatus;    // 保证 ReviewStatus 被引用
 
 // ══════════════════════════════════════
 // Repository interface
@@ -257,32 +218,8 @@ export const cmsRepo = {
     return rows;
   },
 
-  // Applications · 全部走 CreatorInterest Prisma 表 · 无内存 sample seed
-  async listApplications(status?: string): Promise<CmsApplicationRow[]> {
-    const rows = await listInterests(
-      status && status !== "all" ? { reviewStatus: status as ReviewStatus } : undefined,
-    );
-    return rows.map(interestToAppRow);
-  },
-  async getApplication(id: string): Promise<CmsApplicationRow | undefined> {
-    const r = await getInterest(id);
-    return r ? interestToAppRow(r) : undefined;
-  },
-  /** 详情弹窗读原始 CreatorInterest · 含未脱敏 email/mobile/telephone · 仅 admin */
-  async getApplicationRaw(id: string): Promise<CreatorInterestRecord | null> {
-    return getInterest(id);
-  },
-  async updateApplication(
-    id: string,
-    patch: Partial<CmsApplicationRow> & { reviewNotes?: string },
-    actorId?: string,
-  ): Promise<CmsApplicationRow | null> {
-    const rev: { reviewStatus?: ReviewStatus; reviewNotes?: string | null } = {};
-    if (patch.status) rev.reviewStatus = patch.status as ReviewStatus;
-    if (typeof patch.reviewNotes === "string") rev.reviewNotes = patch.reviewNotes;
-    const r = await updateInterestReview(id, rev, actorId);
-    return r ? interestToAppRow(r) : null;
-  },
+  // Applications 相关方法已下线 · 后台页面直接从 CreatorInterest 读取
+  // 见 app/admin/creators/applications/page.tsx + lib/creator-interest/repository.ts
 
   // Journal ═════════════════════════════════════════════════
   listJournalPosts(): CmsJournalPostRow[] {

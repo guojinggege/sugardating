@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { randomBytes, createHash } from "node:crypto";
 
 export type InterestStatus = "student" | "employed" | "freelancer";
+export type ReviewStatus = "submitted" | "reviewing" | "needs_changes" | "approved" | "rejected";
 
 export interface CreatorInterestInput {
   nickname: string;
@@ -24,6 +25,10 @@ export interface CreatorInterestInput {
 export interface CreatorInterestRecord extends CreatorInterestInput {
   id: string;
   createdAt: Date;
+  reviewStatus: ReviewStatus;
+  reviewNotes?: string | null;
+  reviewedAt?: Date | null;
+  reviewedBy?: string | null;
 }
 
 declare global {
@@ -38,19 +43,73 @@ export async function createInterest(input: CreatorInterestInput): Promise<Creat
     const row = await (prisma as any).creatorInterest.create({ data: input });
     return row as CreatorInterestRecord;
   } catch (e: any) {
-    // 表不存在 (P2021) / 客户端未生成 · 走内存兜底
-    // 生产建议:npm run db:deploy 后重启
     if (process.env.NODE_ENV !== "production") {
-      // 开发期可能 schema 未 push · 只打印元信息 · 不打印 input (含敏感字段)
-      console.warn("[creator-interest] Prisma failed, using in-memory:", e?.code || e?.name || "unknown");
+      console.warn("[creator-interest] Prisma create failed, using in-memory:", e?.code || e?.name || "unknown");
     }
     const rec: CreatorInterestRecord = {
       id: `mem_${randomBytes(6).toString("hex")}`,
       ...input,
       createdAt: new Date(),
+      reviewStatus: "submitted",
+      reviewNotes: null,
+      reviewedAt: null,
+      reviewedBy: null,
     };
     memStore.push(rec);
     return rec;
+  }
+}
+
+// ══════════════════════════════════════
+// Admin · 读 / 更新 · 全部走 Prisma · 表未 migrate 时 fallback 到内存
+// ══════════════════════════════════════
+
+export async function listInterests(filter?: { reviewStatus?: ReviewStatus }): Promise<CreatorInterestRecord[]> {
+  try {
+    const rows = await (prisma as any).creatorInterest.findMany({
+      where: filter?.reviewStatus ? { reviewStatus: filter.reviewStatus } : undefined,
+      orderBy: { createdAt: "desc" },
+    });
+    return rows as CreatorInterestRecord[];
+  } catch (e: any) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[creator-interest] Prisma list failed, using in-memory:", e?.code || e?.name || "unknown");
+    }
+    const rows = filter?.reviewStatus
+      ? memStore.filter((r) => r.reviewStatus === filter.reviewStatus)
+      : memStore.slice();
+    return rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+}
+
+export async function getInterest(id: string): Promise<CreatorInterestRecord | null> {
+  try {
+    const row = await (prisma as any).creatorInterest.findUnique({ where: { id } });
+    return (row as CreatorInterestRecord) ?? null;
+  } catch {
+    return memStore.find((r) => r.id === id) ?? null;
+  }
+}
+
+export async function updateInterestReview(
+  id: string,
+  patch: { reviewStatus?: ReviewStatus; reviewNotes?: string | null },
+  actorId?: string,
+): Promise<CreatorInterestRecord | null> {
+  const now = new Date();
+  const data: any = { ...patch, reviewedAt: now };
+  if (actorId) data.reviewedBy = actorId;
+  try {
+    const row = await (prisma as any).creatorInterest.update({ where: { id }, data });
+    return row as CreatorInterestRecord;
+  } catch (e: any) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[creator-interest] Prisma update failed, using in-memory:", e?.code || e?.name || "unknown");
+    }
+    const idx = memStore.findIndex((r) => r.id === id);
+    if (idx === -1) return null;
+    memStore[idx] = { ...memStore[idx], ...patch, reviewedAt: now, reviewedBy: actorId ?? memStore[idx].reviewedBy ?? null };
+    return memStore[idx];
   }
 }
 

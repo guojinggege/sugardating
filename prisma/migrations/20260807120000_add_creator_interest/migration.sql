@@ -12,6 +12,10 @@ CREATE TABLE "CreatorInterest" (
     "ipHash" TEXT,
     "userAgent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "reviewStatus" TEXT NOT NULL DEFAULT 'submitted',
+    "reviewNotes" TEXT,
+    "reviewedAt" TIMESTAMP(3),
+    "reviewedBy" TEXT,
 
     CONSTRAINT "CreatorInterest_pkey" PRIMARY KEY ("id")
 );
@@ -20,4 +24,4 @@ CREATE TABLE "CreatorInterest" (
 CREATE INDEX "CreatorInterest_createdAt_idx" ON "CreatorInterest"("createdAt");
 
 -- CreateIndex
-CREATE INDEX "CreatorInterest_status_createdAt_idx" ON "CreatorInterest"("status", "createdAt");
+CREATE INDEX "CreatorInterest_reviewStatus_createdAt_idx" ON "CreatorInterest"("reviewStatus", "createdAt");

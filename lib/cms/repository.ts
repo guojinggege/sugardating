@@ -136,25 +136,49 @@ const mediaStore = globalThis.__sgCmsMedia ?? seedMedia();
 globalThis.__sgCmsMedia = mediaStore;
 
 // ══════════════════════════════════════
-// Sample applications (for demo · reflects apply wizard drafts)
+// Applications · 唯一数据源 = CreatorInterest 表 (Prisma / Neon)
+// 旧 sample seed 已彻底移除 · 后台读到的都是 /apply 页面真实提交
 // ══════════════════════════════════════
+import {
+  listInterests, getInterest, updateInterestReview,
+  type CreatorInterestRecord, type ReviewStatus,
+} from "@/lib/creator-interest/repository";
 
-function sampleApplications(): CmsApplicationRow[] {
-  return [
-    { id: "app_001", applicantName: "Aria Chen",      applicantEmail: "aria@demo.io",    type: "sugargirl", city: "London",     country: "UK", languages: ["中文", "English"],       completion: 92, status: "submitted",     mediaCount: 8, submittedAt: new Date(Date.now() - 3600_000).toISOString() },
-    { id: "app_002", applicantName: "Leo Alaric",     applicantEmail: "leo@demo.io",     type: "sugarboy",  city: "London",     country: "UK", languages: ["English"],                 completion: 88, status: "reviewing",     mediaCount: 6, submittedAt: new Date(Date.now() - 10800_000).toISOString() },
-    { id: "app_003", applicantName: "Mira Wei",       applicantEmail: "mira@demo.io",    type: "massage",   city: "Manchester", country: "UK", languages: ["中文", "English"],       completion: 76, status: "needs_changes", mediaCount: 4, submittedAt: new Date(Date.now() - 86400_000).toISOString(), reviewNotes: "需要补充视频认证" },
-    { id: "app_004", applicantName: "Sofia Reyes",    applicantEmail: "sofia@demo.io",   type: "sugargirl", city: "Birmingham", country: "UK", languages: ["English", "Español"],   completion: 100, status: "approved",    mediaCount: 12, submittedAt: new Date(Date.now() - 3 * 86400_000).toISOString() },
-    { id: "app_005", applicantName: "Yuki Tanaka",    applicantEmail: "yuki@demo.io",    type: "sugargirl", city: "London",     country: "UK", languages: ["日本語", "English"],    completion: 45, status: "draft",         mediaCount: 2 },
-    { id: "app_006", applicantName: "Marcus O'Neal",  applicantEmail: "marcus@demo.io",  type: "sugarboy",  city: "Edinburgh",  country: "UK", languages: ["English"],               completion: 100, status: "approved",    mediaCount: 10, submittedAt: new Date(Date.now() - 5 * 86400_000).toISOString() },
-  ];
+/** CreatorInterest 行 → 后台 Applications table row (兼容原字段) */
+function interestToAppRow(r: CreatorInterestRecord): CmsApplicationRow {
+  const langs: string[] = [];
+  if (r.locale === "zh") langs.push("中文"); else if (r.locale === "en") langs.push("English");
+  // 邮箱优先展示;否则脱敏 mobile/telephone
+  const applicantEmail = r.email
+    ? r.email
+    : r.mobile
+      ? `📱 ${maskPhone(r.mobile)}`
+      : r.telephone ? `☎️ ${maskPhone(r.telephone)}` : "—";
+  return {
+    id: r.id,
+    applicantName: r.nickname,
+    applicantEmail,
+    type: "sugargirl",                        // /apply 目前只面向 sugargirl 招募
+    city: r.city,
+    country: undefined,
+    languages: langs,
+    completion: 20,                           // 意向阶段 · 固定 20%
+    status: r.reviewStatus as CmsApplicationRow["status"],
+    mediaCount: 0,
+    submittedAt: r.createdAt.toISOString(),
+    reviewNotes: r.reviewNotes ?? undefined,
+  };
 }
-declare global {
-  // eslint-disable-next-line no-var
-  var __sgCmsApplications: CmsApplicationRow[] | undefined;
+
+/** 只显示末 4 位 · 用于列表页兼容 email 列 · 详情弹窗展示原值 */
+function maskPhone(p: string): string {
+  const digits = p.replace(/[^0-9]/g, "");
+  if (digits.length <= 4) return "•".repeat(digits.length);
+  return "•".repeat(Math.max(0, digits.length - 4)) + digits.slice(-4);
 }
-const appStore = globalThis.__sgCmsApplications ?? sampleApplications();
-globalThis.__sgCmsApplications = appStore;
+
+/** 意向记录 status 映射到后台四态 · 意向没有 "draft" · 但类型兼容 */
+const _ = null as unknown as ReviewStatus;    // 保证 ReviewStatus 被引用
 
 // ══════════════════════════════════════
 // Repository interface
@@ -178,7 +202,9 @@ export const cmsRepo = {
         creditsTransactions: 1856,
       },
       pending: {
-        applications: appStore.filter((a) => a.status === "submitted" || a.status === "reviewing").length,
+        // Applications 现在真实来自 CreatorInterest 表 · 这里只用 media / reports mock 数
+        // 精确 pending 数在后台 Applications 页由 async listApplications() 计算
+        applications: 0,
         media: mediaStore.filter((m) => m.status === "pending").length,
         reports: 2,
         missingTranslations: 12,
@@ -231,18 +257,31 @@ export const cmsRepo = {
     return rows;
   },
 
-  // Applications
-  listApplications(status?: string): CmsApplicationRow[] {
-    return status ? appStore.filter((a) => a.status === status) : appStore;
+  // Applications · 全部走 CreatorInterest Prisma 表 · 无内存 sample seed
+  async listApplications(status?: string): Promise<CmsApplicationRow[]> {
+    const rows = await listInterests(
+      status && status !== "all" ? { reviewStatus: status as ReviewStatus } : undefined,
+    );
+    return rows.map(interestToAppRow);
   },
-  getApplication(id: string): CmsApplicationRow | undefined {
-    return appStore.find((a) => a.id === id);
+  async getApplication(id: string): Promise<CmsApplicationRow | undefined> {
+    const r = await getInterest(id);
+    return r ? interestToAppRow(r) : undefined;
   },
-  updateApplication(id: string, patch: Partial<CmsApplicationRow>): CmsApplicationRow | null {
-    const idx = appStore.findIndex((a) => a.id === id);
-    if (idx === -1) return null;
-    appStore[idx] = { ...appStore[idx], ...patch };
-    return appStore[idx];
+  /** 详情弹窗读原始 CreatorInterest · 含未脱敏 email/mobile/telephone · 仅 admin */
+  async getApplicationRaw(id: string): Promise<CreatorInterestRecord | null> {
+    return getInterest(id);
+  },
+  async updateApplication(
+    id: string,
+    patch: Partial<CmsApplicationRow> & { reviewNotes?: string },
+    actorId?: string,
+  ): Promise<CmsApplicationRow | null> {
+    const rev: { reviewStatus?: ReviewStatus; reviewNotes?: string | null } = {};
+    if (patch.status) rev.reviewStatus = patch.status as ReviewStatus;
+    if (typeof patch.reviewNotes === "string") rev.reviewNotes = patch.reviewNotes;
+    const r = await updateInterestReview(id, rev, actorId);
+    return r ? interestToAppRow(r) : null;
   },
 
   // Journal ═════════════════════════════════════════════════

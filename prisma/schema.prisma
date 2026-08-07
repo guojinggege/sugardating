@@ -148,24 +148,30 @@ model MembershipPlan {
   @@unique([tier, period])
 }
 
-// Sugargirl 入驻意向 · /apply 页面提交的公开信息收集表 · 无需登录
-// 只存基础联系信息 · 平台后续人工联系 · 不公开展示
+// Sugargirl 入驻意向 · /apply 页面提交 · 同时是后台 Applications 审核数据源
+// 提交时公开无需登录 · 审核字段仅 admin 可写
 model CreatorInterest {
-  id         String   @id @default(cuid())
-  nickname   String
-  city       String
-  status     String   // student | employed | freelancer
-  telephone  String?
-  email      String?
-  mobile     String?
-  locale     String?  // zh | en · 提交时页面 locale
-  source     String?  // hero | sticky | inline | final · CTA 来源
-  ipHash     String?  // 反滥用 · SHA-256 前 12 位 · 不存原 IP
-  userAgent  String?  // 截断到 200 字符 · 反滥用调查用
-  createdAt  DateTime @default(now())
+  id           String   @id @default(cuid())
+  // 用户提交 · 原始字段
+  nickname     String
+  city         String
+  status       String   // student | employed | freelancer
+  telephone    String?
+  email        String?
+  mobile       String?
+  locale       String?  // zh | en
+  source       String?  // hero | sticky | inline | final
+  ipHash       String?  // salt-based SHA-256 前 12 位
+  userAgent    String?  // 截断 200
+  createdAt    DateTime @default(now())
+  // 后台审核 · admin 可写
+  reviewStatus String   @default("submitted") // submitted | reviewing | needs_changes | approved | rejected
+  reviewNotes  String?
+  reviewedAt   DateTime?
+  reviewedBy   String?  // admin userId
 
   @@index([createdAt])
-  @@index([status, createdAt])
+  @@index([reviewStatus, createdAt])
 }
 
 // 用户开通的会员 — userId 暂时可空,待 auth 接入后回填

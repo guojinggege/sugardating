@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AdminPageHeader, AdminTable, AdminBadge } from "@/components/admin/AdminPrimitives";
 import { cmsRepo } from "@/lib/cms/repository";
 import ApplicationActions from "@/components/admin/ApplicationActions";
+import ApplicationDetailButton from "@/components/admin/ApplicationDetailButton";
 import type { ApplicationStatus } from "@/lib/cms/types";
 
 export const dynamic = "force-dynamic";
@@ -19,14 +20,17 @@ const STATUS_LABELS: Record<ApplicationStatus, string> = {
   needs_changes: "需补充", approved: "已通过", rejected: "已拒绝",
 };
 
-export default function AdminApplicationsPage({ searchParams }: Props) {
+export default async function AdminApplicationsPage({ searchParams }: Props) {
   const status = searchParams.status as ApplicationStatus | undefined;
-  const rows = cmsRepo.listApplications(status);
-  const all = cmsRepo.listApplications();
+  const [rows, all] = await Promise.all([
+    cmsRepo.listApplications(status),
+    cmsRepo.listApplications(),
+  ]);
   const counts: Record<string, number> = { all: all.length };
   for (const a of all) counts[a.status] = (counts[a.status] || 0) + 1;
 
-  const statusTabs: (ApplicationStatus | "all")[] = ["all", "submitted", "reviewing", "needs_changes", "approved", "rejected", "draft"];
+  // draft 意向不产生 · 意向阶段只有 submitted 起步
+  const statusTabs: (ApplicationStatus | "all")[] = ["all", "submitted", "reviewing", "needs_changes", "approved", "rejected"];
 
   return (
     <>
@@ -93,7 +97,12 @@ export default function AdminApplicationsPage({ searchParams }: Props) {
                 </span>
               ),
             },
-            { key: "ops", label: "操作", align: "right", render: (r) => <ApplicationActions id={r.id} status={r.status} /> },
+            { key: "ops", label: "操作", align: "right", render: (r) => (
+              <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                <ApplicationDetailButton id={r.id} />
+                <ApplicationActions id={r.id} status={r.status} />
+              </div>
+            ) },
           ]}
         />
       </div>

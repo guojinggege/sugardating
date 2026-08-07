@@ -148,27 +148,50 @@ model MembershipPlan {
   @@unique([tier, period])
 }
 
-// Sugargirl 入驻意向 · /apply 页面提交 · 同时是后台 Applications 审核数据源
-// 提交时公开无需登录 · 审核字段仅 admin 可写
+// Sugargirl 入驻意向 · /apply 页面提交 · 后台只读展示
+// 提交时公开无需登录 · 旧联系方式字段保留仅用于历史记录
 model CreatorInterest {
-  id           String   @id @default(cuid())
-  // 用户提交 · 原始字段
-  nickname     String
-  city         String
-  status       String   // student | employed | freelancer
-  telephone    String?
-  email        String?
-  mobile       String?
-  locale       String?  // zh | en
-  source       String?  // hero | sticky | inline | final
-  ipHash       String?  // salt-based SHA-256 前 12 位
-  userAgent    String?  // 截断 200
-  createdAt    DateTime @default(now())
-  // 后台审核 · admin 可写
-  reviewStatus String   @default("submitted") // submitted | reviewing | needs_changes | approved | rejected
-  reviewNotes  String?
-  reviewedAt   DateTime?
-  reviewedBy   String?  // admin userId
+  id             String   @id @default(cuid())
+  nickname       String
+  city           String
+  status         String   // student | employed | freelancer
+
+  // 新联系方式 · 表单顺序:WhatsApp / Ins / X / 其他 · 四选一必填
+  whatsapp       String?
+  instagram      String?
+  xHandle        String?  @map("x_handle")
+  otherContact   String?  @map("other_contact")
+
+  // 旧联系方式 · 保留兼容历史 · 新提交不再写入
+  telephone      String?
+  email          String?
+  mobile         String?
+
+  // 合规确认
+  ageConfirmed   Boolean  @default(false)
+  contactConsent Boolean  @default(false)
+
+  // 来源与归因
+  locale         String?  // zh | en
+  source         String?  // inline_form | header_apply | hero_apply | floating_primary | ...
+  pagePath       String?  @map("page_path")
+  referrer       String?
+  utmSource      String?  @map("utm_source")
+  utmMedium      String?  @map("utm_medium")
+  utmCampaign    String?  @map("utm_campaign")
+  utmContent     String?  @map("utm_content")
+
+  // 安全审计
+  ipHash         String?  // salt-based SHA-256 前 12 位
+  userAgent      String?  // 截断 200
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  // 审核字段 (已下线 UI) · 保留列避免破坏性 migration
+  reviewStatus   String   @default("submitted")
+  reviewNotes    String?
+  reviewedAt     DateTime?
+  reviewedBy     String?
 
   @@index([createdAt])
   @@index([reviewStatus, createdAt])

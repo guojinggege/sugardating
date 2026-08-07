@@ -1,7 +1,7 @@
-// /apply — Sugardating Creator Recruitment Landing
-// 高端招募落地页 · 12 sections · 面向 18+ 成年女性创作者
-// 允许未登录访问 (读故事);表单本身要求登录
+// /apply — Sugargirl 全球招募计划 · 意向信息收集页
+// 允许未登录访问 · 数据落 CreatorInterest 表 · 后台只读展示
 import type { Metadata } from "next";
+import Image from "next/image";
 import Img from "@/components/Img";
 import { pick } from "@/lib/images";
 import InterestDialogProvider from "@/components/Apply/InterestDialogProvider";
@@ -12,9 +12,15 @@ import ApplyFloatingCTAs from "@/components/Apply/ApplyFloatingCTAs";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "成为 Sugardating sugargirl · 高端 sugargirl 入驻",
+  title: "Sugargirl全球招募计划 | Sugardating",
   description:
-    "加入 Sugardating,建立你的高端 sugargirl 主页,连接更成熟的用户群体。平台提供曝光 · 认证 · 安全体系 · 免费写真与视频拍摄支持。面向 18+ 成年 sugargirl。",
+    "加入 Sugargirl 全球招募计划,提交昵称、所在城市、当前状态及常用社交联系方式,Sugardating 团队将与你沟通后续入驻安排。",
+  alternates: { canonical: "/apply" },
+  openGraph: {
+    title: "Sugargirl全球招募计划 | Sugardating",
+    description: "加入 Sugargirl 全球招募计划,提交你的入驻意向,团队将与你联系。",
+    images: ["/images/apply/sugargirl-global-recruitment-hero.jpg"],
+  },
 };
 
 // ─── Icon helpers ──────────────────
@@ -95,27 +101,34 @@ export default function ApplyPage() {
 
   return (
     <InterestDialogProvider>
-      {/* ═══ 1. Hero ═══ */}
-      <section className="ap-hero">
-        <div className="ap-hero-media"><Img src={heroBg} alt="" sizes="100vw" priority /></div>
-        <div className="ap-hero-veil" />
-        <div className="ap-hero-inner">
-          <div className="ap-hero-badges">
-            <span className="ap-hero-badge">18+ sugargirl 入驻申请</span>
-            <span className="ap-hero-badge">高端认证社区</span>
-            <span className="ap-hero-badge">隐私优先</span>
-          </div>
-          <div className="ap-hero-eye">Sugardating sugargirl 招募</div>
-          <h1 className="ap-hero-title">让你的美,<br />不只是被浏览,<br />而是被认真选择</h1>
-          <p className="ap-hero-sub">
-            加入 Sugardating,建立你的高端 sugargirl 主页,连接更成熟、更真实、更有消费能力的用户群体。
-            平台提供曝光、认证、安全体系,以及免费的写真与视频内容支持。
+      {/* ═══ 1. Hero · 全球招募 · 桌面覆盖图 · 移动上下结构 ═══ */}
+      <section className="grhero">
+        {/* 桌面 · 全宽图 + 左侧文字遮罩 */}
+        <div className="grhero-media" aria-hidden>
+          <Image
+            src="/images/apply/sugargirl-global-recruitment-hero.jpg"
+            alt=""
+            fill
+            priority
+            quality={88}
+            sizes="100vw"
+            style={{ objectFit: "cover", objectPosition: "50% 48%" }}
+          />
+          <div className="grhero-veil" />
+        </div>
+        <div className="grhero-inner">
+          <div className="grhero-eye">SUGARDATING GLOBAL RECRUITMENT</div>
+          <h1 className="grhero-title">Sugargirl全球招募计划</h1>
+          <p className="grhero-sub">
+            加入 Sugargirl 全球招募计划 · 留下昵称、所在城市和你常用的社交联系方式,Sugardating
+            团队会与你沟通后续入驻安排。
           </p>
-          <div className="ap-hero-cta">
-            <InterestTrigger source="hero" className="ap-btn-primary">提交入驻意向</InterestTrigger>
+          <div className="grhero-cta">
+            <InterestTrigger source="hero_apply" className="ap-btn-primary">提交入驻意向</InterestTrigger>
             <a href="#benefits" className="ap-btn-ghost">了解平台优势</a>
           </div>
         </div>
+        {/* 移动 · 图片区(image-only) · Hero 内容在 grhero-inner (会用 CSS 单列排布) */}
       </section>
 
       {/* ═══ 1.5 意向资料收集 ═══ Hero 下方 · 页面主转化模块 */}
@@ -260,7 +273,7 @@ export default function ApplyPage() {
           <p className="ap-lead" style={{ marginBottom: 24 }}>
             填写基础信息后 · Sugardating 团队会通过你选择的联系方式与你沟通后续入驻安排。
           </p>
-          <InterestTrigger source="final" className="ap-btn-primary">提交入驻意向</InterestTrigger>
+          <InterestTrigger source="footer_apply" className="ap-btn-primary">提交入驻意向</InterestTrigger>
         </div>
       </section>
 

@@ -15,7 +15,7 @@ export default function FinalCta() {
         <div className="fc-cta">
           <Link href="/register" className="fc-btn fc-btn--gold">注册领 30 Credits</Link>
           <Link href="/male-artists" className="fc-btn fc-btn--ghost">先浏览资料</Link>
-          <Link href="/apply" className="fc-btn fc-btn--ghost">申请入驻 sugargirl</Link>
+          <Link href="/apply?apply=1" className="fc-btn fc-btn--ghost">申请入驻 sugargirl</Link>
         </div>
         <div className="fc-fine">注册免费 · 无义务 · 18+ · 可随时注销</div>
       </div>

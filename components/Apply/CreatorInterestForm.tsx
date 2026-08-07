@@ -1,114 +1,158 @@
 "use client";
-// Sugargirl 入驻意向表单 · /apply 页面共用组件
-// 提交 POST /api/creator/apply-intent · 成功后显示感谢态
-// - nickname / city / status 必填 · telephone / email / mobile 至少一项
-// - 前端与后端两层校验一致
-// - 输入字号 16px 避免 iOS 聚焦缩放
-import { useState } from "react";
+// Sugargirl 全球招募意向表单 · 页面内嵌 / Dialog / Drawer 三处共用
+// 字段:昵称 · 城市 · 当前状态 · WhatsApp · Ins · X · 其他 · 18+ · 同意
+// 联系方式四选一必填 · 提交前后端两层校验一致
+// 只在拿到真实 leadId 才展示成功页
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 type Status = "" | "student" | "employed" | "freelancer";
+type Source =
+  | "inline_form" | "header_apply" | "hero_apply"
+  | "floating_primary" | "floating_secondary"
+  | "onboarding_cta" | "footer_apply" | "mobile_menu_apply";
 
 interface Props {
-  source?: "hero" | "inline" | "sticky" | "final";
-  onSuccess?: () => void;
-  compact?: boolean;               // 弹窗内使用 · 减少内边距
+  source?: Source;
+  onSuccess?: (leadId: string) => void;
+  compact?: boolean;
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const SocialIcon = {
+  wa: (<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden><path d="M17.5 14.4c-.3-.2-1.8-.9-2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.3 8.3 0 0 1-2.4-1.5 9.1 9.1 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5s0-.4 0-.5-.7-1.7-.9-2.3-.5-.5-.7-.5h-.6a1.1 1.1 0 0 0-.8.4 3.5 3.5 0 0 0-1.1 2.6c0 1.5 1.1 3 1.3 3.2s2.2 3.4 5.4 4.7a18 18 0 0 0 1.8.6 4.4 4.4 0 0 0 2 .1 3.3 3.3 0 0 0 2.1-1.5 2.6 2.6 0 0 0 .2-1.5c-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z"/></svg>),
+  ig: (<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>),
+  x:  (<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden><path d="M18.24 3H21l-6.55 7.48L22 21h-6.83l-4.66-6.1L5.2 21H2.42l7-8L2 3h6.98l4.22 5.58L18.24 3zm-1.19 16.2h1.53L7.02 4.72H5.4L17.05 19.2z"/></svg>),
+};
 
-export default function CreatorInterestForm({ source = "inline", onSuccess, compact }: Props) {
+/** URL search params → 归因字段 · 只在客户端 mount 时读一次 */
+function readAttribution() {
+  if (typeof window === "undefined") return {};
+  const u = new URL(window.location.href);
+  const q = u.searchParams;
+  return {
+    pagePath: u.pathname,
+    referrer: (document.referrer || "").slice(0, 500),
+    utmSource:   q.get("utm_source")   || null,
+    utmMedium:   q.get("utm_medium")   || null,
+    utmCampaign: q.get("utm_campaign") || null,
+    utmContent:  q.get("utm_content")  || null,
+  };
+}
+
+export default function CreatorInterestForm({ source = "inline_form", onSuccess, compact }: Props) {
   const t = useTranslations("apply.interest");
   const locale = (useLocale() === "zh" ? "zh" : "en") as "zh" | "en";
 
   const [nickname, setNickname] = useState("");
   const [city, setCity] = useState("");
   const [status, setStatus] = useState<Status>("");
-  const [telephone, setTelephone] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [xHandle, setXHandle] = useState("");
+  const [otherContact, setOtherContact] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [contactConsent, setContactConsent] = useState(false);
+  const [hp, setHp] = useState("");    // honeypot
 
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [done, setDone] = useState(false);
+  const [doneId, setDoneId] = useState<string | null>(null);
 
-  function validate(): { ok: boolean; errs: Record<string, string> } {
+  const waRef = useRef<HTMLInputElement>(null);
+
+  function validate(): Record<string, string> {
     const errs: Record<string, string> = {};
     const nk = nickname.trim();
     if (nk.length < 2 || nk.length > 30) errs.nickname = t("errNickname");
     const c = city.trim();
     if (c.length < 2 || c.length > 60) errs.city = t("errCity");
-    if (!status) errs.status = t("errStatus");
-    const hasAnyContact = !!(telephone.trim() || email.trim() || mobile.trim());
-    if (!hasAnyContact) errs.contact = t("errContact");
-    if (email.trim() && !EMAIL_RE.test(email.trim().toLowerCase())) errs.email = t("errEmail");
-    return { ok: Object.keys(errs).length === 0, errs };
+    if (!status) errs.currentStatus = t("errStatus");
+    const hasContact = [whatsapp, instagram, xHandle, otherContact].some((v) => v.trim().length > 0);
+    if (!hasContact) errs.contact = t("errContact");
+    if (!ageConfirmed) errs.ageConfirmed = t("errAge");
+    if (!contactConsent) errs.contactConsent = t("errConsent");
+    return errs;
   }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
-    const { ok, errs } = validate();
+    const errs = validate();
     setErrors(errs);
-    if (!ok) return;
+    if (Object.keys(errs).length > 0) {
+      if (errs.contact && waRef.current) waRef.current.focus();
+      return;
+    }
     setBusy(true);
     try {
+      const attr = readAttribution();
       const r = await fetch("/api/creator/apply-intent", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           nickname: nickname.trim(),
           city: city.trim(),
-          status,
-          telephone: telephone.trim(),
-          email: email.trim(),
-          mobile: mobile.trim(),
+          currentStatus: status,
+          whatsapp: whatsapp.trim(),
+          instagram: instagram.trim(),
+          xHandle: xHandle.trim(),
+          otherContact: otherContact.trim(),
+          ageConfirmed,
+          contactConsent,
+          hp,
           locale,
           source,
+          ...attr,
         }),
       });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok || !d?.ok || !d?.id) {
-        // 后端 code → 字段级错误 · 敏感字段值本身不落客户端日志
+      // 三条齐:ok · success · leadId
+      if (!r.ok || !d?.success || !d?.leadId) {
         const errsSrv: Record<string, string> = {};
         const code = d?.code || "UNKNOWN";
         switch (code) {
-          case "INVALID_NICKNAME": errsSrv.nickname = t("errNickname"); break;
-          case "INVALID_CITY":     errsSrv.city = t("errCity"); break;
-          case "INVALID_STATUS":   errsSrv.status = t("errStatus"); break;
-          case "CONTACT_REQUIRED": errsSrv.contact = t("errContact"); break;
-          case "INVALID_EMAIL":    errsSrv.email = t("errEmail"); break;
-          case "TOO_MANY_SUBMISSIONS": errsSrv.contact = t("errTooMany"); break;
+          case "INVALID_NICKNAME":    errsSrv.nickname = t("errNickname"); break;
+          case "INVALID_CITY":        errsSrv.city = t("errCity"); break;
+          case "INVALID_STATUS":      errsSrv.currentStatus = t("errStatus"); break;
+          case "AGE_NOT_CONFIRMED":   errsSrv.ageConfirmed = t("errAge"); break;
+          case "CONSENT_REQUIRED":    errsSrv.contactConsent = t("errConsent"); break;
+          case "CONTACT_REQUIRED":    errsSrv.contact = t("errContact"); break;
+          case "TOO_MANY_SUBMISSIONS":errsSrv.contact = t("errTooMany"); break;
           case "TABLE_MISSING":
           case "DB_ERROR":
-          case "PERSIST_FAILED":   errsSrv.contact = t("errPersist"); break;
-          default:                 errsSrv.contact = t("errNetwork");
+          case "DATABASE_INSERT_FAILED":
+                                      errsSrv.contact = t("errPersist"); break;
+          default:                    errsSrv.contact = t("errNetwork");
         }
         setErrors(errsSrv);
         return;
       }
-      // 只有拿到真实 DB id 才展示成功
-      setDone(true);
-      onSuccess?.();
+      setDoneId(d.leadId);
+      onSuccess?.(d.leadId);
     } catch {
       setErrors({ contact: t("errNetwork") });
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
   }
 
-  if (done) {
+  if (doneId) {
     return (
       <div className={"cif cif--done" + (compact ? " cif--compact" : "")}>
         <div className="cif-done-emoji" aria-hidden>✓</div>
         <h3>{t("thanksTitle")}</h3>
         <p>{t("thanksDesc")}</p>
+        <div className="cif-done-id" title={doneId}>ID · {doneId}</div>
       </div>
     );
   }
 
   return (
     <form className={"cif" + (compact ? " cif--compact" : "")} onSubmit={onSubmit} noValidate>
+      {/* Honeypot — 视觉隐藏但可被 bot 表单库自动填 */}
+      <div aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
+        <label>Do not fill<input value={hp} onChange={(e) => setHp(e.target.value)} tabIndex={-1} autoComplete="off" /></label>
+      </div>
+
+      {/* 基础信息 */}
       <div className="cif-row">
         <label className="cif-label" htmlFor="cif-nickname">{t("nicknameLabel")} <em>*</em></label>
         <input id="cif-nickname" className={"cif-input" + (errors.nickname ? " is-err" : "")}
@@ -136,34 +180,72 @@ export default function CreatorInterestForm({ source = "inline", onSuccess, comp
             </label>
           ))}
         </div>
-        {errors.status && <span className="cif-err">{errors.status}</span>}
+        {errors.currentStatus && <span className="cif-err">{errors.currentStatus}</span>}
       </div>
 
-      <div className="cif-contact-hint">{t("contactHint")}</div>
-
-      <div className="cif-row">
-        <label className="cif-label" htmlFor="cif-tel">{t("telephoneLabel")}</label>
-        <input id="cif-tel" className="cif-input" type="tel" inputMode="tel"
-          value={telephone} onChange={(e) => setTelephone(e.target.value)}
-          placeholder={t("telephonePh")} autoComplete="tel" maxLength={40} />
+      {/* 联系方式 · WhatsApp / Ins / X / 其他 · 严格 DOM 顺序 */}
+      <div className="cif-section-h">
+        <span>{t("contactMethods")}</span>
+        <em>{t("contactHint")}</em>
       </div>
 
-      <div className="cif-row">
-        <label className="cif-label" htmlFor="cif-email">{t("emailLabel")}</label>
-        <input id="cif-email" className={"cif-input" + (errors.email ? " is-err" : "")}
-          type="email" inputMode="email"
-          value={email} onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@example.com" autoComplete="email" maxLength={120} />
-        {errors.email && <span className="cif-err">{errors.email}</span>}
+      <div className="cif-contact-grid">
+        <div className="cif-row">
+          <label className="cif-label" htmlFor="cif-wa">
+            <span className="cif-lbl-ico">{SocialIcon.wa}</span>{t("whatsappLabel")}
+          </label>
+          <input ref={waRef} id="cif-wa" className="cif-input contact-input" type="tel" inputMode="tel"
+            value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+            placeholder={t("whatsappPh")} autoComplete="tel" maxLength={40} />
+          <span className="cif-hint">{t("whatsappHint")}</span>
+        </div>
+
+        <div className="cif-row">
+          <label className="cif-label" htmlFor="cif-ig">
+            <span className="cif-lbl-ico">{SocialIcon.ig}</span>{t("instagramLabel")}
+          </label>
+          <input id="cif-ig" className="cif-input contact-input"
+            value={instagram} onChange={(e) => setInstagram(e.target.value)}
+            placeholder="@username" maxLength={160} />
+          <span className="cif-hint">{t("instagramHint")}</span>
+        </div>
+
+        <div className="cif-row">
+          <label className="cif-label" htmlFor="cif-x">
+            <span className="cif-lbl-ico">{SocialIcon.x}</span>{t("xLabel")}
+          </label>
+          <input id="cif-x" className="cif-input contact-input"
+            value={xHandle} onChange={(e) => setXHandle(e.target.value)}
+            placeholder="@username" maxLength={160} />
+          <span className="cif-hint">{t("xHint")}</span>
+        </div>
+
+        <div className="cif-row">
+          <label className="cif-label" htmlFor="cif-other">{t("otherContactLabel")}</label>
+          <input id="cif-other" className="cif-input contact-input"
+            value={otherContact} onChange={(e) => setOtherContact(e.target.value)}
+            placeholder={t("otherContactPh")} maxLength={160} />
+        </div>
       </div>
 
-      <div className="cif-row">
-        <label className="cif-label" htmlFor="cif-mob">{t("mobileLabel")}</label>
-        <input id="cif-mob" className="cif-input" type="tel" inputMode="tel"
-          value={mobile} onChange={(e) => setMobile(e.target.value)}
-          placeholder={t("mobilePh")} autoComplete="tel-national" maxLength={40} />
-        {errors.contact && <span className="cif-err">{errors.contact}</span>}
-      </div>
+      {errors.contact && <div className="cif-err cif-err--block">{errors.contact}</div>}
+
+      {/* 合规 */}
+      <label className="cif-check">
+        <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} />
+        <span>{t("ageLabel")} <em>*</em></span>
+      </label>
+      {errors.ageConfirmed && <span className="cif-err">{errors.ageConfirmed}</span>}
+
+      <label className="cif-check">
+        <input type="checkbox" checked={contactConsent} onChange={(e) => setContactConsent(e.target.checked)} />
+        <span>
+          {t.rich("consentLabel", {
+            privacy: (chunks) => <a href="/privacy" target="_blank" rel="noopener noreferrer">{chunks}</a>,
+          })} <em>*</em>
+        </span>
+      </label>
+      {errors.contactConsent && <span className="cif-err">{errors.contactConsent}</span>}
 
       <p className="cif-privacy">{t("privacyNote")}</p>
 
